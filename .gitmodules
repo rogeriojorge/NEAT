@@ -1,0 +1,4 @@
+[submodule "gyronimo"]
+	path = gyronimo
+	url = https://github.com/prodrigs/gyronimo
+	branch = development
