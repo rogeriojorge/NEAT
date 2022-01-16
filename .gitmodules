@@ -1,8 +1,8 @@
 [submodule "gyronimo"]
-	path = gyronimo
+	path = external/gyronimo
 	url = https://github.com/prodrigs/gyronimo
 	branch = development
 [submodule "pybind11"]
-	path = pybind11
+	path = external/pybind11
 	url = https://github.com/pybind/pybind11.git
 	branch = stable
