@@ -1,9 +1,9 @@
 # NEAT
 NEar-Axis opTimisation
 
-gyronimo added in the file gyronimo using git submodules
-To download gyronimo when cloning NEAT, clone it using the command
+gyronimo and pybind11 added to NEAT using git submodules
+To download gyronimo and pybind11 when cloning NEAT clone using the following command:
 git clone --recurse-submodules https://github.com/rogeriojorge/NEAT.git
-or, after cloning NET, run
+or, alternatively, after cloning NEAT, run:
 git submodule init
 git submodule update
