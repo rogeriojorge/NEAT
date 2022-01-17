@@ -1,0 +1,20 @@
+FROM python:3.9-slim
+LABEL maintainer.name="Rogerio Jorge" \
+      maintainer.email="rogerio.jorge.at.tecnico.ulisboa" \
+      developers="Enabling Research IST-MOD-01 team @ Tecnico Lisboa" \
+      version="0.1" \
+      description="Docker file for NEAT container based on an alpine image" 
+
+# Define working directory
+WORKDIR /usr/src/app
+
+# Install requirements
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get install -y openmpi-bin
+RUN pip install --no-cache-dir numpy scipy matplotlib ninja cmake qsc
+
+# Install SIMSOPT
+RUN pip install simsopt
+
+# Run entrypoint
+COPY . .
+CMD ["bash"]
