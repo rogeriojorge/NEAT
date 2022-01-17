@@ -1,7 +1,8 @@
 ## Manually added gitignore commands
 src/results
+external/*
 
-## Python, Docker, C++ and other gitignore commands
+## Python, Docker, C++, CMake and other gitignore commands
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -192,3 +193,19 @@ Vagrantfile
 *.exe
 *.out
 *.app
+
+#C Make
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+Doxyfile.doc
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake

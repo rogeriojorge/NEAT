@@ -6,9 +6,13 @@
 // Command to compile NEAT on a Macbook with gsl pre-installed with macports
 // g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../include -isysroot`xcrun --show-sdk-path` NEAT.cpp -o NEAT.so
 
-#include <../include/pybind11/pybind11.h>
-#include <../include/pybind11/stl.h>
+// g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -isysroot`xcrun --show-sdk-path` NEAT.cpp -o NEAT.so
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+// // // //  USE CUBIC_GSL_PERIODIC
 #include <gyronimo/interpolators/cubic_gsl.hh>
+#include <gyronimo/interpolators/steffen_gsl.hh>
 #include <gyronimo/metrics/metric_stellna.hh>
 #include <gyronimo/core/dblock.hh>
 #include <vector>
@@ -48,14 +52,15 @@ std::vector< std::vector<double>> gc_solver(
   double vpp_sign = std::copysign(1.0, lambda);
 
   // Prepare metric, equilibrium and particles
-  cubic_gsl_factory ifactory;
+//   cubic_gsl_factory ifactory;
+  steffen_gsl_factory ifactory;
   metric_stellna g(field_periods, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN,
                    dblock_adapter(B0), dblock_adapter(B1c), dblock_adapter(B1s),
                    dblock_adapter(B20), dblock_adapter(B2c), dblock_adapter(B2s),
                    dblock_adapter(beta0), dblock_adapter(beta1c), dblock_adapter(beta1s),
                    &ifactory);
 
-  equilibrium_stellna qsc(&g, Bref);
+  equilibrium_stellna qsc(&g);
 
   guiding_centre gc(1, Valfven, charge/mass, std::abs(lambda)*energySI/Ualfven/Bref, &qsc);
   guiding_centre::state initial_state = gc.generate_state(
@@ -88,8 +93,8 @@ std::vector< std::vector<double>> gc_solver(
   };
 
   // Integrate for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
-  boost::numeric::odeint::bulirsch_stoer<guiding_centre::state> integration_algorithm;
 //   boost::numeric::odeint::runge_kutta4<gyronimo::guiding_centre::state> integration_algorithm;
+  boost::numeric::odeint::bulirsch_stoer<gyronimo::guiding_centre::state> integration_algorithm;
   boost::numeric::odeint::integrate_const(
       integration_algorithm, odeint_adapter(&gc),
       initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
