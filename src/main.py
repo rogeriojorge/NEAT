@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import time
 import math
+import sys
+sys.path.append("..")
 import inputs
 from stell_repo import get_stel
 import matplotlib.pyplot as plt
@@ -8,7 +10,16 @@ from functions import orbit
 import numpy as np
 
 ## Stellarator to analyze
-stel, name, r0, Lambda = get_stel(inputs.nphi,inputs.stel_id)
+try:
+    stel, name, r0, Lambda = get_stel(inputs.nphi,inputs.stel_id)
+except Exception as e:
+    try:
+        stel = inputs.stel
+        name = inputs.name
+        r0   = inputs.r0
+        Lambda = inputs.Lambda
+    except Exception as e:
+        sys.exit('Need to define in inputs.py either stel_id or stellarator parameters stel, name r0 and Lambda')
 
 if __name__ == '__main__':
     print("---------------------------------")

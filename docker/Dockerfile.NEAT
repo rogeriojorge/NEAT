@@ -1,0 +1,32 @@
+FROM python:3.9
+LABEL maintainer.name="Rogerio Jorge" \
+      maintainer.email="rogerio.jorge.at.tecnico.ulisboa" \
+      developers="Enabling Research IST-MOD-01 team @ Tecnico Lisboa" \
+      version="0.1" \
+      description="Docker file for NEAT container based on an alpine image" 
+
+# Define working directory
+WORKDIR /usr/src/app
+
+# Install requirements
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential openmpi-bin gsl-bin libgsl-dev cmake libboost-all-dev doxygen
+RUN pip install --no-cache-dir numpy scipy matplotlib ninja cmake qsc pybind11
+
+# Install SIMSOPT
+RUN pip install --no-cache-dir  simsopt
+
+# Install gyronimo
+COPY . .
+RUN rm -rf build
+RUN mkdir -p build
+WORKDIR /usr/src/app/build
+RUN CXX=g++ cmake ../external/gyronimo
+RUN make
+
+# Install NEAT
+WORKDIR /usr/src/app/src
+RUN g++ -O2 -Wall -shared -std=c++20 $(python3-config --cflags --ldflags --embed) -fPIC -I/usr/local/include -L/usr/local/lib -lgsl -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -Wl,-rpath ../build NEAT.cc -o NEAT.so
+
+# Run NEAT
+CMD [ "python", "main.py"]
+# CMD ["bash"]
