@@ -20,6 +20,9 @@ mkdir build
 cd build
 CXX=g++ cmake ../external/gyronimo
 make
+```
+If you want to build documentation, run
+```bash
 make doc
 ```
 
