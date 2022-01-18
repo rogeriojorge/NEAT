@@ -7,25 +7,32 @@ LABEL maintainer.name="Rogerio Jorge" \
 
 # Define working directory
 WORKDIR /usr/src/app
+COPY . .
 
 # Install requirements
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential openmpi-bin gsl-bin libgsl-dev cmake libboost-all-dev doxygen
-RUN pip install --no-cache-dir numpy scipy matplotlib ninja cmake qsc pybind11
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get install -y make gsl-bin libgsl-dev libgslcblas0 cmake libboost-all-dev doxygen gcc-10 g++-10 gcc-10-base python3-tk libx11-dev tk python3-matplotlib
+RUN pip install --no-cache-dir numpy scipy ninja cmake pybind11 joblib pyqt5
+
+# Install pyQSC
+WORKDIR /usr/src/app/external
+RUN git clone https://github.com/landreman/pyQSC.git
+WORKDIR /usr/src/app/external/pyQSC
+RUN pip install .
+WORKDIR /usr/src/app
 
 # Install SIMSOPT
-RUN pip install --no-cache-dir  simsopt
+# RUN pip install --no-cache-dir simsopt
 
 # Install gyronimo
-COPY . .
 RUN rm -rf build
 RUN mkdir -p build
 WORKDIR /usr/src/app/build
-RUN CXX=g++ cmake ../external/gyronimo
+RUN CXX=g++-10 cmake ../external/gyronimo
 RUN make
 
 # Install NEAT
 WORKDIR /usr/src/app/src
-RUN g++ -O2 -Wall -shared -std=c++20 $(python3-config --cflags --ldflags --embed) -fPIC -I/usr/local/include -L/usr/local/lib -lgsl -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -Wl,-rpath ../build NEAT.cc -o NEAT.so
+RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python -m pybind11 --includes) -L/usr/lib -lgsl -L../build -lgyronimo -I../external/gyronimo -Wl,-rpath ../build
 
 # Run NEAT
 CMD [ "python", "main.py"]

@@ -2,4 +2,7 @@ numpy
 matplotlib
 scipy
 math
+cmake
+joblib
+pybind11
 qsc

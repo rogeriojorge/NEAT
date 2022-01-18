@@ -23,8 +23,6 @@ except Exception as e:
 
 if __name__ == '__main__':
     print("---------------------------------")
-    nN=stel.iota-stel.iotaN
-    print("---------------------------------")
     print("Get particle orbit using gyronimo")
     result=[]
     start_time = time.time()

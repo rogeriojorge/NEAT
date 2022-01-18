@@ -33,7 +33,7 @@ make doc
 (soon to be moved to a docker container)
 Example on MacOS
 ```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -Wl,-rpath ../build -isysroot`xcrun --show-sdk-path` NEAT.cc -o NEAT.so
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build -lgyronimo -I../external/gyronimo/ NEAT.cc -o NEAT.so
 ```
 Example on Linux
 RUN g++ -O2 -Wall -shared -std=c++20 $(python3-config --cflags --ldflags --embed) -fPIC -I/usr/local/include -L/usr/local/lib -lgsl -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -Wl,-rpath ../build NEAT.cc -o NEAT.so
@@ -51,8 +51,9 @@ How to build the container:
 2. Run the docker image using the `docker run` command and your inputs file:
     ``` bash
     docker run -v "$(pwd)/inputs.py:/usr/src/app/inputs.py" neat
+    <!-- docker run --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --rm -it -v "$(pwd)/inputs.py:/usr/src/app/inputs.py" neat -->
     ```
-3. (Not required) If you want to log into the container, first run
+Optional: If you want to log into the container, first run
     ```bash
     docker run -dit neat
     ```
