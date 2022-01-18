@@ -54,81 +54,89 @@ def create_BEAMS3D_input(name,stel,rhom,mass,
 
 ## Obtain particle orbit
 def orbit(stel,r0,theta0,phi0,charge,rhom,mass,Lambda,energy,nsamples,Tfinal,B20real):
-    if stel.order=='r1':
-        stel.B20      = [0]*len(stel.varphi)
-        stel.B20_mean = 0
-        stel.G2       = 0
-        stel.beta_1s  = 0
-        stel.X20      = [0]*len(stel.varphi)
-        stel.X2c      = [0]*len(stel.varphi)
-        stel.X2s      = [0]*len(stel.varphi)
-        stel.Y20      = [0]*len(stel.varphi)
-        stel.Y2c      = [0]*len(stel.varphi)
-        stel.Y2s      = [0]*len(stel.varphi)
-        stel.Z20      = [0]*len(stel.varphi)
-        stel.Z2c      = [0]*len(stel.varphi)
-        stel.Z2s      = [0]*len(stel.varphi)
+    if hasattr(stel.B0, "__len__"):
+        if stel.order == 'r1':
+            B20 = [0]*(len(stel.varphi)+1)
+            B2c = [0]*(len(stel.varphi)+1)
+            B2s = [0]*(len(stel.varphi)+1)
+            beta_0  = [0]*(len(stel.varphi)+1)
+            beta_1c = [0]*(len(stel.varphi)+1)
+            beta_1s = [0]*(len(stel.varphi)+1)
+            stel.G2 = 0
+        else:
+            if B20real==1:
+                B20=np.append(stel.B20,stel.B20[0])
+            else:
+                B20=[stel.B20_mean]*(len(stel.varphi)+1)
+            B2c = [stel.B2c]*(len(stel.varphi)+1)
+            B2s = [stel.B2s]*(len(stel.varphi)+1)
+            beta_0  = np.append(stel.beta_0,stel.beta_0[0])
+            beta_1c = np.append(stel.beta_1c,stel.beta_1c[0])
+            beta_1s = np.append(stel.beta_1s,stel.beta_1s[0])
 
-    if B20real==1:
-        B20=np.append(stel.B20,stel.B20[0])
+        # Call Gyronimo
+        sol = np.array(NEAT.gc_solver(int(stel.nfp),
+        stel.G0, stel.G2, stel.I2, stel.iota, stel.iotaN, stel.Bbar,
+        np.append(stel.varphi,2*np.pi/stel.nfp+stel.varphi[0]),
+        np.append(stel.B0,stel.B0[0]), np.append(stel.B1c,stel.B1c[0]), np.append(stel.B1s,stel.B1s[0]),
+        B20, B2c, B2s, beta_0, beta_1c, beta_1s,
+        charge, rhom, mass, Lambda, energy, r0, theta0, phi0, nsamples, Tfinal))
     else:
-        B20=[stel.B20_mean]*(len(stel.varphi)+1)
-    # Call Gyronimo
-    sol = np.array(NEAT.gc_solver(int(stel.nfp), stel.d_l_d_varphi,
-    stel.B0, stel.etabar, B20, stel.B2c, stel.B2s,
-    stel.G0, stel.G2, stel.I2, stel.iota, stel.iotaN, stel.beta_1s,
-    np.append(stel.varphi,2*np.pi/stel.nfp),
-    np.append(stel.torsion,stel.torsion[0]),
-    np.append(stel.curvature,stel.curvature[0]),
-    np.append(stel.X1c,stel.X1c[0]),
-    np.append(stel.X1s,stel.X1s[0]),
-    np.append(stel.Y1c,stel.Y1c[0]),
-    np.append(stel.Y1s,stel.Y1s[0]),
-    np.append(stel.X20,stel.X20[0]),
-    np.append(stel.X2c,stel.X2c[0]),
-    np.append(stel.X2s,stel.X2s[0]),
-    np.append(stel.Y20,stel.Y20[0]),
-    np.append(stel.Y2c,stel.Y2c[0]),
-    np.append(stel.Y2s,stel.Y2s[0]),
-    np.append(stel.Z20,stel.Z20[0]),
-    np.append(stel.Z2c,stel.Z2c[0]),
-    np.append(stel.Z2s,stel.Z2s[0]),
-    charge, rhom, mass, Lambda,
-    energy, r0, theta0, phi0, nsamples, stel.rc[0], Tfinal))
+        if stel.order == 'r1':
+            B20 = [0]*(len(stel.varphi)+1)
+            stel.B2c = 0
+            stel.B2s = 0
+            stel.beta_1s = 0
+            stel.G2 = 0
+        else:
+            if B20real==1:
+                B20=np.append(stel.B20,stel.B20[0])
+            else:
+                B20=[stel.B20_mean]*(len(stel.varphi)+1)
 
+        # Call Gyronimo
+        sol = np.array(NEAT.gc_solver(int(stel.nfp),
+        stel.G0, stel.G2, stel.I2, stel.iota, stel.iotaN, stel.Bbar,
+        np.append(stel.varphi,2*np.pi/stel.nfp),
+        [stel.B0]*(len(stel.varphi)+1), [stel.B0*stel.etabar]*(len(stel.varphi)+1), [0]*(len(stel.varphi)+1),
+        B20, [stel.B2c]*(len(stel.varphi)+1), [stel.B2s]*(len(stel.varphi)+1),
+        [0]*(len(stel.varphi)+1), [0]*(len(stel.varphi)+1), [stel.beta_1s]*(len(stel.varphi)+1),
+        charge, rhom, mass, Lambda, energy, r0, theta0, phi0, nsamples, Tfinal))
+
+    # Store all output quantities
     time      = sol[:,0]
     r_pos     = sol[:,1]
     theta_pos = sol[:,2]
-    phi_pos   = sol[:,3]
+    varphi    = sol[:,3]
+    from scipy.interpolate import CubicSpline as spline
+    nu = stel.varphi - stel.phi
+    nu_spline_of_varphi = spline(np.append(stel.varphi,2*np.pi/stel.nfp), np.append(nu,nu[0]), bc_type='periodic')
+    phi_pos   = varphi - nu_spline_of_varphi(varphi)
     energy_parallel = sol[:,4]
     energy_perpendicular = sol[:,5]
+    total_energy = energy_parallel+energy_perpendicular
     Bfield = sol[:,6]
     v_parallel = sol[:,7]
     rdot = sol[:,8]
     thetadot = sol[:,9]
     phidot = sol[:,10]
-    
-    total_energy = energy_parallel+energy_perpendicular
     vppdot = sol[:,11]
+
     m_proton = 1.67262192369e-27
     e = 1.602176634e-19
     mu0 = 1.25663706212e-6
     Valfven = 1/np.sqrt(mu0*rhom*m_proton*1.e+19)
 
-    # p_phi = mass*m_proton*v_parallel*Valfven*stel.B0*(stel.G0+r_pos**2*(stel.G2+(stel.iota-stel.iotaN)*stel.I2))/Bfield-charge*e*r_pos**2*stel.B0/2*stel.iotaN
-    p_phi1=mass*m_proton*v_parallel*Valfven*(stel.G0+r_pos**2*(stel.G2+(stel.iota-stel.iotaN)*stel.I2))/Bfield
-    p_phi2=charge*e*r_pos**2*stel.B0/2*stel.iotaN
+    # Calculate canonical angular momentum p_phi
+    m_proton = 1.67262192369e-27
+    e = 1.602176634e-19
+    mu0 = 1.25663706212e-6
+    Valfven = stel.Bbar/np.sqrt(mu0*rhom*m_proton*1.e+19)
+    p_phi1=mass*m_proton*v_parallel*Valfven*(stel.G0+r_pos**2*(stel.G2+(stel.iota-stel.iotaN)*stel.I2))/Bfield/stel.Bbar
+    p_phi2=charge*e*r_pos**2*stel.Bbar/2*stel.iotaN
     p_phi=p_phi1-p_phi2
-    # ratio=(p_phi1-np.mean(p_phi1))/(p_phi2-np.mean(p_phi2))
-    # print(ratio[10])
-    # print(" ")
-    # plt.figure()
-    # plt.plot(p_phi1-np.mean(p_phi1))
-    # plt.plot(p_phi2-np.mean(p_phi2))
-    # plt.plot(p_phi)
-    # plt.show()
-    # exit()
-    return [time,r_pos,theta_pos,phi_pos,total_energy,theta0,phi0,Lambda,energy,p_phi,rdot,thetadot,phidot,vppdot,v_parallel,Bfield]
+
+    return [time,r_pos,theta_pos,phi_pos,total_energy,theta0,phi0,Lambda,energy,p_phi,rdot,thetadot,phidot,vppdot,v_parallel,Bfield,varphi]
 
 def rxyzOrbit(rSurf,zSurf,phiCylindrical,nfp,r_pos,theta_pos,phi_pos,i):
     rPar=rSurf(r_pos[i],phi_pos[i],theta_pos[i])

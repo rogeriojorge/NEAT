@@ -19,8 +19,10 @@ nstep  = 1 # step size in the time series for the particle orbit (step=1 show al
 ncores = 6 # number of cores used in the parallelization to unpack orbit position(t)
 
 ntheta = 30 # poloidal resolution for the 3D plot
-nphi   = 60 # ##CLASH WITH PREVOUS nph #toroidal resolution for the 3D plot
+# nphi   = 60 # ##CLASH WITH PREVOUS nph #toroidal resolution for the 3D plot
 
 boundaryR0 = 0.09
 
 stel_id = 0
+
+showPlots = 1

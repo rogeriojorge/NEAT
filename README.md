@@ -17,8 +17,8 @@ git submodule update
 In NEAT's root folder, run
 ```bash
 mkdir build
-(CXX=g++ CMAKE_CXX_COMPILER=g++)
-cmake external/gyronimo 
+cd build
+CXX=g++ cmake ../external/gyronimo
 make
 make doc
 ```
@@ -27,7 +27,7 @@ make doc
 (soon to be moved to a docker container)
 Example on MacOS
 ```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -isysroot`xcrun --show-sdk-path` NEAT.cpp -o NEAT.so
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -Wl,-rpath ../build -isysroot`xcrun --show-sdk-path` NEAT.cc -o NEAT.so
 ```
 
 ## NEAT Docker Container
