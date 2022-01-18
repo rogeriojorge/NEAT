@@ -47,17 +47,6 @@ if __name__ == '__main__':
     max_p_phi_error = [max(perror[3::]) for perror in p_phi_error]
     print("Max Canonical Angular Momentum Error per orbit = ",max_p_phi_error)
 
-
-    # Check energy error for each orbit
-    energy_error     = [np.log10(np.abs(res[4]-res[4][0]+1e-30)/res[4][0]) for res in result]
-    max_energy_error = [max(eerror[3::]) for eerror in energy_error]
-    print("Max Energy Error per orbit = ",max_energy_error)
-
-    # Check canonical angular momentum error for each orbit
-    p_phi_error     = [np.log10(np.abs(res[9]-res[9][0]+1e-30)/abs(res[9][0])) for res in result]
-    max_p_phi_error = [max(perror[3::]) for perror in p_phi_error]
-    print("Max Canonical Angular Momentum Error per orbit = ",max_p_phi_error)
-
     # Plot relevant quantities
     if inputs.showPlots==1:
         fig=plt.figure(figsize=(10,6))
@@ -73,16 +62,16 @@ if __name__ == '__main__':
         th=np.linspace(0,2*np.pi,100);plt.plot(r0*np.cos(th),r0*np.sin(th))
         plt.xlabel('r cos(theta)');plt.ylabel('r sin(theta)')
 
-        # points = np.array([[res[1],res[2],res[16]] for res in result]).transpose(0,2,1)
-        # rpos_cylindrical = np.array([stel.to_RZ(points[i]) for i in range(len(result))])
-        # rpos_cartesian = [[rpos_cylindrical[i][0]*np.cos(result[i][3]),rpos_cylindrical[i][0]*np.sin(result[i][3]),rpos_cylindrical[i][1]] for i in range(len(result))]
-        # boundary = np.array(stel.get_boundary(r=0.9*r0,nphi=90,ntheta=25,ntheta_fourier=16,mpol=8,ntor=15))
+        points = np.array([[res[1],res[2],res[16]] for res in result]).transpose(0,2,1)
+        rpos_cylindrical = np.array([stel.to_RZ(points[i]) for i in range(len(result))])
+        rpos_cartesian = [[rpos_cylindrical[i][0]*np.cos(rpos_cylindrical[i][2]),rpos_cylindrical[i][0]*np.sin(rpos_cylindrical[i][2]),rpos_cylindrical[i][1]] for i in range(len(result))]
+        boundary = np.array(stel.get_boundary(r=0.9*r0,nphi=90,ntheta=25,ntheta_fourier=16,mpol=8,ntor=15))
 
-        # plt.subplot(3, 3, 8)
-        # [plt.plot(rpos_cylindrical[i][0],rpos_cylindrical[i][1]) for i in range(len(result))]
-        # phi1dplot_RZ = np.linspace(0, 2 * np.pi / stel.nfp, 4, endpoint=False)
-        # [plt.plot(boundary[3,:,int(phi / (2 * np.pi) * 90)],boundary[2,:,int(phi / (2 * np.pi) * 90)]) for phi in phi1dplot_RZ]
-        # plt.xlabel('R');plt.ylabel('Z')
+        plt.subplot(3, 3, 8)
+        [plt.plot(rpos_cylindrical[i][0],rpos_cylindrical[i][1]) for i in range(len(result))]
+        phi1dplot_RZ = np.linspace(0, 2 * np.pi / stel.nfp, 4, endpoint=False)
+        [plt.plot(boundary[3,:,int(phi / (2 * np.pi) * 90)],boundary[2,:,int(phi / (2 * np.pi) * 90)]) for phi in phi1dplot_RZ]
+        plt.xlabel('R');plt.ylabel('Z')
 
         plt.subplot(3, 3, 9)
         [plt.plot(res[0],res[15],label='gyronimo') for res in result]
