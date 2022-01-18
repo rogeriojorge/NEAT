@@ -33,10 +33,10 @@ make doc
 (soon to be moved to a docker container)
 Example on MacOS
 ```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build -lgyronimo -I../external/gyronimo/ NEAT.cc -o NEAT.so
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build -lgyronimo -I../external/gyronimo/ -Wl,-rpath ../build
 ```
 Example on Linux
-RUN g++ -O2 -Wall -shared -std=c++20 $(python3-config --cflags --ldflags --embed) -fPIC -I/usr/local/include -L/usr/local/lib -lgsl -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -Wl,-rpath ../build NEAT.cc -o NEAT.so
+RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python -m pybind11 --includes) -L/usr/lib -lgsl -L../build -lgyronimo -I../external/gyronimo -Wl,-rpath ../build
 
 ## NEAT Docker Container
 This document explains how to build the docker container for simsopt.
