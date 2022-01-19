@@ -49,18 +49,21 @@ RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python -m pybind11 --in
 This section explains how to build the docker container for NEAT. It can be used to compile gyronimo, install pyQSC, simsopt and compile NEAT in a docker image directly.
 
 0. Install docker
+
 1. Build the docker image by running the `docker build` command in the repo root directory:
    ```bash
    docker build -t neat -f docker/Dockerfile.NEAT .
    ```
 This process yields an image with roughly 2 GB and may take minute to build.
+
 2. Run the docker image using the `docker run` command including your inputs file and results folder:
     ``` bash
     docker run -v "$(pwd)/inputs.py:/usr/src/app/inputs.py" -v "$(pwd)/results:/usr/src/app/results" neat
     ```
+
 3. Your results folder will be populated with NEAT's results
 
-####Optional
+#### Optional
 If you want to log into the container, first run
     ```bash
     docker run -dit neat
