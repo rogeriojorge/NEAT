@@ -55,10 +55,10 @@ if __name__ == '__main__':
     result = np.array(result, dtype=object)
 
     # Check energy error for each orbit
-    print("Max Energy Error per orbit = ",check_log_error(result[:,4]))
+    print("Max Energy Error per Orbit = ",check_log_error(result[:,4]))
 
     # Check canonical angular momentum error for each orbit
-    print("Max Energy Error per orbit = ",check_log_error(result[:,9]))
+    print("Max Canonical Angular Momentum Error per Orbit = ",check_log_error(result[:,9]))
 
     # Plot relevant quantities
     if inputs.makePlots==1:

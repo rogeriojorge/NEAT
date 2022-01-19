@@ -1,22 +1,16 @@
-## NEAT
+# **NEAT**
 NEar-Axis opTimisation
 
-# Requirements
-To run NEAT, you'll need the following libraries
+NEAT is a python framework that is intended to find optimized stellarator configurations for fast particle confinement using the near-axis expansion formalism.
+The magnetic field is calculated using the code [pyQSC](https://github.com/landreman/pyQSC/), the particle orbits are traced using the code [gyronimo](https://github.com/prodrigs/gyronimo) (included as a submodule) and the optimization is done using the code [simsopt](https://github.com/hiddenSymmetries/).
 
-* gsl
-* boost
-* gcc10
+To download clone NEAT including its submodules, use the following command:
 
-and the python packages specified in requirements.txt .
-
-# Download NEAT
-gyronimo and pybind11 added to NEAT using git submodules
-To download gyronimo and pybind11 when cloning NEAT clone using the following command:
 ```bash
 git clone --recurse-submodules https://github.com/rogeriojorge/NEAT.git
 ```
-or, alternatively, after cloning NEAT, run:
+or, alternatively, after downloading this repository, in the root folder, run:
+
 ```bash
 git submodule init
 git submodule update
@@ -24,7 +18,9 @@ git submodule update
 
 # Usage
 
-## Recommended
+NEAT could be run either directly by installing the requirements pyQSC, gyronimo and SIMSOPT, and then compiling the [NEAT.cc](src/NEAT.cc) file in the *[src](src/)* folder, or using the provided Docker image. The usage of the Docker image is recommended.
+
+## Docker
 
 This section explains how to build the docker container for NEAT. It can be used to compile gyronimo, install pyQSC, simsopt and compile NEAT in a docker image directly.
 
@@ -55,6 +51,15 @@ If you want to log into the container, first run
 
 ## Development
 
+### Requirements
+To run NEAT, you'll need the following libraries
+
+* gsl
+* boost
+* gcc10
+
+and the python packages specified in [requirements.txt](requirements.txt) .
+
 ### Install gyronimo
 In NEAT's root folder, run
 ```bash
@@ -69,11 +74,15 @@ make doc
 ```
 
 ### Compile NEAT
+
 Example on MacOS
+
 ```bash
 g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build -lgyronimo -I../external/gyronimo/ -Wl,-rpath ../build
 ```
+
 Example on Linux
+
 ```bash
 RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python -m pybind11 --includes) -L/usr/lib -lgsl -L../build -lgyronimo -I../external/gyronimo -Wl,-rpath ../build
 ```
