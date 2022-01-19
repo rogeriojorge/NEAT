@@ -22,30 +22,10 @@ git submodule init
 git submodule update
 ```
 
-# Install gyronimo
-In NEAT's root folder, run
-```bash
-mkdir build
-cd build
-CXX=g++ cmake ../external/gyronimo
-make
-```
-If you want to build documentation, run
-```bash
-make doc
-```
+# Usage
 
-## Compile NEAT
-Example on MacOS
-```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build -lgyronimo -I../external/gyronimo/ -Wl,-rpath ../build
-```
-Example on Linux
-```bash
-RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python -m pybind11 --includes) -L/usr/lib -lgsl -L../build -lgyronimo -I../external/gyronimo -Wl,-rpath ../build
-```
+## Recommended
 
-## NEAT Docker Container
 This section explains how to build the docker container for NEAT. It can be used to compile gyronimo, install pyQSC, simsopt and compile NEAT in a docker image directly.
 
 0. Install docker
@@ -72,3 +52,28 @@ If you want to log into the container, first run
     ``` bash
     docker attach CONTAINER ID
     ```
+
+## Development
+
+### Install gyronimo
+In NEAT's root folder, run
+```bash
+mkdir build
+cd build
+CXX=g++ cmake ../external/gyronimo
+make
+```
+If you want to build documentation, run
+```bash
+make doc
+```
+
+### Compile NEAT
+Example on MacOS
+```bash
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build -lgyronimo -I../external/gyronimo/ -Wl,-rpath ../build
+```
+Example on Linux
+```bash
+RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python -m pybind11 --includes) -L/usr/lib -lgsl -L../build -lgyronimo -I../external/gyronimo -Wl,-rpath ../build
+```
