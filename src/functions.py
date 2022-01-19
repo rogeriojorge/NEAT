@@ -26,6 +26,8 @@ def orbit(stel, params, B20real):
         params['rhom'] = inputs_default.rhom
     if 'mass' not in params.keys():
         params['mass'] = inputs_default.mass
+    if 'Lambda'not in params.keys():
+        params['Lambda'] = inputs_default.Lambda
     if 'energy' not in params.keys():
         params['energy'] = inputs_default.energy
     if 'nsamples' not in params.keys():

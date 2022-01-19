@@ -31,4 +31,5 @@ name = 'paper_r2_5.'+str(paper_case) # name of results folder and files
 r0       = 0.005
 Lambda   = [0.2]
 
-showPlots = 1
+makePlots = 1
+savePlots = 1

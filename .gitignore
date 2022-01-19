@@ -1,5 +1,6 @@
 ## Manually added gitignore commands
 src/results
+results
 external/*
 
 ## Python, Docker, C++, CMake and other gitignore commands

@@ -10,8 +10,8 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install requirements
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get install -y make gsl-bin libgsl-dev libgslcblas0 cmake libboost-all-dev doxygen gcc-10 g++-10 gcc-10-base python3-tk libx11-dev tk python3-matplotlib
-RUN pip install --no-cache-dir numpy scipy ninja cmake pybind11 joblib pyqt5
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get install -y make gsl-bin libgsl-dev libgslcblas0 cmake libboost-all-dev doxygen gcc-10 g++-10 gcc-10-base
+RUN pip install --no-cache-dir matplotlib numpy scipy ninja cmake pybind11 joblib
 
 # Install pyQSC
 WORKDIR /usr/src/app/external
