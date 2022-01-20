@@ -62,27 +62,53 @@ and the python packages specified in [requirements.txt](requirements.txt) .
 
 ### Install gyronimo
 In NEAT's root folder, run
+
 ```bash
+cd external/gyronimo
 mkdir build
 cd build
-CXX=g++ cmake ../external/gyronimo
-make
+CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
+cmake --build . --target install
 ```
-If you want to build documentation, run
+
+If you want to build documentation with doxygen, run
+
 ```bash
-make doc
+cmake --build . --target doc
 ```
 
 ### Compile NEAT
 
+Compilation is done in the src/ folder of the repo.
+
 Example on MacOS
 
 ```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build -lgyronimo -I../external/gyronimo/ -Wl,-rpath ../build
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build/lib -lgyronimo -I../build/include -Wl,-rpath ../build/lib
 ```
 
 Example on Linux
 
 ```bash
-RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python -m pybind11 --includes) -L/usr/lib -lgsl -L../build -lgyronimo -I../external/gyronimo -Wl,-rpath ../build
+g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L../build/lib -lgyronimo -I../build/include/gyronimo -Wl,-rpath ../build/lib
 ```
+
+# Profiling
+
+## Install gperftools
+
+The recommended way of installation in MacOS is through Macports (port install gperftools) or Homebrew (brew install gperftools).
+In linux, the recommended way is through using apt (apt-get install google-perftools).
+
+Alternatively, the gperftools/gperftools repository can be cloned to external/gperftools and installed in the build/ folder using the following commands:
+
+```bash
+cd external/gperftools
+./autogen.sh
+./configure --prefix=$PWD/../../build
+make
+make install
+```
+
+
+

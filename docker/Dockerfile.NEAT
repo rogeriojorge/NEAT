@@ -1,39 +1,75 @@
-FROM python:3.9
+FROM ubuntu:22.04
 LABEL maintainer.name="Rogerio Jorge" \
       maintainer.email="rogerio.jorge.at.tecnico.ulisboa" \
       developers="Enabling Research IST-MOD-01 team @ Tecnico Lisboa" \
       version="0.1" \
       description="Docker file for NEAT container based on an alpine image" 
 
-# Define working directory
-WORKDIR /usr/src/app
-COPY . .
+# Define environment variable needed to run non-interactively
+ENV DEBIAN_FRONTEND noninteractive
 
 # Install requirements
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get install -y make gsl-bin libgsl-dev libgslcblas0 cmake libboost-all-dev doxygen gcc-10 g++-10 gcc-10-base
+RUN apt update
+RUN apt-get install -y wget git less make gsl-bin libgsl-dev libgslcblas0 cmake libboost-all-dev doxygen gcc-10 g++-10 gcc-10-base python3-dev python3-pip pkg-config software-properties-common
+RUN alias pip=pip3
+RUN alias python=python3
 RUN pip install --no-cache-dir matplotlib numpy scipy ninja cmake pybind11 joblib
 
+# Add new user neat
+RUN apt-get install -y ssh sudo openssh-server
+RUN useradd -rm -d /home/neat -s /bin/bash -g root -G sudo -u 1000 neat 
+RUN usermod -aG sudo neat
+RUN echo 'neat:neat' | sudo chpasswd
+
+# Define working directory
+WORKDIR /home/neat
+
+# Copy files from git repository
+COPY . .
+
 # Install pyQSC
-WORKDIR /usr/src/app/external
+WORKDIR /home/neat/external
 RUN git clone https://github.com/landreman/pyQSC.git
-WORKDIR /usr/src/app/external/pyQSC
+WORKDIR /home/neat/external/pyQSC
 RUN pip install .
-WORKDIR /usr/src/app
+WORKDIR /home/neat/
 
 # Install SIMSOPT
 # RUN pip install --no-cache-dir simsopt
 
 # Install gyronimo
+WORKDIR /home/neat/external/gyronimo
 RUN rm -rf build
 RUN mkdir -p build
-WORKDIR /usr/src/app/build
-RUN CXX=g++-10 cmake ../external/gyronimo
-RUN make
+WORKDIR /home/neat/external/gyronimo/build
+RUN CXX=g++-10 cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
+RUN cmake --build . --target install
+
+# Install google-perftools for profiling
+RUN apt-get install -y google-perftools
 
 # Install NEAT
-WORKDIR /usr/src/app/src
-RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python -m pybind11 --includes) -L/usr/lib -lgsl -L../build -lgyronimo -I../external/gyronimo -Wl,-rpath ../build
+WORKDIR /home/neat/src
+RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L../build/lib -lgyronimo -I../build/include/ -Wl,-rpath ../build/lib
 
 # Run NEAT
-CMD [ "python", "main.py"]
+CMD [ "python3", "main.py"]
 # CMD ["bash"]
+
+# ## Next section - profiling using Intel's Vtune Profiler software
+# # Install VTune Profiler
+# RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+# RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+# RUN rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+# RUN add-apt-repository -y "deb https://apt.repos.intel.com/oneapi all main"
+# RUN apt-get install -y intel-oneapi-vtune
+# # RUN source /opt/intel/oneapi/vtune/latest/sep_vars.sh
+
+# # Start ssh server with user 'neat' and password 'neat'
+# # Use command 'docker run -p 22:22 neat' to set up port 22 and run 'ssh neat@localhost'
+# # To passwordless login in the container, do 'ssh-copy-id neat@localhost once
+# RUN service ssh restart
+# EXPOSE 22
+# RUN mkdir .ssh
+# RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+# CMD ["/usr/sbin/sshd","-D"]
