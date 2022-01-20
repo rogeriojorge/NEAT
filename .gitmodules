@@ -2,3 +2,4 @@
 	path = external/gyronimo
 	url = https://github.com/prodrigs/gyronimo
 	branch = development
+    ignore = dirty
