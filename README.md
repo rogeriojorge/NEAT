@@ -81,13 +81,13 @@ cmake --build . --target doc
 
 Compilation is done in the src/ folder of the repo.
 
-Example on MacOS
+#### Example on MacOS
 
 ```bash
 g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build/lib -lgyronimo -I../build/include -Wl,-rpath ../build/lib
 ```
 
-Example on Linux
+#### Example on Linux
 
 ```bash
 g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L../build/lib -lgyronimo -I../build/include/gyronimo -Wl,-rpath ../build/lib
@@ -110,5 +110,29 @@ make
 make install
 ```
 
+## Install yep
 
+```bash
+pip install yep
+```
+
+## Install gv
+
+On MacOS **port install gv** or **brew install gv**
+Open an instance of XQuartz
+
+## Compile with gperftools linking
+
+Example on MacOS
+
+```bash
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl-L../build/lib -lgyronimo -I../build/include -Wl,-rpath ../build/lib
+```
+
+## Run and Analyze
+
+```bash
+python -m yep -v -- main.py
+pprof --gv main.py main.py.prof
+```
 

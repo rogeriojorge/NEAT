@@ -2,6 +2,8 @@
 src/results
 results
 external/*
+*.prof
+*.profile
 
 ## Python, Docker, C++, CMake and other gitignore commands
 
