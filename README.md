@@ -34,19 +34,15 @@ This process yields an image with roughly 2 GB and may take minute to build.
 
 2. Run the docker image using the `docker run` command including your inputs file and results folder:
     ``` bash
-    docker run -v "$(pwd)/inputs.py:/usr/src/app/inputs.py" -v "$(pwd)/results:/usr/src/app/results" neat
+    docker run -v "$(pwd)/inputs.py:/home/neat/src/inputs.py" -v "$(pwd)/results:/home/neat/results" neat
     ```
 
 3. Your results folder will be populated with NEAT's results
 
 #### Optional
-If you want to log into the container, first run
+If you want to run NEAT and continue working in the container, instead run the docker image using the flag **-it** and end with **/bin*bash**
     ```bash
-    docker run -dit neat
-    ```
-    then attach your terminal's input to the running container using the CONTAINER ID specified by the `docker ps` command
-    ``` bash
-    docker attach CONTAINER ID
+    docker run -v "$(pwd)/inputs.py:/home/neat/src/inputs.py" -v "$(pwd)/results:/home/neat/results" -it neat /bin/bash
     ```
 
 ## Development
@@ -116,23 +112,18 @@ make install
 pip install yep
 ```
 
-## Install gv
-
-On MacOS **port install gv** or **brew install gv**
-Open an instance of XQuartz
-
 ## Compile with gperftools linking
 
 Example on MacOS
 
 ```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl-L../build/lib -lgyronimo -I../build/include -Wl,-rpath ../build/lib
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lprofiler -L../build/lib -lgyronimo -I../build/include -Wl,-rpath ../build/lib
 ```
 
 ## Run and Analyze
 
 ```bash
 python -m yep -v -- main.py
-pprof --gv main.py main.py.prof
+pprof --svg main.py main.py.prof > ../results/NEAT_profile.svg
 ```
 
