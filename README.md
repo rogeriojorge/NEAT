@@ -126,8 +126,3 @@ g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $
 python -m yep -v -- main.py
 pprof --svg main.py main.py.prof > ../results/NEAT_profile.svg
 ```
-
-# Continuous integration
-
-Tested locally with [act](https://github.com/nektos/act)
-Just run the command **act** in the repository root folder
