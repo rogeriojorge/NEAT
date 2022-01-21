@@ -17,18 +17,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         submodules: 'true'
-        recursive submodules: 'true'
         token: ${{secrets.CI_TOKEN}}
-        # token: ${ CI_TOKEN }
-
-    - name: checkout gyronimo
-      uses: actions/checkout@v2
-      with:
-        repository: prodrigs/gyronimo
-        token: ${{ secrets.CI_TOKEN }}
-        # token: ${ CI_TOKEN }
-        ref: development
-        path: external/gyronimo
 
     - name: Print user and group id
       run: id
