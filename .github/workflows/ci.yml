@@ -13,12 +13,6 @@ jobs:
 
     steps:
 
-    # - variables:
-    #     GIT_SUBMODULE_STRATEGY: recursive
-
-    - name: Change git configuration
-      run: git config --global url.ssh://git@github.com/.insteadOf https://github.com/
-
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
