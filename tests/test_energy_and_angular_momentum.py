@@ -23,11 +23,9 @@ class QscTests(unittest.TestCase):
         result = np.array(orbit(stel,params,0), dtype=object)
 
         # Check energy error
-        print(check_log_error([result[4]]))
         logger.info('Energy error = {}'.format(check_log_error([result[4]])))
-        assert np.allclose(check_log_error([result[4]]),-12.879998571350793)
+        assert np.allclose(check_log_error([result[4]]),-12.879998571350793, rtol=1e-03)
 
         # Check canonical angular momentum error for each orbit
-        print(check_log_error([result[9]]))
         logger.info('Canonical angular momentum error = {}'.format(check_log_error([result[9]])))
-        assert np.allclose(check_log_error([result[9]]),-9.219989815050411)
+        assert np.allclose(check_log_error([result[9]]),-9.219989815050411, rtol=1e-03)
