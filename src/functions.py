@@ -1,7 +1,6 @@
 import NEAT
 import numpy as np
 import os
-import inputs_default
 
 # Function called in main.py to run each particle orbit using gyronimo
 def orbit(stel, params, B20real):
@@ -14,26 +13,27 @@ def orbit(stel, params, B20real):
             r0,theta0,phi0,charge,rhom,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     '''
-    if 'r0' not in params.keys():
-        params['r0'] = inputs_default.r0
-    if 'theta0' not in params.keys():
-        params['theta0'] = inputs_default.theta0
-    if 'phi0' not in params.keys():
-        params['phi0'] = inputs_default.phi0
-    if 'charge' not in params.keys():
-        params['charge'] = inputs_default.charge
-    if 'rhom' not in params.keys():
-        params['rhom'] = inputs_default.rhom
-    if 'mass' not in params.keys():
-        params['mass'] = inputs_default.mass
-    if 'Lambda'not in params.keys():
-        params['Lambda'] = inputs_default.Lambda
-    if 'energy' not in params.keys():
-        params['energy'] = inputs_default.energy
-    if 'nsamples' not in params.keys():
-        params['nsamples'] = inputs_default.nsamples
-    if 'Tfinal' not in params.keys():
-        params['Tfinal'] = inputs_default.Tfinal
+    # import inputs_default
+    # if 'r0' not in params.keys():
+    #     params['r0'] = inputs_default.r0
+    # if 'theta0' not in params.keys():
+    #     params['theta0'] = inputs_default.theta0
+    # if 'phi0' not in params.keys():
+    #     params['phi0'] = inputs_default.phi0
+    # if 'charge' not in params.keys():
+    #     params['charge'] = inputs_default.charge
+    # if 'rhom' not in params.keys():
+    #     params['rhom'] = inputs_default.rhom
+    # if 'mass' not in params.keys():
+    #     params['mass'] = inputs_default.mass
+    # if 'Lambda'not in params.keys():
+    #     params['Lambda'] = inputs_default.Lambda
+    # if 'energy' not in params.keys():
+    #     params['energy'] = inputs_default.energy
+    # if 'nsamples' not in params.keys():
+    #     params['nsamples'] = inputs_default.nsamples
+    # if 'Tfinal' not in params.keys():
+    #     params['Tfinal'] = inputs_default.Tfinal
 
     if hasattr(stel.B0, "__len__"):
         if stel.order == 'r1':
@@ -123,8 +123,8 @@ def check_log_error(result_array: float) -> float:
     '''
     Check the log error for a given array result_array, defined as log(abs((result_array-result_array[0])/result_array))
     '''
-    energy_error     = [np.log10(np.abs(res-res[0]+1e-30)/res[0]) for res in result_array]
-    max_error = [max(error[3::]) for error in energy_error]
+    array_error     = [np.log10(np.abs(res-res[0]+1e-30)/res[0]) for res in result_array]
+    max_error = [max(error[3::]) for error in array_error]
     return max_error
 
 def create_BEAMS3D_input(name,stel,rhom,mass,r0,

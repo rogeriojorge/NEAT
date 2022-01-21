@@ -80,13 +80,13 @@ Compilation is done in the src/ folder of the repo.
 #### Example on MacOS
 
 ```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L../build/lib -lgyronimo -I../build/include -Wl,-rpath ../build/lib
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include -Wl,-rpath $(pwd)/../build/lib
 ```
 
 #### Example on Linux
 
 ```bash
-g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L../build/lib -lgyronimo -I../build/include/gyronimo -Wl,-rpath ../build/lib
+g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include  -Wl,-rpath $(pwd)/../build/lib
 ```
 
 # Profiling
@@ -127,3 +127,7 @@ python -m yep -v -- main.py
 pprof --svg main.py main.py.prof > ../results/NEAT_profile.svg
 ```
 
+# Continuous integration
+
+Tested locally with [act](https://github.com/nektos/act)
+Just run the command **act** in the repository root folder
