@@ -65,12 +65,17 @@ jobs:
         CXX=g++-10 cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
         cmake --build . --target install 
 
+    - name: PWD
+      run: pwd
+
+    - name: ls
+      run: ls
+
     - name: Install NEAT
       run: |
-        cd ../../../src
+        cd src
         g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L../build/lib -lgyronimo -I../build/include/ -Wl,-rpath ../build/lib
 
     - name: Run unit tests
       run: |
-        cd ../
         python -m unittest -v
