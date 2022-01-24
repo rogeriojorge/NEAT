@@ -45,10 +45,6 @@ WORKDIR /home/neat/external/gyronimo/build
 RUN CXX=g++-10 cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
 RUN cmake --build . --target install
 
-# Install google-perftools and yep for profiling
-RUN apt-get install -y google-perftools libgoogle-perftools-dev
-RUN pip install --no-cache-dir yep
-
 # Install NEAT
 WORKDIR /home/neat/src
 RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include/ -Wl,-rpath $(pwd)/../build/lib
@@ -56,17 +52,11 @@ RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --i
 # Run NEAT from entrypoint script /docker/docker-entrypoint.sh
 RUN ["chmod", "+x", "/home/neat/docker/docker-entrypoint.sh"]
 ENTRYPOINT ["/home/neat/docker/docker-entrypoint.sh"]
+
+# Open terminal for docker run
 # CMD ["bash"]
 
-# Run NEAT in profiling mode
-# RUN python3 -m yep -v -- main.py
-# CMD ["google-pprof --svg main.py main.py.prof > ../results/NEAT_profile.svg"]
-
-# Run NEAT
-# CMD [ "python3", "main.py"]
-# CMD ["bash"]
-
-# ## Next section - profiling using Intel's Vtune Profiler software
+# ## Profiling using Intel's Vtune Profiler software
 # # Install VTune Profiler
 # RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 # RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB

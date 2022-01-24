@@ -91,38 +91,16 @@ g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --inclu
 
 # Profiling
 
-## Install gperftools
+## test_openmp_stellna
 
-The recommended way of installation in MacOS is through Macports (port install gperftools) or Homebrew (brew install gperftools).
-In linux, the recommended way is through using apt (apt-get install google-perftools).
-
-Alternatively, the gperftools/gperftools repository can be cloned to external/gperftools and installed in the build/ folder using the following commands:
+An simple openmp version of for OpenMP profiling purposes is in tests/test_openmp_stellna. After compilation
 
 ```bash
-cd external/gperftools
-./autogen.sh
-./configure --prefix=$PWD/../../build
-make
-make install
+g++ -std=c++20 -fopenmp openmp_stellna.cc -o openmp_stellna -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include  -Wl,-rpath $(pwd)/../build/lib
 ```
 
-## Install yep
+it creates an executable that can be analyzed using a profiling tool such as Instruments in MacOS, specifically the Time Profiler. The number of threads can be changed using the command
 
 ```bash
-pip install yep
-```
-
-## Compile with gperftools linking
-
-Example on MacOS
-
-```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lprofiler -L../build/lib -lgyronimo -I../build/include -Wl,-rpath ../build/lib
-```
-
-## Run and Analyze
-
-```bash
-python -m yep -v -- main.py
-pprof --svg main.py main.py.prof > ../results/NEAT_profile.svg
+export OMP_NUM_THREADS=[number of threads]
 ```

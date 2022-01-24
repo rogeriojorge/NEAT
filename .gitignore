@@ -1,4 +1,11 @@
 ## Manually added gitignore commands
+
+# Ignore files without extension such as executables
+*
+!*.*
+!*/
+
+# Other files
 src/results
 results
 external/*

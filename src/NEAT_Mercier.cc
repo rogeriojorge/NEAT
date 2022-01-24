@@ -6,8 +6,8 @@
 // Command to compile NEAT on a Macbook with gsl pre-installed with macports
 // g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../include -isysroot`xcrun --show-sdk-path` NEAT_Mercier.cpp -o NEAT_Mercier.so
 
-#include <../include/pybind11/pybind11.h>
-#include <../include/pybind11/stl.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <gyronimo/interpolators/cubic_gsl.hh>
 #include <gyronimo/metrics/metric_mercier.hh>
 #include <gyronimo/core/dblock.hh>
