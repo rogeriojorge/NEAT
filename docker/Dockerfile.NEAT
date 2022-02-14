@@ -13,7 +13,8 @@ RUN apt update
 RUN apt-get install -y wget git less make gsl-bin libgsl-dev libgslcblas0 cmake libboost-all-dev doxygen gcc-10 g++-10 gcc-10-base python3-dev python3-pip pkg-config software-properties-common
 RUN alias pip=pip3
 RUN alias python=python3
-RUN pip install --no-cache-dir matplotlib numpy scipy ninja cmake pybind11 joblib
+# RUN pip install --no-cache-dir matplotlib numpy scipy ninja cmake pybind11 joblib
+RUN pip install matplotlib numpy scipy ninja cmake pybind11 joblib
 
 # Add new user neat
 RUN apt-get install -y ssh sudo openssh-server
@@ -31,7 +32,8 @@ COPY . .
 WORKDIR /home/neat/external
 RUN git clone https://github.com/landreman/pyQSC.git
 WORKDIR /home/neat/external/pyQSC
-RUN pip install --no-cache-dir .
+# RUN pip install --no-cache-dir .
+RUN pip install .
 WORKDIR /home/neat/
 
 # Install SIMSOPT
@@ -46,10 +48,15 @@ RUN CXX=g++-10 cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
 RUN cmake --build . --target install
 
 # Install NEAT
-WORKDIR /home/neat/src
-RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include/ -Wl,-rpath $(pwd)/../build/lib
+WORKDIR /home/neat/src/fields_NEAT
+RUN g++-10 -std=c++2a -fPIC equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+WORKDIR /home/neat/src/metrics_NEAT
+RUN g++-10 -std=c++2a -fPIC metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+WORKDIR /home/neat/src/NEATpp
+RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc ../fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/metric_stellna_qs.o -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/../../build/include/ -I$(pwd)/../ -Wl,-rpath $(pwd)/../../build/lib -Wl,-rpath $(pwd)/..
 
 # Run NEAT from entrypoint script /docker/docker-entrypoint.sh
+WORKDIR /home/neat/src
 RUN ["chmod", "+x", "/home/neat/docker/docker-entrypoint.sh"]
 ENTRYPOINT ["/home/neat/docker/docker-entrypoint.sh"]
 

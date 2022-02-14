@@ -4,7 +4,6 @@ import math
 import sys
 sys.path.append("..")
 import inputs
-import inputs_default
 from stell_repo import get_stel
 import matplotlib.pyplot as plt
 from functions import orbit
@@ -17,22 +16,13 @@ from plotting import set_axes_equal
 try:
     stel, name, r0, Lambda = get_stel(inputs.nphi,inputs.stel_id)
 except Exception as e:
-    try:
-        stel = inputs.stel
-        name = inputs.name
-        r0   = inputs.r0
-        Lambda = inputs.Lambda
-    except Exception as e:
-        stel = inputs_default.stel
-        name = inputs_default.name
-        r0   = inputs_default.r0
-        Lambda = inputs_default.Lambda
+    stel = inputs.stel
+    name = inputs.name
+    r0   = inputs.r0
+    Lambda = inputs.Lambda
 
 ## Create folders
-try:
-    results_folder = inputs.results_folder
-except:
-    results_folder = inputs_default.results_folder
+results_folder = inputs.results_folder
 Path('../'+results_folder+'/'+name).mkdir(parents=True, exist_ok=True)
 results_path = str(Path('../'+results_folder+'/'+name+'/').resolve())
 

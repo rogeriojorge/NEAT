@@ -32,12 +32,17 @@ This section explains how to build the docker container for NEAT. It can be used
    ```
 This process yields an image with roughly 2 GB and may take minute to build.
 
-2. Run the docker image using the `docker run` command including your inputs file and results folder:
+2. Run the docker image using the `docker run` command including your results folder:
     ``` bash
-    docker run -v "$(pwd)/inputs.py:/home/neat/src/inputs.py" -v "$(pwd)/results:/home/neat/results" neat
+    docker run -v "$(pwd)/results:/home/neat/results" neat
     ```
 
 3. Your results folder will be populated with NEAT's results
+
+4. In case the input parameters are changed, there is no need to rebuild the image, just include your inputs file after the docker run command
+    ``` bash
+    docker run -v "$(pwd)/inputs.py:/home/neat/src/inputs.py" -v "$(pwd)/results:/home/neat/results" neat
+    ```
 
 #### Optional
 If you want to run NEAT and continue working in the container, instead run the docker image using the flag **-it** and end with **/bin*bash**
@@ -75,18 +80,51 @@ cmake --build . --target doc
 
 ### Compile NEAT
 
-Compilation is done in the src/ folder of the repo.
+Compilation is done in the src/ folder of the repo. The fields and metrics need to be compiled before compiling the main file NEAT.cc in the src/NEATpp folder
 
 #### Example on MacOS
 
 ```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include -Wl,-rpath $(pwd)/../build/lib
+cd src
+
+cd fields_NEAT
+g++-mp-11 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+
+cd ../metrics_NEAT
+g++-mp-11 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+
+cd ../NEATpp
+```
+
+Compile the serial version (no parallelization)
+```bash
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc ../fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/metric_stellna_qs.o -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib -Wl,-rpath $(pwd)/..
+```
+
+Compile the OpenMP version
+```bash
+g++ -O2 -Wall -std=c++20 -fopenmp NEAT_openmp.cc ../fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/metric_stellna_qs.o -o NEAT_openmp -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib
+```
+
+The number of threads can be changed using the command
+
+```bash
+export OMP_NUM_THREADS=[number of threads]
 ```
 
 #### Example on Linux
 
 ```bash
-g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include  -Wl,-rpath $(pwd)/../build/lib
+cd src
+
+cd fields_NEAT
+g++-10 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+
+cd ../metrics_NEAT
+g++-10 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+
+cd ../NEATpp
+g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include  -Wl,-rpath $(pwd)/../../build/lib
 ```
 
 # Profiling

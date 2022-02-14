@@ -1,16 +1,16 @@
 from qsc import Qsc
 
-nphi = 251 # resolution of the magnetic axis
+nphi     = 251 # resolution of the magnetic axis
 theta0   = [3.14]
 phi0     = [0.01]
 charge   = 1
 rhom     = 1
 mass     = 1
 energy   = [4e4]
-nsamples = 1000
-Tfinal   = 1000
+nsamples = 5000
+Tfinal   = 5500
 
-B20real   = True
+B20real   = False
 makePlots = 1
 showPlots = 0
 Animation = 0
@@ -25,11 +25,11 @@ ntheta = 30 # poloidal resolution for the 3D plot
 boundaryR0 = 0.09
 
 # stel_id = 0
-paper_case = 2
+paper_case = 1
 stel = Qsc.from_paper(paper_case,nphi=nphi,B0=3)
 name = 'paper_r2_5.'+str(paper_case) # name of results folder and files
-r0       = 0.005
-Lambda   = [0.2]
+r0       = 0.12
+Lambda   = [0.99]
 
 makePlots = 1
 savePlots = 1

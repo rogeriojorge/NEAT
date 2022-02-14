@@ -2,11 +2,8 @@
 #include <cmath>
 #include <random>
 #include <chrono>
-#include <gyronimo/interpolators/cubic_gsl.hh>
-#include <gyronimo/metrics/metric_polar_torus.hh>
-#include <gyronimo/metrics/metric_stellna.hh>
-#include <gyronimo/fields/equilibrium_circular.hh>
-#include <gyronimo/fields/equilibrium_stellna.hh>
+#include <metrics_NEAT/metric_stellna_qs.hh>
+#include <fields_NEAT/equilibrium_stellna_qs.hh>
 #include <gyronimo/core/codata.hh>
 #include <gyronimo/dynamics/guiding_centre.hh>
 #include <gyronimo/dynamics/odeint_adapter.hh>
@@ -51,7 +48,7 @@ public:
     std::cout  << t << " ";
     for(std::size_t k = 0;k < ensemble_type::size;k++){
       gyronimo::IR3 x = gc_pointer_->get_position(z[k]);
-      double v_parallel = gc_pointer_->get_vpp(z[k]);
+    //   double v_parallel = gc_pointer_->get_vpp(z[k]);
       std::cout
         << x[gyronimo::IR3::u] << " ";
 //      << x[gyronimo::IR3::v] << " "
@@ -65,34 +62,20 @@ private:
 };
 
 int main() {
-  const double a = 1.0, R0 = 3.0, B0 = 2.7, qaxis=1.0;  // jet-like parameters;
+  const double R0 = 3.0, B0 = 2.7, qaxis=1.0;  // jet-like parameters;
   //auto q = [](double u){return 1.0 + 2.5*u*u;};  // parabolic safety-factor;
-  //auto qprime = [](double u){return 5.0*u;};  // safety-factor derivative;
-  //gyronimo::metric_polar_torus g(a, R0);
-  //gyronimo::equilibrium_circular eq(B0, &g, q, qprime);
-  int field_periods = 1;
   double G0 = B0 * R0, G2 = 0;
   double I2 = B0 / (R0 * qaxis);
   double iota=1/qaxis, iotaN=iota, Bref=B0, etabar=1/R0;
-  double pi = 3.141593;
-  double phi_grid [5] = {0., pi/2/field_periods, pi/field_periods, 3*pi/2/field_periods, 2*pi/field_periods};
-  double B1c [5] = {B0*etabar, B0*etabar, B0*etabar, B0*etabar, B0*etabar};
-  double B0_array [5] = {B0, B0, B0, B0, B0};
-  double B1s [5] = {0., 0., 0., 0., 0.};
-  double B20 [5] = {0., 0., 0., 0., 0.};
-  double B2c [5] = {0., 0., 0., 0., 0.};
-  double B2s [5] = {0., 0., 0., 0., 0.};
-  double beta0 [5] = {0., 0., 0., 0., 0.};
-  double beta1c [5] = {0., 0., 0., 0., 0.};
-  double beta1s [5] = {0., 0., 0., 0., 0.};
+  double B1c = B0*etabar;
+  double B20 = 0;
+  double B2c = 0;
+  double beta1s = 0;
 
-  gyronimo::cubic_gsl_factory ifactory;
-  gyronimo::metric_stellna g(field_periods, Bref, gyronimo::dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN,
-                   gyronimo::dblock_adapter(B0_array), gyronimo::dblock_adapter(B1c), gyronimo::dblock_adapter(B1s),
-                   gyronimo::dblock_adapter(B20), gyronimo::dblock_adapter(B2c), gyronimo::dblock_adapter(B2s),
-                   gyronimo::dblock_adapter(beta0), gyronimo::dblock_adapter(beta1c), gyronimo::dblock_adapter(beta1s),
-                   &ifactory);
-  gyronimo::equilibrium_stellna eq(&g);
+  metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
+                     B0, B1c, B20, B2c, beta1s);
+
+  equilibrium_stellna_qs eq(&g);
 
 // defines the guiding-centre equation system:
   const double mass = 2.0, charge = 1.0, mu = 0.0;  // mu=0 deuteron;
@@ -119,14 +102,9 @@ int main() {
         {r_distro(rand_generator), 0.0, 0.0}, vpp_distro(rand_generator),
         gyronimo::guiding_centre::vpp_sign::plus);
 
-// creates an observer (is it really necessary?):
-//std::cout.precision(16);
-//std::cout.setf(std::ios::scientific);
-//orbit_observer observer(&gc);
-
 // integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
-  const double Tfinal = 100.0;
-  const std::size_t nsamples = 10000;
+  const double Tfinal = 50.0;
+  const std::size_t nsamples = 1000;
   boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
   boost::numeric::odeint::integrate_const(
       ode_stepper, ensemble_type(&gc),

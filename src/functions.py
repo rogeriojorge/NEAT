@@ -1,4 +1,4 @@
-import NEAT
+from NEATpp import NEAT
 import numpy as np
 import os
 
@@ -13,28 +13,6 @@ def orbit(stel, params, B20real):
             r0,theta0,phi0,charge,rhom,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     '''
-    # import inputs_default
-    # if 'r0' not in params.keys():
-    #     params['r0'] = inputs_default.r0
-    # if 'theta0' not in params.keys():
-    #     params['theta0'] = inputs_default.theta0
-    # if 'phi0' not in params.keys():
-    #     params['phi0'] = inputs_default.phi0
-    # if 'charge' not in params.keys():
-    #     params['charge'] = inputs_default.charge
-    # if 'rhom' not in params.keys():
-    #     params['rhom'] = inputs_default.rhom
-    # if 'mass' not in params.keys():
-    #     params['mass'] = inputs_default.mass
-    # if 'Lambda'not in params.keys():
-    #     params['Lambda'] = inputs_default.Lambda
-    # if 'energy' not in params.keys():
-    #     params['energy'] = inputs_default.energy
-    # if 'nsamples' not in params.keys():
-    #     params['nsamples'] = inputs_default.nsamples
-    # if 'Tfinal' not in params.keys():
-    #     params['Tfinal'] = inputs_default.Tfinal
-
     if hasattr(stel.B0, "__len__"):
         if stel.order == 'r1':
             B20 = [0]*(len(stel.varphi)+1)
@@ -64,25 +42,28 @@ def orbit(stel, params, B20real):
         params['charge'], params['rhom'], params['mass'], params['Lambda'], params['energy'], params['r0'], params['theta0'], params['phi0'], params['nsamples'], params['Tfinal']))
     else:
         if stel.order == 'r1':
-            B20 = [0]*(len(stel.varphi)+1)
-            stel.B2c = 0
-            stel.B2s = 0
-            stel.beta_1s = 0
-            stel.G2 = 0
+            B20 = 0
+            B2c = 0
+            beta_1s = 0
+            G2 = 0
         else:
+            B2c = stel.B2c
+            beta_1s = stel.beta_1s
+            G2 = stel.G2
             if B20real:
-                B20=np.append(stel.B20,stel.B20[0])
+                # B20=np.append(stel.B20,stel.B20[0])
+                print("Quasisymmetric NEAT not implemented yet")
+                exit()
             else:
-                B20=[stel.B20_mean]*(len(stel.varphi)+1)
+                B20=stel.B20_mean
 
         # Call Gyronimo
-        sol = np.array(NEAT.gc_solver(int(stel.nfp),
-        stel.G0, stel.G2, stel.I2, stel.iota, stel.iotaN, stel.Bbar,
-        np.append(stel.varphi,2*np.pi/stel.nfp),
-        [stel.B0]*(len(stel.varphi)+1), [stel.B0*stel.etabar]*(len(stel.varphi)+1), [0]*(len(stel.varphi)+1),
-        B20, [stel.B2c]*(len(stel.varphi)+1), [stel.B2s]*(len(stel.varphi)+1),
-        [0]*(len(stel.varphi)+1), [0]*(len(stel.varphi)+1), [stel.beta_1s]*(len(stel.varphi)+1),
-        params['charge'], params['rhom'], params['mass'], params['Lambda'], params['energy'], params['r0'], params['theta0'], params['phi0'], params['nsamples'], params['Tfinal']))
+        sol = np.array(NEAT.gc_solver_qs(
+        stel.G0, G2, stel.I2, stel.iota, stel.iotaN, stel.Bbar,
+        stel.B0, stel.etabar*stel.B0, B20, B2c, beta_1s,
+        params['charge'], params['rhom'], params['mass'],
+        params['Lambda'], params['energy'], params['r0'],
+        params['theta0'], params['phi0'], params['nsamples'], params['Tfinal']))
 
     # Store all output quantities
     time      = sol[:,0]
