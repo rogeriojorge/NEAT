@@ -64,8 +64,12 @@ jobs:
 
     - name: Install NEAT
       run: |
-        cd src
-        g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include/ -Wl,-rpath $(pwd)/../build/lib
+        cd src/fields_NEAT
+        RUN g++-10 -std=c++2a -fPIC equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+        cd src/metrics_NEAT
+        g++-10 -std=c++2a -fPIC metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+        cd src/NEATpp
+        g++-10 -std=c++2a -fPIC -shared NEAT.cc ../fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/metric_stellna_qs.o -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/../../build/include/ -I$(pwd)/../ -Wl,-rpath $(pwd)/../../build/lib -Wl,-rpath $(pwd)/..
 
     - name: Run unit tests
       run: |
