@@ -126,19 +126,3 @@ g++-10 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I
 cd ../NEATpp
 g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include  -Wl,-rpath $(pwd)/../../build/lib
 ```
-
-# Profiling
-
-## test_openmp_stellna
-
-An simple openmp version of for OpenMP profiling purposes is in tests/test_openmp_stellna. After compilation
-
-```bash
-g++ -std=c++20 -fopenmp openmp_stellna.cc -o openmp_stellna -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../build/lib -lgyronimo -I$(pwd)/../build/include  -Wl,-rpath $(pwd)/../build/lib
-```
-
-it creates an executable that can be analyzed using a profiling tool such as Instruments in MacOS, specifically the Time Profiler. The number of threads can be changed using the command
-
-```bash
-export OMP_NUM_THREADS=[number of threads]
-```
