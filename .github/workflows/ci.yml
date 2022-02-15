@@ -65,7 +65,7 @@ jobs:
     - name: Install NEAT
       run: |
         cd src/fields_NEAT
-        RUN g++-10 -std=c++2a -fPIC equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
+        g++-10 -std=c++2a -fPIC equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
         cd src/metrics_NEAT
         g++-10 -std=c++2a -fPIC metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
         cd src/NEATpp
