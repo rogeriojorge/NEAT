@@ -38,7 +38,7 @@ class ensemble {
 };
 
 // defines the ensemble size and dynamical system:
-typedef ensemble<gyronimo::guiding_centre, 3000> ensemble_type;
+typedef ensemble<gyronimo::guiding_centre, 10000> ensemble_type;
 
 // ODEInt observer object to print diagnostics at each time step.
 class orbit_observer {
@@ -60,6 +60,12 @@ public:
 private:
   const gyronimo::guiding_centre* gc_pointer_;
 };
+
+// Benchmark simulation to have enough statistics
+// 5000  particles on one flux surface
+// 20000 particles on the whole volume
+// sampling in theta, phi (uniformly spaced, weighted by the jacobian, element-wise tensor multiplication), lambda
+// simulation should run for 10-3 to 10-2 seconds
 
 int main() {
   const double R0 = 3.0, B0 = 2.7, qaxis=1.0;  // jet-like parameters;
@@ -103,7 +109,7 @@ int main() {
         gyronimo::guiding_centre::vpp_sign::plus);
 
 // integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
-  const double Tfinal = 50.0;
+  const double Tfinal = 250.0;
   const std::size_t nsamples = 1000;
   boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
   boost::numeric::odeint::integrate_const(
