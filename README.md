@@ -47,7 +47,7 @@ This process yields an image with roughly 2 GB and may take minute to build.
 #### Optional
 If you want to run NEAT and continue working in the container, instead run the docker image using the flag **-it** and end with **/bin*bash**
     ```bash
-    docker run -v "$(pwd)/inputs.py:/home/neat/src/inputs.py" -v "$(pwd)/results:/home/neat/results" -it neat /bin/bash
+    docker run -it --entrypoint /bin/bash neat
     ```
 
 ## Development
