@@ -66,27 +66,27 @@ def binormalZ(phi):
     sp=spline(stel.phi, stel.binormal_cylindrical[:,2], k=3, s=0)
     return sp(np.mod(phi,2*np.pi/NFP))
 
-def getFourierCurve(outputFile,ppp=10):
-	from simsopt.geo.curvexyzfourier import CurveXYZFourier
-	from simsopt.core.optimizable import optimizable
-	coil_data = np.loadtxt(outputFile, delimiter=',')
-	Nt_coils=len(coil_data)-1
-	num_coils = int(len(coil_data[0])/6)
-	coils = [optimizable(CurveXYZFourier(Nt_coils*ppp, Nt_coils)) for i in range(num_coils)]
-	for ic in range(num_coils):
-		dofs = coils[ic].dofs
-		dofs[0][0] = coil_data[0, 6*ic + 1]
-		dofs[1][0] = coil_data[0, 6*ic + 3]
-		dofs[2][0] = coil_data[0, 6*ic + 5]
-		for io in range(0, Nt_coils):
-			dofs[0][2*io+1] = coil_data[io+1, 6*ic + 0]
-			dofs[0][2*io+2] = coil_data[io+1, 6*ic + 1]
-			dofs[1][2*io+1] = coil_data[io+1, 6*ic + 2]
-			dofs[1][2*io+2] = coil_data[io+1, 6*ic + 3]
-			dofs[2][2*io+1] = coil_data[io+1, 6*ic + 4]
-			dofs[2][2*io+2] = coil_data[io+1, 6*ic + 5]
-		coils[ic].set_dofs(np.concatenate(dofs))
-	return coils
+# def getFourierCurve(outputFile,ppp=10):
+# 	from simsopt.geo.curvexyzfourier import CurveXYZFourier
+# 	from simsopt.core.optimizable import optimizable
+# 	coil_data = np.loadtxt(outputFile, delimiter=',')
+# 	Nt_coils=len(coil_data)-1
+# 	num_coils = int(len(coil_data[0])/6)
+# 	coils = [optimizable(CurveXYZFourier(Nt_coils*ppp, Nt_coils)) for i in range(num_coils)]
+# 	for ic in range(num_coils):
+# 		dofs = coils[ic].dofs
+# 		dofs[0][0] = coil_data[0, 6*ic + 1]
+# 		dofs[1][0] = coil_data[0, 6*ic + 3]
+# 		dofs[2][0] = coil_data[0, 6*ic + 5]
+# 		for io in range(0, Nt_coils):
+# 			dofs[0][2*io+1] = coil_data[io+1, 6*ic + 0]
+# 			dofs[0][2*io+2] = coil_data[io+1, 6*ic + 1]
+# 			dofs[1][2*io+1] = coil_data[io+1, 6*ic + 2]
+# 			dofs[1][2*io+2] = coil_data[io+1, 6*ic + 3]
+# 			dofs[2][2*io+1] = coil_data[io+1, 6*ic + 4]
+# 			dofs[2][2*io+2] = coil_data[io+1, 6*ic + 5]
+# 		coils[ic].set_dofs(np.concatenate(dofs))
+# 	return coils
 
 def plot_stellarator(ax,rR,ntheta=50,nphi=200):
     def X1cF(phi):

@@ -11,6 +11,7 @@ results
 external/*
 *.prof
 *.profile
+external
 
 ## Python, Docker, C++, CMake and other gitignore commands
 
@@ -86,6 +87,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/build/
 
 # PyBuilder
 target/

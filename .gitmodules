@@ -1,5 +1,9 @@
-[submodule "gyronimo"]
+[submodule "external/vmec"]
+	path = external/vmec
+	url = https://github.com/hiddenSymmetries/VMEC2000.git
+[submodule "external/simple"]
+	path = external/simple
+	url = https://github.com/itpplasma/SIMPLE.git
+[submodule "external/gyronimo"]
 	path = external/gyronimo
 	url = https://github.com/prodrigs/gyronimo
-	branch = development
-    ignore = dirty

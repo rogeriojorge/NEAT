@@ -78,6 +78,18 @@ If you want to build documentation with doxygen, run
 cmake --build . --target doc
 ```
 
+#### Optional VMEC support
+
+If you want to compile gyronimo with VMEC and OpenMP functionality, run instead
+
+```
+cd external/gyronimo
+mkdir build
+cd build
+CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build -DSUPPORT_OPENMP=ON -DSUPPORT_VMEC=ON ../
+cmake --build . --target install
+```
+
 ### Compile NEAT
 
 Compilation is done in the src/ folder of the repo. The fields and metrics need to be compiled before compiling the main file NEAT.cc in the src/NEATpp folder

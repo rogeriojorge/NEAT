@@ -1,8 +1,8 @@
 FROM ubuntu:22.04
 LABEL maintainer.name="Rogerio Jorge" \
       maintainer.email="rogerio.jorge.at.tecnico.ulisboa" \
-      developers="Enabling Research IST-MOD-01 team @ Tecnico Lisboa" \
-      version="0.1" \
+      developers="EUROfusion Enabling Research IST-MOD-01 team @ Tecnico Lisboa" \
+      version="0.0.1" \
       description="Docker file for NEAT container based on an alpine image" 
 
 # Define environment variable needed to run non-interactively

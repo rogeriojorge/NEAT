@@ -3,7 +3,8 @@ import time
 import math
 import sys
 sys.path.append("..")
-import inputs
+import toml
+inputs = toml.load("../inputs.toml")
 from stell_repo import get_stel
 import matplotlib.pyplot as plt
 from functions import orbit
@@ -11,18 +12,16 @@ import numpy as np
 from functions import check_log_error
 from pathlib import Path
 from plotting import set_axes_equal
+from qsc import Qsc
 
 ## Stellarator to analyze
-try:
-    stel, name, r0, Lambda = get_stel(inputs.nphi,inputs.stel_id)
-except Exception as e:
-    stel = inputs.stel
-    name = inputs.name
-    r0   = inputs.r0
-    Lambda = inputs.Lambda
+stel = eval(inputs['equilibrium']['stel'])
+name = inputs['equilibrium']['name']
+r0   = inputs['equilibrium']['r0']
+Lambda = inputs['equilibrium']['Lambda']
 
 ## Create folders
-results_folder = inputs.results_folder
+results_folder = inputs['folders']['results_folder']
 Path('../'+results_folder+'/'+name).mkdir(parents=True, exist_ok=True)
 results_path = str(Path('../'+results_folder+'/'+name+'/').resolve())
 
@@ -31,12 +30,12 @@ if __name__ == '__main__':
     print("Get particle orbit using gyronimo")
     result=[]
     start_time = time.time()
-    for _phi0 in inputs.phi0:
+    for _phi0 in inputs['particles']['phi0']:
         for _Lambda in Lambda:
-            for _energy in inputs.energy:
-                for _theta0 in inputs.theta0:
-                    params = {"r0": r0, "theta0": _theta0, "phi0": _phi0, "charge": inputs.charge, "rhom": inputs.rhom, "mass": inputs.mass, "Lambda": _Lambda, "energy": _energy, "nsamples": inputs.nsamples, "Tfinal": inputs.Tfinal,}
-                    orbit_temp=orbit(stel,params,inputs.B20real)
+            for _energy in inputs['particles']['energy']:
+                for _theta0 in inputs['particles']['theta0']:
+                    params = {"r0": r0, "theta0": _theta0, "phi0": _phi0, "charge": inputs['particles']['charge'], "rhom": inputs['particles']['rhom'], "mass": inputs['particles']['mass'], "Lambda": _Lambda, "energy": _energy, "nsamples": inputs['particles']['nsamples'], "Tfinal": inputs['particles']['Tfinal']}
+                    orbit_temp=orbit(stel,params,inputs['equilibrium']['B20real'])
                     if not math.isnan(orbit_temp[1][-1]):
                         result.append(orbit_temp)
     print("--- gyronimo took %s seconds ---" % (time.time() - start_time))
@@ -51,7 +50,7 @@ if __name__ == '__main__':
     print("Max Canonical Angular Momentum Error per Orbit = ",check_log_error(result[:,9]))
 
     # Plot relevant quantities
-    if inputs.makePlots==1:
+    if inputs['plotting']['makePlots']==1:
         fig=plt.figure(figsize=(10,6))
         plt.subplot(3, 3, 1);[plt.plot(res[0],res[1])  for res in result];plt.xlabel('Time');plt.ylabel('r')
         plt.subplot(3, 3, 2);[plt.plot(res[0],res[4])  for res in result];plt.xlabel('Time');plt.ylabel('Energy')
@@ -81,14 +80,14 @@ if __name__ == '__main__':
         [plt.plot(res[0],stel.B_mag(res[1], res[2], res[3]),label='theory') for res in result]
         plt.xlabel('Time');plt.ylabel('Bfield');plt.legend()
 
-        if inputs.savePlots==1:
+        if inputs['plotting']['savePlots']==1:
             plt.savefig(results_path + '/gyronimo_orbit_params.png')
 
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
         [ax.plot3D(rpos_cartesian[i][0],rpos_cartesian[i][1],rpos_cartesian[i][2]) for i in range(len(result))]
         ax.plot_surface(boundary[0],boundary[1],boundary[2],alpha=0.5);set_axes_equal(ax);ax.set_axis_off()
         ax.dist = 6.0
-        if inputs.savePlots==1:
+        if inputs['plotting']['savePlots']==1:
             plt.savefig(results_path + '/gyronimo_orbit3D.png')
 
         # import mayavi.mlab as mlab
