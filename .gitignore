@@ -1,7 +1,7 @@
 ## Manually added gitignore commands
 
 # Ignore files without extension such as executables
-*
+# *
 !*.*
 !*/
 
