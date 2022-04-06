@@ -68,7 +68,7 @@ In NEAT's root folder, run
 cd external/gyronimo
 mkdir build
 cd build
-CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
+CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build -DSUPPORT_OPENMP=ON -DSUPPORT_VMEC=ON ../
 cmake --build . --target install
 ```
 

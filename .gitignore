@@ -8,10 +8,10 @@
 # Other files
 src/results
 results
-# external/*
+external/*
 *.prof
 *.profile
-# external
+external
 
 ## Python, Docker, C++, CMake and other gitignore commands
 
