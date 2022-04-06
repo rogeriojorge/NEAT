@@ -7,3 +7,4 @@
 [submodule "external/gyronimo"]
 	path = external/gyronimo
 	url = https://github.com/rogeriojorge/gyronimo.git
+    branch = feature/gyronimo-without-makima-bspline3
