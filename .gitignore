@@ -8,7 +8,6 @@
 # Other files
 src/results
 results
-external/*
 *.prof
 *.profile
 
