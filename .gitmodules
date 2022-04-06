@@ -6,4 +6,4 @@
 	url = https://github.com/itpplasma/SIMPLE.git
 [submodule "external/gyronimo"]
 	path = external/gyronimo
-	url = https://github.com/prodrigs/gyronimo
+	url = https://github.com/rogeriojorge/gyronimo.git
