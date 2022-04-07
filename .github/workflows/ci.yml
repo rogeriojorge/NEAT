@@ -74,6 +74,27 @@ jobs:
     - name: Try importing vmec module
       run: python -c "print(dir()); import vmec; print(dir()); print(dir(vmec)); print('package:', vmec.__package__); print('spec:', vmec.__spec__); print('doc:', vmec.__doc__); print('file:', vmec.__file__); print('path:', vmec.__path__)"
 
+    - name: Configure and install simple
+      run: |
+        cd external/simple
+        mkdir build
+        CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
+        cmake --build . --target install
+        cp simple.x ../../../build/bin
+
+    - name: Try running simple
+      run: |
+        cd build/bin
+        ./simple.x
+    
+    - name: Install simsopt
+      run: |
+        pip install simsopt
+
+    - name: Try running simsopt
+      run: |
+        python -c "import simsopt; print('success')"
+
     - name: Install NEAT
       run: |
         cd src/fields_NEAT
