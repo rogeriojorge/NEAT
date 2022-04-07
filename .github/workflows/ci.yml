@@ -40,7 +40,7 @@ jobs:
     - name: Install required python packages
       run: |
         python -m pip install --upgrade pip
-        pip install wheel matplotlib numpy scipy ninja cmake pybind11 joblib qsc
+        pip install wheel matplotlib numpy scipy ninja cmake pybind11 joblib qsc mpi4py f90wrap
         alias pip=pip3
         alias python=python3
     
@@ -60,6 +60,19 @@ jobs:
         cd build
         CXX=g++-10 cmake -DCMAKE_INSTALL_PREFIX=../../../build -DSUPPORT_OPENMP=ON -DSUPPORT_VMEC=ON ../
         cmake --build . --target install 
+
+    - name: Add to LD_LIBRARY_PATH so scalapack etc can be found
+      run: echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
+
+    - name: Configure and install vmec
+      run: |
+        cd external/vmec
+        cp cmake/machines/ubuntu.json cmake_config_file.json
+        cat cmake_config_file.json
+        pip install .
+
+    - name: Try importing vmec module
+      run: python -c "print(dir()); import vmec; print(dir()); print(dir(vmec)); print('package:', vmec.__package__); print('spec:', vmec.__spec__); print('doc:', vmec.__doc__); print('file:', vmec.__file__); print('path:', vmec.__path__)"
 
     - name: Install NEAT
       run: |

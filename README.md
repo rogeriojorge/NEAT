@@ -78,17 +78,6 @@ If you want to build documentation with doxygen, run
 cmake --build . --target doc
 ```
 
-#### Optional VMEC support
-
-If you want to compile gyronimo with VMEC and OpenMP functionality, run instead
-
-```
-cd external/gyronimo
-mkdir build
-cd build
-CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build -DSUPPORT_OPENMP=ON -DSUPPORT_VMEC=ON ../
-cmake --build . --target install
-```
 
 ### Compile NEAT
 
@@ -137,4 +126,50 @@ g++-10 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I
 
 cd ../NEATpp
 g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include  -Wl,-rpath $(pwd)/../../build/lib
+```
+
+### Install SIMPLE
+In NEAT's root folder, run
+
+```bash
+cd external/simple
+mkdir build
+cd build
+CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
+cmake --build . --target install
+cp simple.x ../../../build/bin
+```
+
+The last command copies the executable of SIMPLE to the folder build/bin
+
+### Install VMEC
+First, in the external/vmec folder, change the file cmake_config_file.json to your machine using an example from the cmake/machines templates. Here is a template for MacOS running gcc11
+
+```
+{
+    "comment": "This configuration file works on a macbook on which gcc and netcdf have been installed using macports.",
+    "cmake_args": [
+           "-DCMAKE_C_COMPILER=mpicc",
+           "-DCMAKE_CXX_COMPILER=mpicxx",
+           "-DCMAKE_Fortran_COMPILER=mpif90",
+           "-DNETCDF_INC_PATH=/opt/local/include",
+           "-DNETCDF_LIB_PATH=/opt/local/lib",
+           "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch"]
+}
+```
+
+Then, in NEAT's root folder, run
+
+```bash
+cd external/vmec
+pip install numpy
+pip install cmake scikit-build ninja f90wrap
+python setup.py build_ext
+python setup.py install
+```
+
+To test VMEC's installation, you can run
+
+```
+python -c "import vmec; print('success')"
 ```
