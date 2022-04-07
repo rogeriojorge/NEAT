@@ -78,6 +78,7 @@ jobs:
       run: |
         cd external/simple
         mkdir build
+        cd build
         CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
         cmake --build . --target install
         cp simple.x ../../../build/bin
