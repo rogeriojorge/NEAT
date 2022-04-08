@@ -1,6 +1,3 @@
-[submodule "external/vmec"]
-	path = external/vmec
-	url = https://github.com/hiddenSymmetries/VMEC2000.git
 [submodule "external/simple"]
 	path = external/simple
 	url = https://github.com/itpplasma/SIMPLE.git
