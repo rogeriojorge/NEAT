@@ -82,7 +82,7 @@ endif()
 
 add_subdirectory(external/vmec)
 # add_subdirectory(external/simple)
-# add_subdirectory(external/gyronimo)
+add_subdirectory(external/gyronimo)
 # add_subdirectory(external/pybind11)
 
 # pybind11_add_module(${PROJECT_NAME}

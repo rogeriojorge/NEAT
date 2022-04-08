@@ -11,3 +11,4 @@
 [submodule "external/vmec"]
 	path = external/vmec
 	url = https://github.com/rogeriojorge/VMEC2000.git
+    branch = feature/compile-out-of-source
