@@ -92,9 +92,9 @@ jobs:
       run: |
         pip install simsopt
 
-    - name: Try running simsopt
-      run: |
-        python -c "import simsopt; print('success')"
+    # - name: Try running simsopt
+    #   run: |
+    #     python -c "import simsopt; print('success')"
 
     - name: Install NEAT
       run: |

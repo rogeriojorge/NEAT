@@ -6,7 +6,7 @@
 #define EQUILIBRIUM_STELLNA_QS
 
 #include <gyronimo/fields/IR3field_c1.hh>
-#include <metrics_NEAT/metric_stellna_qs.hh>
+#include <metric_stellna_qs.hh>
 using namespace gyronimo;
 
 //! Quasi-symmetric stellarator equilibrium field in near-axis coordinates.

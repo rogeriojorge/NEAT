@@ -6,7 +6,7 @@
 
 #include <math.h>
 #include <numbers>
-#include <metrics_NEAT/metric_stellna_qs.hh>
+#include "metric_stellna_qs.hh"
 #include <gyronimo/core/error.hh>
 #include <iostream>
 using namespace gyronimo;

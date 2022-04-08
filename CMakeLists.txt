@@ -48,53 +48,106 @@ endif()
 # endif()
 
 # find_package(OpenMP)
-# find_package(Boost 1.71.0)
-# if(Boost_FOUND)
-#     message(STATUS "Boost version is ${Boost_VERSION_STRING}")
-#     message(STATUS "Boost include dirs are ${Boost_INCLUDE_DIRS}")
-# else()
-#     message(STATUS "Downloading and installing boost.")
-#     # For some external project macros
-#     include(ExternalProject)
 
-#     # Download boost from git and build the headers
-#     set( boost_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/boost )
-#     set( boost_target boost)
+# Add BOOST
+find_package(Boost 1.71.0)
+if(Boost_FOUND)
+    message(STATUS "Boost version is ${Boost_VERSION_STRING}")
+    message(STATUS "Boost include dirs are ${Boost_INCLUDE_DIRS}")
+else()
+    message(STATUS "Downloading and installing boost.")
+    # For some external project macros
+    include(ExternalProject)
 
-#     ExternalProject_Add(
-#         ${boost_target}
-#         PREFIX ${boost_DIR}
-#         GIT_REPOSITORY https://github.com/boostorg/boost.git
-#         GIT_TAG boost-1.76.0
-#         GIT_SHALLOW TRUE
-#         GIT_PROGRESS TRUE
-#         GIT_SUBMODULES tools/build tools/boost_install libs/config libs/numeric
-#             libs/math libs/type_traits libs/predef libs/assert libs/static_assert
-#             libs/throw_exception libs/core libs/serialization libs/preprocessor libs/mpl
-#             libs/utility libs/typeof libs/array libs/units libs/integer libs/fusion
-#             libs/range libs/iterator libs/concept_check libs/detail libs/function_types
-#             libs/lexical_cast libs/container libs/move libs/smart_ptr libs/multi_array
-#             libs/functional libs/function libs/type_index libs/container_hash libs/bind
-#         CONFIGURE_COMMAND ./bootstrap.sh --prefix=<PREFIX>
-#         BUILD_COMMAND ./b2 headers --prefix=${boost_DIR}
-#         BUILD_IN_SOURCE 1
-#         INSTALL_COMMAND ""
-#     )
+    # Download boost from git and build the headers
+    set( boost_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/boost )
+    set( boost_target boost)
 
-#     set(Boost_INCLUDE_DIRS ${boost_DIR}/src/${boost_target})
-#     message(STATUS "Boost include dirs are ${Boost_INCLUDE_DIRS}")
-# endif()
+    ExternalProject_Add(
+        ${boost_target}
+        PREFIX ${boost_DIR}
+        GIT_REPOSITORY https://github.com/boostorg/boost.git
+        GIT_TAG boost-1.76.0
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        GIT_SUBMODULES tools/build tools/boost_install libs/config libs/numeric
+            libs/math libs/type_traits libs/predef libs/assert libs/static_assert
+            libs/throw_exception libs/core libs/serialization libs/preprocessor libs/mpl
+            libs/utility libs/typeof libs/array libs/units libs/integer libs/fusion
+            libs/range libs/iterator libs/concept_check libs/detail libs/function_types
+            libs/lexical_cast libs/container libs/move libs/smart_ptr libs/multi_array
+            libs/functional libs/function libs/type_index libs/container_hash libs/bind
+        CONFIGURE_COMMAND ./bootstrap.sh --prefix=<PREFIX>
+        BUILD_COMMAND ./b2 headers --prefix=${boost_DIR}
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND ""
+    )
 
-# add_subdirectory(external/vmec)
+    set(Boost_INCLUDE_DIRS ${boost_DIR}/src/${boost_target})
+    message(STATUS "Boost include dirs are ${Boost_INCLUDE_DIRS}")
+endif()
+
+# Add GSL
+find_package(GSL REQUIRED)
+  include_directories(${GSL_INCLUDE_DIRS})
+
+# Compile git submodules
+add_subdirectory(external/vmec)
 add_subdirectory(external/simple)
-# add_subdirectory(external/gyronimo)
-# add_subdirectory(external/pybind11)
+add_subdirectory(external/gyronimo)
 
-# pybind11_add_module(${PROJECT_NAME}
-# src/NEATpp/NEAT.cc
-# src/NEATpp/NEAT_Mercier.cc
-# )
+# PYBIND11 specific configurations
+if(SKBUILD)
+  # Scikit-Build does not add your site-packages to the search path
+  # automatically, so we need to add it _or_ the pybind11 specific directory
+  # here.
+  execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c
+            "import pybind11; print(pybind11.get_cmake_dir())"
+    OUTPUT_VARIABLE _tmp_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
+  list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+endif()
+  
+find_package(pybind11 CONFIG REQUIRED)
 
+# Build NEAT
+# file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
+# add_library(neat SHARED ${neat_sources})
+pybind11_add_module(neat
+    src/NEATpp/NEAT.cc
+    # src/NEATpp/NEAT_Mercier.cc
+)
+target_link_libraries(neat PUBLIC gyronimo)
+target_include_directories(neat PUBLIC ${PROJECT_SOURCE_DIR}/src/fields_NEAT)
+target_include_directories(neat PUBLIC ${PROJECT_SOURCE_DIR}/src/metrics_NEAT)
+target_link_libraries(neat PUBLIC ${GSL_LIBRARIES})
+include_directories(${Boost_INCLUDE_DIRS})
+target_compile_features(neat PRIVATE cxx_std_20)
 
-# build NEATpp
-file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
+# file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
+# add_library(neat SHARED ${neat_sources})
+
+# add_library(external/gyronimo ${neat_sources})
+# add_executable(neat ${PROJECT_SOURCE_DIR}/src/NEATpp/NEAT.cc)
+# add_dependencies(gyronimo)
+# target_link_libraries(neat PRIVATE external/gyronimo)
+# find_library(GYRONIMO_LOCATION external/gyronimo)
+# target_link_libraries(neat ${GYRONIMO_LOCATION})
+
+# # build NEATpp
+# file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
+# file(GLOB neat_headers ${PROJECT_SOURCE_DIR}/src/*/*.hh)
+# add_library(neat SHARED ${neat_sources})
+# target_include_directories(neat PUBLIC ${neat_headers})
+# target_include_directories(neat PUBLIC ${pybind11_INCLUDE_DIR})
+# target_include_directories(neat PUBLIC ${Python_INCLUDE_DIRS})
+# target_include_directories(neat PUBLIC ${CMAKE_INSTALL_PREFIX}/include)
+# # target_link_libraries(neat PUBLIC external/gyronimo)
+# # target_link_libraries(neat PUBLIC gyronimo)
+# Install NEATpp
+install(TARGETS neat LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+# # install(
+# #   DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/neat
+# #   TYPE INCLUDE MESSAGE_NEVER
+# #   FILES_MATCHING PATTERN "*.hh")

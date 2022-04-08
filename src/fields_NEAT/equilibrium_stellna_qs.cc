@@ -4,7 +4,7 @@
 
 
 #include <numbers>
-#include <fields_NEAT/equilibrium_stellna_qs.hh>
+#include "equilibrium_stellna_qs.hh"
 #include <valarray>
 using namespace gyronimo;
 

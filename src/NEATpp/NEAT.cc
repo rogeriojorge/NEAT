@@ -8,24 +8,24 @@
 
 // g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -Wl,-rpath ../build -isysroot`xcrun --show-sdk-path` NEAT.cc -o NEAT.so
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 // // // //  USE CUBIC_GSL_PERIODIC
-#include "gyronimo/interpolators/cubic_gsl.hh"
-#include "gyronimo/interpolators/steffen_gsl.hh"
-#include <metrics_NEAT/metric_stellna_qs.hh>
+#include <gyronimo/interpolators/cubic_gsl.hh>
+#include <gyronimo/interpolators/steffen_gsl.hh>
+#include "metric_stellna_qs.hh"
 // #include <gyronimo/metrics/metric_stellna.hh>
-#include "gyronimo/core/dblock.hh"
+#include <gyronimo/core/dblock.hh>
 #include <vector>
-#include <fields_NEAT/equilibrium_stellna_qs.hh>
+#include "equilibrium_stellna_qs.hh"
 // #include <gyronimo/fields/equilibrium_stellna.hh>
-#include "gyronimo/dynamics/guiding_centre.hh"
+#include <gyronimo/dynamics/guiding_centre.hh>
 #include <boost/math/tools/roots.hpp>
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 #include <boost/numeric/odeint/stepper/bulirsch_stoer.hpp>
-#include "gyronimo/dynamics/odeint_adapter.hh"
-#include "gyronimo/core/codata.hh"
+#include <gyronimo/dynamics/odeint_adapter.hh>
+#include <gyronimo/core/codata.hh>
 // namespace py = pybind11;
 using namespace gyronimo;
 
