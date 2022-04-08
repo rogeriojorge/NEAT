@@ -1,20 +1,25 @@
 cmake_minimum_required(VERSION 3.5)
 project(NEATpp)
 
-# set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Enable output of compile commands during generation.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Add the -fPIC flag using the line below
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Use python version that satisfies version constraints
+set(Python_FIND_STRATEGY LOCATION)
+# Make sure that python libraries such as numpy are found
+find_package(Python 3 COMPONENTS Interpreter Development.Module NumPy)
+# Use relative paths in MacOS
+set(CMAKE_MACOSX_RPATH ON)
 
-# set(Python_FIND_STRATEGY LOCATION)
-# find_package(Python 3 COMPONENTS Interpreter Development.Module NumPy)
+# Logging messages to debug possible Python issues
+message(status " Python executable is ${Python_EXECUTABLE}")
+message(status " Python Development Module found value is ${Python_Development.Module_FOUND}")
+message(status " Python header dirs are ${Python_INCLUDE_DIRS}")
+message(status " Python library dirs are ${Python_LIBRARY_DIRS}")
+message(status " Python version is ${Python_VERSION}")
 
-# set(CMAKE_MACOSX_RPATH 1)
-
-# message(status "Python executable is ${Python_EXECUTABLE}")
-# message(status "Python Development Module found value is ${Python_Development.Module_FOUND}")
-# message(status "Python header dirs are ${Python_INCLUDE_DIRS}")
-# message(status "Python library dirs are ${Python_LIBRARY_DIRS}")
-# message(status "Python version is ${Python_VERSION}")
-
+# Download git submodules
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 # Update submodules as needed
@@ -80,9 +85,9 @@ endif()
 #     message(STATUS "Boost include dirs are ${Boost_INCLUDE_DIRS}")
 # endif()
 
-add_subdirectory(external/vmec)
-# add_subdirectory(external/simple)
-add_subdirectory(external/gyronimo)
+# add_subdirectory(external/vmec)
+add_subdirectory(external/simple)
+# add_subdirectory(external/gyronimo)
 # add_subdirectory(external/pybind11)
 
 # pybind11_add_module(${PROJECT_NAME}
@@ -92,4 +97,4 @@ add_subdirectory(external/gyronimo)
 
 
 # build NEATpp
-# file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
+file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)

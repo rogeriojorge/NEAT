@@ -83,10 +83,10 @@ jobs:
         cmake --build .
         cp simple.x ../../../build/bin
 
-    - name: Try running simple
-      run: |
-        cd build/bin
-        ./simple.x
+    # - name: Try running simple
+    #   run: |
+    #     cd build/bin
+    #     ./simple.x
     
     - name: Install simsopt
       run: |
