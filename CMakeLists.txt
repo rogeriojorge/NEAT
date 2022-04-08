@@ -80,3 +80,12 @@ endif()
 add_subdirectory(external/vmec)
 add_subdirectory(external/simple)
 add_subdirectory(external/gyronimo)
+add_subdirectory(external/pybind11)
+
+pybind11_add_module(${PROJECT_NAME}
+src/NEATpp/NEAT.cc
+src/NEATpp/NEAT_Mercier.cc
+)
+
+# build NEATpp
+file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
