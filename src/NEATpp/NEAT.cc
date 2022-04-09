@@ -166,7 +166,7 @@ using namespace gyronimo;
 // }
 
 // Python wrapper functions
-PYBIND11_MODULE(Neat, m) {
+PYBIND11_MODULE(NEATpp, m) {
     m.doc() = "Gyronimo Wrapper for the Stellarator Near-Axis Expansion (STELLNA)";
     // m.def("gc_solver",&gc_solver);
     m.def("gc_solver_qs",&gc_solver_qs);

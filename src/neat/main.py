@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 import time
 import math
-import sys
-sys.path.append("..")
 import toml
-inputs = toml.load("../inputs.toml")
-from stell_repo import get_stel
 import matplotlib.pyplot as plt
-from functions import orbit
+from .functions import orbit, check_log_error
 import numpy as np
-from functions import check_log_error
 from pathlib import Path
-from plotting import set_axes_equal
+from .plotting import set_axes_equal
 from qsc import Qsc
+
+## Generate inputs
+inputs = toml.load("inputs.toml")
 
 ## Stellarator to analyze
 stel = eval(inputs['equilibrium']['stel'])
@@ -25,23 +23,31 @@ results_folder = inputs['folders']['results_folder']
 Path('../'+results_folder+'/'+name).mkdir(parents=True, exist_ok=True)
 results_path = str(Path('../'+results_folder+'/'+name+'/').resolve())
 
+class orbit_gyronimo():
+    """
+    This is the main class for calculating particle
+    trakectories using gyronimo
+    """
+    def __init__(self):
+        result=[]
+        start_time = time.time()
+        for _phi0 in inputs['particles']['phi0']:
+            for _Lambda in Lambda:
+                for _energy in inputs['particles']['energy']:
+                    for _theta0 in inputs['particles']['theta0']:
+                        params = {"r0": r0, "theta0": _theta0, "phi0": _phi0, "charge": inputs['particles']['charge'], "rhom": inputs['particles']['rhom'], "mass": inputs['particles']['mass'], "Lambda": _Lambda, "energy": _energy, "nsamples": inputs['particles']['nsamples'], "Tfinal": inputs['particles']['Tfinal']}
+                        orbit_temp=orbit(stel,params,inputs['equilibrium']['B20real'])
+                        if not math.isnan(orbit_temp[1][-1]):
+                            result.append(orbit_temp)
+        print("--- gyronimo took %s seconds ---" % (time.time() - start_time))
+        self.result = result
+
 if __name__ == '__main__':
     print("---------------------------------")
     print("Get particle orbit using gyronimo")
-    result=[]
-    start_time = time.time()
-    for _phi0 in inputs['particles']['phi0']:
-        for _Lambda in Lambda:
-            for _energy in inputs['particles']['energy']:
-                for _theta0 in inputs['particles']['theta0']:
-                    params = {"r0": r0, "theta0": _theta0, "phi0": _phi0, "charge": inputs['particles']['charge'], "rhom": inputs['particles']['rhom'], "mass": inputs['particles']['mass'], "Lambda": _Lambda, "energy": _energy, "nsamples": inputs['particles']['nsamples'], "Tfinal": inputs['particles']['Tfinal']}
-                    orbit_temp=orbit(stel,params,inputs['equilibrium']['B20real'])
-                    if not math.isnan(orbit_temp[1][-1]):
-                        result.append(orbit_temp)
-    print("--- gyronimo took %s seconds ---" % (time.time() - start_time))
 
     # Use array for an easier indexing and calculation
-    result = np.array(result, dtype=object)
+    result = np.array(orbit_gyronimo().result, dtype=object)
 
     # Check energy error for each orbit
     print("Max Energy Error per Orbit = ",check_log_error(result[:,4]))
