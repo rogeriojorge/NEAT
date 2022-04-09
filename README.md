@@ -20,6 +20,17 @@ git submodule update
 
 NEAT could be run either directly by installing the requirements pyQSC, gyronimo and SIMSOPT, and then compiling the [NEAT.cc](src/NEAT.cc) file in the *[src](src/)* folder, or using the provided Docker image. The usage of the Docker image is recommended.
 
+# Installation
+
+## CMake
+
+On NEAT's root directory run
+
+```
+python setup.py build
+python setup.py install --user
+```
+
 ## Docker
 
 This section explains how to build the docker container for NEAT. It can be used to compile gyronimo, install pyQSC, simsopt and compile NEAT in a docker image directly.

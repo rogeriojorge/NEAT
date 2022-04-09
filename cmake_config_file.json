@@ -8,5 +8,7 @@
            "-DNETCDF_LIB_PATH=/opt/local/lib",
            "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch",
            "-DSUPPORT_OPENMP=ON",
-           "-DSUPPORT_VMEC=ON"]
+           "-DSUPPORT_VMEC=ON",
+           "-DINSTALL_VMEC=OFF",
+           "-DINSTALL_SIMPLE=OFF"]
 }

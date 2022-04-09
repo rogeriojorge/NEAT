@@ -10,7 +10,14 @@ set(Python_FIND_STRATEGY LOCATION)
 # Make sure that python libraries such as numpy are found
 find_package(Python 3 COMPONENTS Interpreter Development.Module NumPy)
 # Use relative paths in MacOS
-set(CMAKE_MACOSX_RPATH ON)
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+# detect virtualenv and set Pip args accordingly
+if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
+  set(_pip_args)
+else()
+  set(_pip_args "--user")
+endif()
 
 # Logging messages to debug possible Python issues
 message(status " Python executable is ${Python_EXECUTABLE}")
@@ -92,8 +99,14 @@ find_package(GSL REQUIRED)
   include_directories(${GSL_INCLUDE_DIRS})
 
 # Compile git submodules
-add_subdirectory(external/vmec)
-add_subdirectory(external/simple)
+if(INSTALL_VMEC)
+    add_subdirectory(external/vmec)
+endif()
+
+if(INSTALL_SIMPLE)
+    add_subdirectory(external/simple)
+endif()
+
 add_subdirectory(external/gyronimo)
 
 # PYBIND11 specific configurations
@@ -114,16 +127,21 @@ find_package(pybind11 CONFIG REQUIRED)
 # Build NEAT
 # file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
 # add_library(neat SHARED ${neat_sources})
-pybind11_add_module(neat
+pybind11_add_module(Neat
+    src/fields_NEAT/equilibrium_stellna_qs.cc
+    src/metrics_NEAT/metric_stellna_qs.cc
     src/NEATpp/NEAT.cc
     # src/NEATpp/NEAT_Mercier.cc
 )
-target_link_libraries(neat PUBLIC gyronimo)
-target_include_directories(neat PUBLIC ${PROJECT_SOURCE_DIR}/src/fields_NEAT)
-target_include_directories(neat PUBLIC ${PROJECT_SOURCE_DIR}/src/metrics_NEAT)
-target_link_libraries(neat PUBLIC ${GSL_LIBRARIES})
+target_link_libraries(Neat PUBLIC gyronimo)
+target_include_directories(Neat PUBLIC ${PROJECT_SOURCE_DIR}/src/fields_NEAT)
+target_include_directories(Neat PUBLIC ${PROJECT_SOURCE_DIR}/src/metrics_NEAT)
+target_link_libraries(Neat PUBLIC ${GSL_LIBRARIES})
 include_directories(${Boost_INCLUDE_DIRS})
-target_compile_features(neat PRIVATE cxx_std_20)
+target_compile_features(Neat PRIVATE cxx_std_20)
+
+# Include Python scripts
+include_directories(${PROJECT_SOURCE_DIR}/src/NEAT)
 
 # file(GLOB neat_sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
 # add_library(neat SHARED ${neat_sources})
@@ -146,7 +164,7 @@ target_compile_features(neat PRIVATE cxx_std_20)
 # # target_link_libraries(neat PUBLIC external/gyronimo)
 # # target_link_libraries(neat PUBLIC gyronimo)
 # Install NEATpp
-install(TARGETS neat LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS Neat LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 # # install(
 # #   DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/neat
 # #   TYPE INCLUDE MESSAGE_NEVER
