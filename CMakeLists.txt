@@ -20,10 +20,9 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # endif()
 
 # Logging messages to debug possible Python issues
-message(status " Python executable is ${Python_EXECUTABLE}")
+find_program(PYTHON "python")
+message(status " Python executable is ${PYTHON}")
 message(status " Python Development Module found value is ${Python_Development.Module_FOUND}")
-message(status " Python header dirs are ${Python_INCLUDE_DIRS}")
-message(status " Python library dirs are ${Python_LIBRARY_DIRS}")
 message(status " Python version is ${Python_VERSION}")
 
 # Download git submodules
@@ -100,7 +99,33 @@ find_package(GSL REQUIRED)
 
 # Compile git submodules
 if(INSTALL_VMEC)
+    message(STATUS "Install VMEC executable")
+    set(VMEC_PYTHON_DIR ".")
     add_subdirectory(external/vmec)
+
+    # message(STATUS "Install VMEC python module")
+    # file(COPY ${PROJECT_SOURCE_DIR}/external/vmec/python/vmec DESTINATION ${CMAKE_BINARY_DIR}/external/vmec/python)
+    # file(COPY_FILE ${PROJECT_SOURCE_DIR}/cmake_config_file.json ${CMAKE_BINARY_DIR}/external/vmec/cmake_config_file.json)
+    # file(COPY_FILE ${PROJECT_SOURCE_DIR}/external/vmec/setup.py ${CMAKE_BINARY_DIR}/external/vmec/setup.py)
+    # file(COPY_FILE ${PROJECT_SOURCE_DIR}/external/vmec/Makefile ${CMAKE_BINARY_DIR}/external/vmec/Makefile)
+    # file(COPY_FILE ${PROJECT_SOURCE_DIR}/external/vmec/CMakeLists.txt ${CMAKE_BINARY_DIR}/external/vmec/CMakeLists.txt)
+    # set(SETUP_PY_IN "${CMAKE_BINARY_DIR}/external/vmec/setup.py")
+    # set(SETUP_PY    "${CMAKE_BINARY_DIR}/external/vmec/setup.py")
+    # set(DEPS        "${CMAKE_BINARY_DIR}/external/vmec/python/vmec/__init__.py")
+    # set(OUTPUT      "vmec")
+
+    # configure_file(${SETUP_PY_IN} ${SETUP_PY})
+
+    # add_custom_command(OUTPUT ${OUTPUT}
+    #                    COMMAND ${PYTHON}
+    #                    ARGS ${SETUP_PY} build
+    #                    DEPENDS ${DEPS}
+    #                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/vmec)
+
+    # add_custom_target(target ALL DEPENDS ${OUTPUT})
+
+    install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install --user WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/vmec)")
+
 endif()
 
 if(INSTALL_SIMPLE)
@@ -115,7 +140,7 @@ if(SKBUILD)
   # automatically, so we need to add it _or_ the pybind11 specific directory
   # here.
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
+    COMMAND "${PYTHON}" -c
             "import pybind11; print(pybind11.get_cmake_dir())"
     OUTPUT_VARIABLE _tmp_dir
     OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)

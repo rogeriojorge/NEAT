@@ -13,9 +13,7 @@ RUN apt update
 # RUN apt-get install -y curl wget git less make gsl-bin libgsl-dev libgslcblas0 cmake libboost-all-dev doxygen gcc-10 g++-10 gcc-10-base pkg-config software-properties-common
 RUN apt-get install -y git gfortran openmpi-bin libopenmpi-dev gfortran g++ libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev
 RUN apt-get install -y libblas-dev liblapack-dev python3 python3-numpy python3-h5py pgplot5 libncarg-dev libscalapack-openmpi-dev python3-pip libnetcdf-c++4-dev cmake
-RUN alias pip=pip3
-RUN alias python=python3
-RUN pip3 install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja
+RUN pip3 install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
 
 # Define working directory
 WORKDIR /home
@@ -26,9 +24,9 @@ WORKDIR /home
 COPY . .
 
 # Install NEAT
-COPY /home/NEAT/cmake_config_files/ubuntu.json /home/NEAT/cmake_config_file.json
-RUN python setup.py build
-RUN python setup.py install
+COPY cmake_config_files/ubuntu.json cmake_config_file.json
+RUN python3 setup.py build
+# RUN python3 setup.py install
 
 # RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 # RUN python3.9 get-pip.py
