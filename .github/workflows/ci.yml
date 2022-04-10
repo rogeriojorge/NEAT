@@ -43,7 +43,7 @@ jobs:
         alias pip=pip3
         alias python=python3
         python -m pip install --upgrade pip
-        pip matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
+        pip install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
     
     - name: env after adding python
       run: env
