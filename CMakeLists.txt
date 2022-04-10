@@ -20,7 +20,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # endif()
 
 # Logging messages to debug possible Python issues
-find_program(PYTHON "python")
+find_program(PYTHON "python3")
 message(status " Python executable is ${PYTHON}")
 message(status " Python Development Module found value is ${Python_Development.Module_FOUND}")
 message(status " Python version is ${Python_VERSION}")

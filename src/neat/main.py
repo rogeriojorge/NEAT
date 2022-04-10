@@ -3,10 +3,10 @@ import time
 import math
 import toml
 import matplotlib.pyplot as plt
-from .functions import orbit, check_log_error
+from functions import orbit, check_log_error
 import numpy as np
 from pathlib import Path
-from .plotting import set_axes_equal
+from plotting import set_axes_equal
 from qsc import Qsc
 
 ## Generate inputs

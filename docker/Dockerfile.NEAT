@@ -10,102 +10,35 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Install requirements
 RUN apt update
-# RUN apt-get install -y curl wget git less make gsl-bin libgsl-dev libgslcblas0 cmake libboost-all-dev doxygen gcc-10 g++-10 gcc-10-base pkg-config software-properties-common
-RUN apt-get install -y git gfortran openmpi-bin libopenmpi-dev gfortran g++ libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev
+RUN apt-get install -y git gfortran openmpi-bin libopenmpi-dev gfortran g++ libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev doxygen
 RUN apt-get install -y libblas-dev liblapack-dev python3 python3-numpy python3-h5py pgplot5 libncarg-dev libscalapack-openmpi-dev python3-pip libnetcdf-c++4-dev cmake
 RUN pip3 install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
+
+# Add to LD_LIBRARY_PATH so scalapack etc can be found
+RUN PATH="/usr/lib64/openmpi/bin:${PATH}"
+RUN LD_LIBRARY_PATH="/usr/lib64/openmpi/lib:${LD_LIBRARY_PATH}"
 
 # Define working directory
 WORKDIR /home
 
 # Get NEAT
-# RUN git clone https://github.com/rogeriojorge/NEAT.git
-# WORKDIR /home/NEAT
 COPY . .
 
 # Install NEAT
 COPY cmake_config_files/ubuntu.json cmake_config_file.json
 RUN python3 setup.py build
-# RUN python3 setup.py install
+RUN python3 setup.py install
 
-# RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-# RUN python3.9 get-pip.py
-# RUN alias pip=pip3.9
-# RUN alias python=python3.9
-# RUN alias python3=python3.9
-# RUN pip3.9 install --no-cache-dir matplotlib numpy scipy ninja cmake pybind11 joblib
-# # RUN pip3.9 install matplotlib numpy scipy ninja cmake pybind11 joblib
+# Install pyQSC
+WORKDIR /home/external
+RUN git clone https://github.com/landreman/pyQSC.git
+WORKDIR /home/external/pyQSC
+RUN pip3 install .
 
-# # Add new user neat
-# RUN apt-get install -y ssh sudo openssh-server
-# RUN useradd -rm -d /home/neat -s /bin/bash -g root -G sudo -u 1000 neat 
-# RUN usermod -aG sudo neat
-# RUN echo 'neat:neat' | sudo chpasswd
+# Run NEAT from entrypoint script /docker/docker-entrypoint.sh
+WORKDIR /home
+RUN ["chmod", "+x", "/home/docker/docker-entrypoint.sh"]
+ENTRYPOINT ["/home/docker/docker-entrypoint.sh"]
 
-# # Define working directory
-# WORKDIR /home/neat
-
-# # Copy files from git repository
-# COPY . .
-
-# # Install NEAT
-# RUN python3.9 setup.py build
-# RUN python3.9 setup.py install --user
-
-
-
-
-
-
-# # Install pyQSC
-# WORKDIR /home/neat/external
-# RUN git clone https://github.com/landreman/pyQSC.git
-# WORKDIR /home/neat/external/pyQSC
-# RUN pip3.9 install --no-cache-dir .
-# # RUN pip3.9 install .
-# WORKDIR /home/neat/
-
-# # Install SIMSOPT
-# # RUN pip install --no-cache-dir simsopt
-
-# # Install gyronimo
-# WORKDIR /home/neat/external/gyronimo
-# RUN rm -rf build
-# RUN mkdir -p build
-# WORKDIR /home/neat/external/gyronimo/build
-# RUN CXX=g++-10 cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
-# RUN cmake --build . --target install
-
-# # Install NEAT
-# WORKDIR /home/neat/src/fields_NEAT
-# RUN g++-10 -std=c++2a -fPIC equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-# WORKDIR /home/neat/src/metrics_NEAT
-# RUN g++-10 -std=c++2a -fPIC metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-# WORKDIR /home/neat/src/NEATpp
-# RUN g++-10 -std=c++2a -fPIC -shared NEAT.cc ../fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/metric_stellna_qs.o -o NEAT.so $(python3.9 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/../../build/include/ -I$(pwd)/../ -Wl,-rpath $(pwd)/../../build/lib -Wl,-rpath $(pwd)/..
-
-# # Run NEAT from entrypoint script /docker/docker-entrypoint.sh
-# WORKDIR /home/neat/src
-# RUN ["chmod", "+x", "/home/neat/docker/docker-entrypoint.sh"]
-# ENTRYPOINT ["/home/neat/docker/docker-entrypoint.sh"]
-
-# # Open terminal for docker run
-# # CMD ["bash"]
-
-# # ## Profiling using Intel's Vtune Profiler software
-# # # Install VTune Profiler
-# # RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-# # RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-# # RUN rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-# # RUN add-apt-repository -y "deb https://apt.repos.intel.com/oneapi all main"
-# # RUN apt-get install -y intel-oneapi-vtune
-# # # RUN source /opt/intel/oneapi/vtune/latest/sep_vars.sh
-
-# # # Start ssh server with user 'neat' and password 'neat'
-# # # Use command 'docker run -p 22:22 neat' to set up port 22 and run 'ssh neat@localhost'
-# # # To passwordless login in the container, do 'ssh-copy-id neat@localhost once
-# # RUN service ssh restart
-# # EXPOSE 22
-# # RUN mkdir .ssh
-# # RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
-# # CMD ["/usr/sbin/sshd","-D"]
+# Open terminal for docker run
+# CMD ["bash"]

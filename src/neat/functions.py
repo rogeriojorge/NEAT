@@ -13,57 +13,57 @@ def orbit(stel, params, B20real):
             r0,theta0,phi0,charge,rhom,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     '''
-    if hasattr(stel.B0, "__len__"):
-        if stel.order == 'r1':
-            B20 = [0]*(len(stel.varphi)+1)
-            B2c = [0]*(len(stel.varphi)+1)
-            B2s = [0]*(len(stel.varphi)+1)
-            beta_0  = [0]*(len(stel.varphi)+1)
-            beta_1c = [0]*(len(stel.varphi)+1)
-            beta_1s = [0]*(len(stel.varphi)+1)
-            stel.G2 = 0
-        else:
-            if B20real:
-                B20=np.append(stel.B20,stel.B20[0])
-            else:
-                B20=[stel.B20_mean]*(len(stel.varphi)+1)
-            B2c = [stel.B2c]*(len(stel.varphi)+1)
-            B2s = [stel.B2s]*(len(stel.varphi)+1)
-            beta_0  = np.append(stel.beta_0,stel.beta_0[0])
-            beta_1c = np.append(stel.beta_1c,stel.beta_1c[0])
-            beta_1s = np.append(stel.beta_1s,stel.beta_1s[0])
+    # if hasattr(stel.B0, "__len__"):
+    #     if stel.order == 'r1':
+    #         B20 = [0]*(len(stel.varphi)+1)
+    #         B2c = [0]*(len(stel.varphi)+1)
+    #         B2s = [0]*(len(stel.varphi)+1)
+    #         beta_0  = [0]*(len(stel.varphi)+1)
+    #         beta_1c = [0]*(len(stel.varphi)+1)
+    #         beta_1s = [0]*(len(stel.varphi)+1)
+    #         stel.G2 = 0
+    #     else:
+    #         if B20real:
+    #             B20=np.append(stel.B20,stel.B20[0])
+    #         else:
+    #             B20=[stel.B20_mean]*(len(stel.varphi)+1)
+    #         B2c = [stel.B2c]*(len(stel.varphi)+1)
+    #         B2s = [stel.B2s]*(len(stel.varphi)+1)
+    #         beta_0  = np.append(stel.beta_0,stel.beta_0[0])
+    #         beta_1c = np.append(stel.beta_1c,stel.beta_1c[0])
+    #         beta_1s = np.append(stel.beta_1s,stel.beta_1s[0])
 
-        # Call Gyronimo
-        sol = np.array(NEAT.gc_solver(int(stel.nfp),
-        stel.G0, stel.G2, stel.I2, stel.iota, stel.iotaN, stel.Bbar,
-        np.append(stel.varphi,2*np.pi/stel.nfp+stel.varphi[0]),
-        np.append(stel.B0,stel.B0[0]), np.append(stel.B1c,stel.B1c[0]), np.append(stel.B1s,stel.B1s[0]),
-        B20, B2c, B2s, beta_0, beta_1c, beta_1s,
-        params['charge'], params['rhom'], params['mass'], params['Lambda'], params['energy'], params['r0'], params['theta0'], params['phi0'], params['nsamples'], params['Tfinal']))
+    #     # Call Gyronimo
+    #     sol = np.array(gc_solver(int(stel.nfp),
+    #     stel.G0, stel.G2, stel.I2, stel.iota, stel.iotaN, stel.Bbar,
+    #     np.append(stel.varphi,2*np.pi/stel.nfp+stel.varphi[0]),
+    #     np.append(stel.B0,stel.B0[0]), np.append(stel.B1c,stel.B1c[0]), np.append(stel.B1s,stel.B1s[0]),
+    #     B20, B2c, B2s, beta_0, beta_1c, beta_1s,
+    #     params['charge'], params['rhom'], params['mass'], params['Lambda'], params['energy'], params['r0'], params['theta0'], params['phi0'], params['nsamples'], params['Tfinal']))
+    # else:
+    if stel.order == 'r1':
+        B20 = 0
+        B2c = 0
+        beta_1s = 0
+        G2 = 0
     else:
-        if stel.order == 'r1':
-            B20 = 0
-            B2c = 0
-            beta_1s = 0
-            G2 = 0
+        B2c = stel.B2c
+        beta_1s = stel.beta_1s
+        G2 = stel.G2
+        if B20real:
+            # B20=np.append(stel.B20,stel.B20[0])
+            print("Quasisymmetric NEAT not implemented yet")
+            exit()
         else:
-            B2c = stel.B2c
-            beta_1s = stel.beta_1s
-            G2 = stel.G2
-            if B20real:
-                # B20=np.append(stel.B20,stel.B20[0])
-                print("Quasisymmetric NEAT not implemented yet")
-                exit()
-            else:
-                B20=stel.B20_mean
+            B20=stel.B20_mean
 
-        # Call Gyronimo
-        sol = np.array(NEAT.gc_solver_qs(
-        stel.G0, G2, stel.I2, stel.iota, stel.iotaN, stel.Bbar,
-        stel.B0, stel.etabar*stel.B0, B20, B2c, beta_1s,
-        params['charge'], params['rhom'], params['mass'],
-        params['Lambda'], params['energy'], params['r0'],
-        params['theta0'], params['phi0'], params['nsamples'], params['Tfinal']))
+    # Call Gyronimo
+    sol = np.array(gc_solver_qs(
+    stel.G0, G2, stel.I2, stel.iota, stel.iotaN, stel.Bbar,
+    stel.B0, stel.etabar*stel.B0, B20, B2c, beta_1s,
+    params['charge'], params['rhom'], params['mass'],
+    params['Lambda'], params['energy'], params['r0'],
+    params['theta0'], params['phi0'], params['nsamples'], params['Tfinal']))
 
     # Store all output quantities
     time      = sol[:,0]
