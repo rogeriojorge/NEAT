@@ -3,11 +3,11 @@
     "cmake_args": [
             "-DCMAKE_C_COMPILER=mpicc",
             "-DCMAKE_CXX_COMPILER=mpicxx",
-            "-DCMAKE_Fortran_COMPILER=mpif90",
+            "-DCMAKE_Fortran_COMPILER=gfortran",
             "-DSCALAPACK_LIB_NAME=scalapack-openmpi",
             "-DNETCDF_INC_PATH=/usr/include",
             "-DNETCDF_LIB_PATH=/usr/lib/x86_64-linux-gnu",
-            "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch",
+            "-DCMAKE_Fortran_FLAGS=-w -fallow-argument-mismatch -O2",
             "-DSUPPORT_OPENMP=ON",
             "-DSUPPORT_VMEC=ON",
             "-DINSTALL_VMEC=ON",
