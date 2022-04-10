@@ -20,8 +20,8 @@ Lambda = inputs['equilibrium']['Lambda']
 
 ## Create folders
 results_folder = inputs['folders']['results_folder']
-Path('../'+results_folder+'/'+name).mkdir(parents=True, exist_ok=True)
-results_path = str(Path('../'+results_folder+'/'+name+'/').resolve())
+Path(results_folder+'/'+name).mkdir(parents=True, exist_ok=True)
+results_path = str(Path(results_folder+'/'+name+'/').resolve())
 
 class orbit_gyronimo():
     """

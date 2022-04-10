@@ -67,7 +67,7 @@ jobs:
 
     - name: Install NEAT
       run: |
-        cp cmake_config_files/ubuntu.json cmake_config_file.json
+        cp cmake_config_files/ubuntu-ci.json cmake_config_file.json
         python3 setup.py build
         python3 setup.py install
 

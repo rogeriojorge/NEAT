@@ -51,7 +51,7 @@ This process yields an image with roughly 2 GB and may take minute to build.
 
 2. Run the docker image using the `docker run` command including your results folder:
     ``` bash
-    docker run -v "$(pwd)/results:/home/neat/results" neat
+    docker run -v "$(pwd)/results:/home/results" neat
     ```
 
 3. Your results folder will be populated with NEAT's results
