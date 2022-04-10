@@ -193,21 +193,21 @@ if __name__ == '__main__':
         ax.plot_surface(boundary[0],boundary[1],boundary[2],alpha=0.5);set_axes_equal(ax);ax.set_axis_off()
         ax.dist = 6.0
 
-        import mayavi.mlab as mlab
-        fig = mlab.figure(bgcolor=(1,1,1), size=(430,720))
-        [mlab.plot3d(rpos_cartesian[i][0],rpos_cartesian[i][1],rpos_cartesian[i][2], color=(0.5,0.5,0.5)) for i in range(len(result))]
+        # import mayavi.mlab as mlab
+        # fig = mlab.figure(bgcolor=(1,1,1), size=(430,720))
+        # [mlab.plot3d(rpos_cartesian[i][0],rpos_cartesian[i][1],rpos_cartesian[i][2], color=(0.5,0.5,0.5)) for i in range(len(result))]
 
-        ntheta=80
-        nphi=220
-        X_qsc, Y_qsc, Z_qsc, R_qsc = stel.get_boundary(r=0.95*r0, ntheta=ntheta, nphi=nphi)
+        # ntheta=80
+        # nphi=220
+        # X_qsc, Y_qsc, Z_qsc, R_qsc = stel.get_boundary(r=0.95*r0, ntheta=ntheta, nphi=nphi)
 
-        theta1D = np.linspace(0, 2 * np.pi, ntheta)
-        phi1D = np.linspace(0, 2 * np.pi, nphi)
-        phi2D, theta2D = np.meshgrid(phi1D, theta1D)
-        Bmag = stel.B_mag(r0, theta2D, phi2D)
+        # theta1D = np.linspace(0, 2 * np.pi, ntheta)
+        # phi1D = np.linspace(0, 2 * np.pi, nphi)
+        # phi2D, theta2D = np.meshgrid(phi1D, theta1D)
+        # Bmag = stel.B_mag(r0, theta2D, phi2D)
 
-        mlab.mesh(X_qsc, Y_qsc, Z_qsc, scalars=Bmag, colormap='viridis')
-        mlab.view(azimuth=0, elevation=0, distance=8.5, focalpoint=(-0.15,0,0), figure=fig)
+        # mlab.mesh(X_qsc, Y_qsc, Z_qsc, scalars=Bmag, colormap='viridis')
+        # mlab.view(azimuth=0, elevation=0, distance=8.5, focalpoint=(-0.15,0,0), figure=fig)
 
-        mlab.show()
+        # mlab.show()
         plt.show()

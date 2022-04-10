@@ -1,6 +1,5 @@
 inputs==0.5
 matplotlib==3.5.1
-mayavi==4.7.3
 mpi4py==3.0.3
 netCDF4==1.5.8
 numpy==1.21.5

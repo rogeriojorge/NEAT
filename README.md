@@ -31,6 +31,12 @@ python setup.py build
 python setup.py install --user
 ```
 
+To clean the build folders and all folders not being tracked by GIT, run
+
+```
+git clean -d -f -x
+```
+
 ## Docker
 
 This section explains how to build the docker container for NEAT. It can be used to compile gyronimo, install pyQSC, simsopt and compile NEAT in a docker image directly.
