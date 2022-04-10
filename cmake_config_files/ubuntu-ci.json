@@ -1,5 +1,5 @@
 {
-    "comment": "This configuration file works on a macbook on which gcc and netcdf have been installed using macports.",
+    "comment": "This configuration file works on ubuntu-20.04 of github actions.",
     "cmake_args": [
             "-DCMAKE_C_COMPILER=mpicc",
             "-DCMAKE_CXX_COMPILER=g++-10",

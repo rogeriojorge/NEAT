@@ -76,9 +76,9 @@ jobs:
 
     - name: Install pyQSC
       run: |
-        cd /home/external
+        cd external
         git clone https://github.com/landreman/pyQSC.git
-        cd /home/external/pyQSC
+        cd pyQSC
         pip3 install .
 
     - name: ls

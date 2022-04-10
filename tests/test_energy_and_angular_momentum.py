@@ -1,7 +1,7 @@
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../src"))
-from functions import orbit, check_log_error
+# sys.path.append(os.path.join(os.path.dirname(__file__), "../src"))
+from neat.functions import orbit, check_log_error
 import numpy as np
 import unittest
 import logging
