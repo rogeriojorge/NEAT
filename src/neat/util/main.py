@@ -18,11 +18,6 @@ name = inputs['equilibrium']['name']
 r0   = inputs['equilibrium']['r0']
 Lambda = inputs['equilibrium']['Lambda']
 
-## Create folders
-results_folder = inputs['folders']['results_folder']
-Path(results_folder+'/'+name).mkdir(parents=True, exist_ok=True)
-results_path = str(Path(results_folder+'/'+name+'/').resolve())
-
 class orbit_gyronimo():
     """
     This is the main class for calculating particle
@@ -58,6 +53,12 @@ if __name__ == '__main__':
 
     # Plot relevant quantities
     if inputs['plotting']['makePlots']==1:
+        if inputs['plotting']['savePlots']==1:
+            ## Create folders
+            results_folder = inputs['folders']['results_folder']
+            Path(results_folder+'/'+name).mkdir(parents=True, exist_ok=True)
+            results_path = str(Path(results_folder+'/'+name+'/').resolve())
+        
         fig=plt.figure(figsize=(10,6))
         plt.subplot(3, 3, 1);[plt.plot(res[0],res[1])  for res in result];plt.xlabel('Time');plt.ylabel('r')
         plt.subplot(3, 3, 2);[plt.plot(res[0],res[4])  for res in result];plt.xlabel('Time');plt.ylabel('Energy')

@@ -154,18 +154,18 @@ find_package(pybind11 CONFIG REQUIRED)
 
 # Build NEAT
 pybind11_add_module(${PROJECT_NAME}
-    src/fields_NEAT/equilibrium_stellna_qs.cc
-    src/metrics_NEAT/metric_stellna_qs.cc
+    src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
+    src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/neatpp.cpp
     # src/neatpp/NEAT_Mercier.cc
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC gyronimo)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/fields_NEAT)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/metrics_NEAT)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${GSL_LIBRARIES})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src/neat)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 # Install neatpp
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION .)
+install(TARGETS ${PROJECT_NAME} DESTINATION .)

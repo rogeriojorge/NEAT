@@ -108,7 +108,7 @@ Compilation is done in the src/ folder of the repo. The fields and metrics need 
 #### Example on MacOS
 
 ```bash
-cd src
+cd src/neatpp
 
 cd fields_NEAT
 g++-mp-11 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
@@ -121,12 +121,12 @@ cd ../neatpp
 
 Compile the serial version (no parallelization)
 ```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc ../fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/metric_stellna_qs.o -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib -Wl,-rpath $(pwd)/..
+g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc ../neatpp/fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/neatpp/metric_stellna_qs.o -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib -Wl,-rpath $(pwd)/..
 ```
 
 Compile the OpenMP version
 ```bash
-g++ -O2 -Wall -std=c++20 -fopenmp NEAT_openmp.cc ../fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/metric_stellna_qs.o -o NEAT_openmp -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib
+g++ -O2 -Wall -std=c++20 -fopenmp NEAT_openmp.cc ../neatpp/fields_NEAT/equilibrium_stellna_qs.o ../neatpp/metrics_NEAT/metric_stellna_qs.o -o NEAT_openmp -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib
 ```
 
 The number of threads can be changed using the command
@@ -138,7 +138,7 @@ export OMP_NUM_THREADS=[number of threads]
 #### Example on Linux
 
 ```bash
-cd src
+cd src/neatpp
 
 cd fields_NEAT
 g++-10 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c

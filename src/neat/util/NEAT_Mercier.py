@@ -11,7 +11,6 @@ import numpy as np
 import time
 import math
 import neatpp.NEAT_Mercier as NEAT_Mercier
-from mpl_toolkits.mplot3d import Axes3D
 
 nphi = 251 # resolution of the magnetic axis
 

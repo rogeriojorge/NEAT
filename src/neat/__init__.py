@@ -5,4 +5,4 @@
 # ===================END ATTENTION=============================================
 
 from neatpp import gc_solver_qs
-from .main import orbit_gyronimo
+from .util.main import orbit_gyronimo

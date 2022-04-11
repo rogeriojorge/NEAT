@@ -3,7 +3,6 @@ import sys
 import json
 import pathlib
 import os
-from setuptools import find_packages
 from skbuild import setup
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
