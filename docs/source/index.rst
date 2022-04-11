@@ -1,9 +1,9 @@
-.. neat documentation master file, created by
-   sphinx-quickstart on Wed Apr  6 19:36:05 2022.
+.. NEAT documentation master file, created by
+   sphinx-quickstart on Mon Apr 11 12:43:35 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to neat's documentation!
+Welcome to NEAT's documentation!
 ================================
 
 .. toctree::

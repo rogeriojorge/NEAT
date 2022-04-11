@@ -17,12 +17,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'neat'
-copyright = '2022, EUROfusion Enabling Research Team ENR-IST-MOD-01 2022'
-author = 'EUROfusion Enabling Research Team ENR-IST-MOD-01 2022'
-
-# The full version, including alpha/beta/rc tags
-release = '0.0.1'
+project = 'NEAT'
+copyright = '2022, Enabling Research EUROfusion enr-mod-ist-01 team'
+author = 'Enabling Research EUROfusion enr-mod-ist-01 team'
 
 
 # -- General configuration ---------------------------------------------------

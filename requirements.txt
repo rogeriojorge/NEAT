@@ -8,4 +8,3 @@ qsc.egg==info
 scikit_build==0.14.0
 scipy==1.7.0
 setuptools==59.6.0
-Sphinx==4.5.0
