@@ -156,7 +156,7 @@ find_package(pybind11 CONFIG REQUIRED)
 pybind11_add_module(${PROJECT_NAME}
     src/fields_NEAT/equilibrium_stellna_qs.cc
     src/metrics_NEAT/metric_stellna_qs.cc
-    src/neatpp/NEAT.cc
+    src/neatpp/neatpp.cpp
     # src/neatpp/NEAT_Mercier.cc
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC gyronimo)

@@ -25,6 +25,5 @@ with open(os.path.join(fldr_path, 'cmake_config_file.json')) as fp:
     d = json.load(fp)
 
 setup(
-    cmake_args=d['cmake_args'],
-    cmdclass={'bdist_wheel': None}
+    cmake_args=d['cmake_args']
     )
