@@ -3,16 +3,8 @@ import sys
 import json
 import pathlib
 import os
-# The lines below try to do "from skbuild import setup" but give an error if not possible
-try:
-    from skbuild import setup
-except ImportError:
-    print(
-        "Please update pip, you need pip 10 or greater,\n"
-        " or you need to install the PEP 518 requirements in pyproject.toml yourself",
-        file=sys.stderr,
-    )
-    raise
+from setuptools import find_packages
+from skbuild import setup
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -33,6 +25,6 @@ with open(os.path.join(fldr_path, 'cmake_config_file.json')) as fp:
     d = json.load(fp)
 
 setup(
-    cmake_args=d['cmake_args']
-    # cmake_install_dir='src/NEATpp'
+    cmake_args=d['cmake_args'],
+    cmdclass={'bdist_wheel': None}
     )

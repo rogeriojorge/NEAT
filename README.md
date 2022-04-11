@@ -103,7 +103,7 @@ cmake --build . --target doc
 
 ### Compile NEAT
 
-Compilation is done in the src/ folder of the repo. The fields and metrics need to be compiled before compiling the main file NEAT.cc in the src/NEATpp folder
+Compilation is done in the src/ folder of the repo. The fields and metrics need to be compiled before compiling the main file NEAT.cc in the src/neatpp folder
 
 #### Example on MacOS
 
@@ -116,7 +116,7 @@ g++-mp-11 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/in
 cd ../metrics_NEAT
 g++-mp-11 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
 
-cd ../NEATpp
+cd ../neatpp
 ```
 
 Compile the serial version (no parallelization)
@@ -146,7 +146,7 @@ g++-10 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/inclu
 cd ../metrics_NEAT
 g++-10 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
 
-cd ../NEATpp
+cd ../neatpp
 g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include  -Wl,-rpath $(pwd)/../../build/lib
 ```
 

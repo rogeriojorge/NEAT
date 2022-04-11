@@ -1,4 +1,4 @@
-from NEATpp import gc_solver_qs
+from neatpp import gc_solver_qs
 import numpy as np
 import os
 

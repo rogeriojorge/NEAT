@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(NEATpp)
+project(neatpp)
 
 # Enable output of compile commands during generation.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -18,6 +18,9 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # else()
 #   set(_pip_args "--user")
 # endif()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Logging messages to debug possible Python issues
 find_program(PYTHON "python3")
@@ -153,8 +156,8 @@ find_package(pybind11 CONFIG REQUIRED)
 pybind11_add_module(${PROJECT_NAME}
     src/fields_NEAT/equilibrium_stellna_qs.cc
     src/metrics_NEAT/metric_stellna_qs.cc
-    src/NEATpp/NEAT.cc
-    # src/NEATpp/NEAT_Mercier.cc
+    src/neatpp/NEAT.cc
+    # src/neatpp/NEAT_Mercier.cc
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC gyronimo)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/fields_NEAT)
@@ -162,7 +165,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/metr
 target_link_libraries(${PROJECT_NAME} PUBLIC ${GSL_LIBRARIES})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src/neat)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
-# Install NEATpp
+# Install neatpp
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION .)

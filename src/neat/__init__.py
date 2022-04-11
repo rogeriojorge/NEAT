@@ -4,5 +4,5 @@
 # Follow the same logic in the sub-packages.
 # ===================END ATTENTION=============================================
 
-from NEATpp import gc_solver_qs
+from neatpp import gc_solver_qs
 from .main import orbit_gyronimo
