@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.9]
-        test-type: [unit, integrated]
+        test-type: [unit]
 
     steps:
 
@@ -109,9 +109,9 @@ jobs:
     - name: Combine coverage reports
       if: contains(matrix.test-type, 'unit')
       run: | 
-        coverage combine
         coverage report
         coverage xml
+      # coverage combine ## When several reports are generated, use this command before coverage report
 
     - name: Upload coverage to github
       if: contains(matrix.test-type, 'unit')
