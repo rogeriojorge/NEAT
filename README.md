@@ -1,6 +1,7 @@
 
 # **NEAT**
-NEar-Axis opTimisation
+**NEar-Axis opTimisation**
+
 ![GitHub](https://img.shields.io/github/license/rogeriojorge/neat)
 [![codecov](https://codecov.io/gh/rogeriojorge/NEAT/branch/main/graph/badge.svg?token=8515A2RQL3)](https://codecov.io/gh/rogeriojorge/NEAT)
 
