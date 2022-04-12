@@ -44,7 +44,7 @@ This section explains how to build the docker container for NEAT. It can be used
    ```bash
    docker build -t neat -f docker/Dockerfile.NEAT .
    ```
-This process yields an image with roughly 2 GB and may take minute to build.
+   This process yields an image with roughly 2 GB and may take minute to build.
 
 2. Run the docker image using the `docker run` command including your results folder:
     ``` bash
