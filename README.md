@@ -27,7 +27,7 @@ NEAT could be run either directly by installing the requirements pyQSC, gyronimo
 
 # Installation
 
-Make sure that you have installed all of the python packages listed in the file ```requirements.txt```
+Make sure that you have installed all of the python packages listed in the file [requirements.txt](requirements.txt).
 
 ## CMake
 
