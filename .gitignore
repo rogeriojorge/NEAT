@@ -236,3 +236,4 @@ _deps
 Doxyfile.doc
 CMakeDoxyfile.in
 CMakeDoxygenDefaults.cmake
+.vscode/settings.json
