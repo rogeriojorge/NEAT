@@ -37,6 +37,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/Dockerfile.ubuntu
+          file: docker/Dockerfile.NEAT
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/neat:latest
