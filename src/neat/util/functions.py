@@ -126,11 +126,11 @@ def orbit(stel, params, B20real):
         * m_proton
         * v_parallel
         * Valfven
-        * (stel.G0 + r_pos ** 2 * (stel.G2 + (stel.iota - stel.iotaN) * stel.I2))
+        * (stel.G0 + r_pos**2 * (stel.G2 + (stel.iota - stel.iotaN) * stel.I2))
         / Bfield
         / stel.Bbar
     )
-    p_phi2 = params["charge"] * e * r_pos ** 2 * stel.Bbar / 2 * stel.iotaN
+    p_phi2 = params["charge"] * e * r_pos**2 * stel.Bbar / 2 * stel.iotaN
     p_phi = p_phi1 - p_phi2
 
     return [

@@ -396,21 +396,21 @@ def verifyMetric(count):
 
     def grr(r, theta, phi):
         return (
-            np.cos(theta) ** 2 * eta ** 2 / curvature(phi) ** 2
+            np.cos(theta) ** 2 * eta**2 / curvature(phi) ** 2
             + (np.sin(theta) + np.cos(theta) * sigma(phi)) ** 2
             * curvature(phi) ** 2
-            / eta ** 2
+            / eta**2
         )
 
     def gtt(r, theta, phi):
         return (
-            r ** 2
+            r**2
             * (
-                eta ** 4 * np.sin(theta) ** 2
+                eta**4 * np.sin(theta) ** 2
                 + curvature(phi) ** 4
                 * (np.cos(theta) - np.sin(theta) * sigma(phi)) ** 2
             )
-            / eta ** 2
+            / eta**2
             / curvature(phi) ** 2
         )
 
@@ -447,18 +447,18 @@ def verifyMetric(count):
 
     def grt(r, theta, phi):
         return (
-            -r * eta ** 2 * np.cos(theta) * np.sin(theta) / curvature(phi) ** 2
+            -r * eta**2 * np.cos(theta) * np.sin(theta) / curvature(phi) ** 2
             + r
             * (np.sin(theta) + np.cos(theta) * sigma(phi))
             * (np.cos(theta) - np.sin(theta) * sigma(phi))
             * curvature(phi) ** 2
-            / eta ** 2
+            / eta**2
         )
 
     def grp(r, theta, phi):
-        return (r * curvature(phi) ** 2 / eta ** 2) * (
+        return (r * curvature(phi) ** 2 / eta**2) * (
             (
-                -(eta ** 4) * np.cos(theta) ** 2 / curvature(phi) ** 4
+                -(eta**4) * np.cos(theta) ** 2 / curvature(phi) ** 4
                 + (np.sin(theta) + np.cos(theta) * sigma(phi)) ** 2
             )
             * dcurvature(phi)
@@ -467,9 +467,9 @@ def verifyMetric(count):
         )
 
     def gtp(r, theta, phi):
-        return (r ** 2 / 2 / eta ** 2 / curvature(phi) ** 3) * (
-            2 * eta ** 2 * curvature(phi) ** 3 * torsion(phi) * d_l_d_phi(phi)
-            + eta ** 4 * np.sin(2 * theta) * dcurvature(phi)
+        return (r**2 / 2 / eta**2 / curvature(phi) ** 3) * (
+            2 * eta**2 * curvature(phi) ** 3 * torsion(phi) * d_l_d_phi(phi)
+            + eta**4 * np.sin(2 * theta) * dcurvature(phi)
             - curvature(phi) ** 4
             * (
                 -np.sin(2 * theta)
@@ -487,26 +487,26 @@ def verifyMetric(count):
     def dgrr(r, theta, phi):
         d_r_grr = 0
         d_theta_grr = (
-            -2 * np.cos(theta) * np.sin(theta) * eta ** 2 / curvature(phi) ** 2
+            -2 * np.cos(theta) * np.sin(theta) * eta**2 / curvature(phi) ** 2
             + 2
             * (np.sin(theta) + np.cos(theta) * sigma(phi))
             * (np.cos(theta) - np.sin(theta) * sigma(phi))
             * curvature(phi) ** 2
-            / eta ** 2
+            / eta**2
         )
         d_phi_grr = (
-            -2 * dcurvature(phi) * np.cos(theta) ** 2 * eta ** 2 / curvature(phi) ** 3
+            -2 * dcurvature(phi) * np.cos(theta) ** 2 * eta**2 / curvature(phi) ** 3
             + (np.sin(theta) + np.cos(theta) * sigma(phi)) ** 2
             * dcurvature(phi)
             * 2
             * curvature(phi)
-            / eta ** 2
+            / eta**2
             + 2
             * np.cos(theta)
             * dsigma(phi)
             * (np.sin(theta) + np.cos(theta) * sigma(phi))
             * curvature(phi) ** 2
-            / eta ** 2
+            / eta**2
         )
         return [d_r_grr, d_theta_grr, d_phi_grr]
 
@@ -515,29 +515,29 @@ def verifyMetric(count):
             2
             * r
             * (
-                eta ** 4 * np.sin(theta) ** 2
+                eta**4 * np.sin(theta) ** 2
                 + curvature(phi) ** 4
                 * (np.cos(theta) - np.sin(theta) * sigma(phi)) ** 2
             )
-            / eta ** 2
+            / eta**2
             / curvature(phi) ** 2
         )
         d_theta_gtt = (
-            r ** 2
+            r**2
             * (
-                eta ** 4 * 2 * np.sin(theta) * np.cos(theta)
+                eta**4 * 2 * np.sin(theta) * np.cos(theta)
                 + curvature(phi) ** 4
                 * (np.cos(theta) - np.sin(theta) * sigma(phi))
                 * 2
                 * (-np.sin(theta) - np.cos(theta) * sigma(phi))
             )
-            / eta ** 2
+            / eta**2
             / curvature(phi) ** 2
         )
         d_phi_gtt = (
-            r ** 2
+            r**2
             * (
-                -2 * dcurvature(phi) / curvature(phi) * eta ** 4 * np.sin(theta) ** 2
+                -2 * dcurvature(phi) / curvature(phi) * eta**4 * np.sin(theta) ** 2
                 + 2
                 * curvature(phi) ** 3
                 * dcurvature(phi)
@@ -547,7 +547,7 @@ def verifyMetric(count):
                 * 2
                 * (-np.sin(theta) * dsigma(phi))
             )
-            / eta ** 2
+            / eta**2
             / curvature(phi) ** 2
         )
         return [d_r_gtt, d_theta_gtt, d_phi_gtt]
@@ -558,7 +558,7 @@ def verifyMetric(count):
         d_r_gpp = (
             2
             * (
-                coso * d_l_d_phi(phi) ** 2 * eta ** 3 * (-1 + coso * eta * r)
+                coso * d_l_d_phi(phi) ** 2 * eta**3 * (-1 + coso * eta * r)
                 + (
                     r
                     * (
@@ -567,7 +567,7 @@ def verifyMetric(count):
                             coso * curvature(phi) * dsigma(phi)
                             + dcurvature(phi) * (coso * sigma(phi) + sino)
                         )
-                        + coso * d_l_d_phi(phi) * eta ** 2 * torsion(phi)
+                        + coso * d_l_d_phi(phi) * eta**2 * torsion(phi)
                     )
                     ** 2
                 )
@@ -575,7 +575,7 @@ def verifyMetric(count):
                 + (
                     r
                     * (
-                        coso * dcurvature(phi) * eta ** 2
+                        coso * dcurvature(phi) * eta**2
                         + curvature(phi) ** 3
                         * d_l_d_phi(phi)
                         * (coso * sigma(phi) + sino)
@@ -585,12 +585,12 @@ def verifyMetric(count):
                 )
                 / curvature(phi) ** 4
             )
-        ) / eta ** 2
+        ) / eta**2
         d_theta_gpp = (
             2
             * r
             * (
-                -(d_l_d_phi(phi) ** 2 * eta ** 3 * (-1 + coso * eta * r) * sino)
+                -(d_l_d_phi(phi) ** 2 * eta**3 * (-1 + coso * eta * r) * sino)
                 - (
                     r
                     * (
@@ -599,7 +599,7 @@ def verifyMetric(count):
                             coso * curvature(phi) * dsigma(phi)
                             + dcurvature(phi) * (coso * sigma(phi) + sino)
                         )
-                        + coso * d_l_d_phi(phi) * eta ** 2 * torsion(phi)
+                        + coso * d_l_d_phi(phi) * eta**2 * torsion(phi)
                     )
                     * (
                         curvature(phi)
@@ -607,21 +607,21 @@ def verifyMetric(count):
                             curvature(phi) * dsigma(phi) * sino
                             + dcurvature(phi) * (-coso + sigma(phi) * sino)
                         )
-                        + d_l_d_phi(phi) * eta ** 2 * sino * torsion(phi)
+                        + d_l_d_phi(phi) * eta**2 * sino * torsion(phi)
                     )
                 )
                 / curvature(phi) ** 2
                 - (
                     r
                     * (
-                        coso * dcurvature(phi) * eta ** 2
+                        coso * dcurvature(phi) * eta**2
                         + curvature(phi) ** 3
                         * d_l_d_phi(phi)
                         * (coso * sigma(phi) + sino)
                         * torsion(phi)
                     )
                     * (
-                        dcurvature(phi) * eta ** 2 * sino
+                        dcurvature(phi) * eta**2 * sino
                         + curvature(phi) ** 3
                         * d_l_d_phi(phi)
                         * (-coso + sigma(phi) * sino)
@@ -630,24 +630,24 @@ def verifyMetric(count):
                 )
                 / curvature(phi) ** 4
             )
-        ) / eta ** 2
+        ) / eta**2
         d_phi_gpp = 2 * (
             d_l_d_phi(phi) * (-1 + coso * eta * r) ** 2 * (dd_l_d_phi(phi))
             + (
-                r ** 2
+                r**2
                 * (
                     curvature(phi)
                     * (
                         coso * curvature(phi) * dsigma(phi)
                         + dcurvature(phi) * (coso * sigma(phi) + sino)
                     )
-                    + coso * d_l_d_phi(phi) * eta ** 2 * torsion(phi)
+                    + coso * d_l_d_phi(phi) * eta**2 * torsion(phi)
                 )
                 * (
                     curvature(phi)
                     * (
                         coso * curvature(phi) ** 2 * ddsigma(phi)
-                        + coso * d_l_d_phi(phi) * dtorsion(phi) * eta ** 2
+                        + coso * d_l_d_phi(phi) * dtorsion(phi) * eta**2
                         + curvature(phi)
                         * (
                             2 * coso * dcurvature(phi) * dsigma(phi)
@@ -655,7 +655,7 @@ def verifyMetric(count):
                         )
                     )
                     - coso
-                    * eta ** 2
+                    * eta**2
                     * torsion(phi)
                     * (
                         dcurvature(phi) * d_l_d_phi(phi)
@@ -663,19 +663,19 @@ def verifyMetric(count):
                     )
                 )
             )
-            / (curvature(phi) ** 3 * eta ** 2)
+            / (curvature(phi) ** 3 * eta**2)
             + (
-                r ** 2
+                r**2
                 * (
-                    coso * dcurvature(phi) * eta ** 2
+                    coso * dcurvature(phi) * eta**2
                     + curvature(phi) ** 3
                     * d_l_d_phi(phi)
                     * (coso * sigma(phi) + sino)
                     * torsion(phi)
                 )
                 * (
-                    -2 * coso * dcurvature(phi) ** 2 * eta ** 2
-                    + coso * curvature(phi) * ddcurvature(phi) * eta ** 2
+                    -2 * coso * dcurvature(phi) ** 2 * eta**2
+                    + coso * curvature(phi) * ddcurvature(phi) * eta**2
                     + curvature(phi) ** 3
                     * dcurvature(phi)
                     * d_l_d_phi(phi)
@@ -692,33 +692,33 @@ def verifyMetric(count):
                     )
                 )
             )
-            / (curvature(phi) ** 5 * eta ** 2)
+            / (curvature(phi) ** 5 * eta**2)
         )
         return [d_r_gpp, d_theta_gpp, d_phi_gpp]
 
     def dgrt(r, theta, phi):
         d_r_grt = (
-            -(eta ** 2) * np.cos(theta) * np.sin(theta) / curvature(phi) ** 2
+            -(eta**2) * np.cos(theta) * np.sin(theta) / curvature(phi) ** 2
             + (np.sin(theta) + np.cos(theta) * sigma(phi))
             * (np.cos(theta) - np.sin(theta) * sigma(phi))
             * curvature(phi) ** 2
-            / eta ** 2
+            / eta**2
         )
         d_theta_grt = (
-            -r * eta ** 2 * np.cos(2 * theta) / curvature(phi) ** 2
+            -r * eta**2 * np.cos(2 * theta) / curvature(phi) ** 2
             + r
             * (
                 -2 * np.sin(2 * theta) * sigma(phi)
                 + np.cos(2 * theta) * (1 - sigma(phi) ** 2)
             )
             * curvature(phi) ** 2
-            / eta ** 2
+            / eta**2
         )
         d_phi_grt = (
             2
             * dcurvature(phi)
             * r
-            * eta ** 2
+            * eta**2
             * np.cos(theta)
             * np.sin(theta)
             / curvature(phi) ** 3
@@ -728,39 +728,39 @@ def verifyMetric(count):
             * (np.cos(theta) - np.sin(theta) * sigma(phi))
             * curvature(phi)
             * dcurvature(phi)
-            / eta ** 2
+            / eta**2
             + r
             * (np.cos(2 * theta) - np.sin(2 * theta) * sigma(phi))
             * dsigma(phi)
             * curvature(phi) ** 2
-            / eta ** 2
+            / eta**2
         )
         return [d_r_grt, d_theta_grt, d_phi_grt]
 
     def dgrp(r, theta, phi):
-        d_r_grp = (curvature(phi) ** 2 / eta ** 2) * (
+        d_r_grp = (curvature(phi) ** 2 / eta**2) * (
             (
-                -(eta ** 4) * np.cos(theta) ** 2 / curvature(phi) ** 4
+                -(eta**4) * np.cos(theta) ** 2 / curvature(phi) ** 4
                 + (np.sin(theta) + np.cos(theta) * sigma(phi)) ** 2
             )
             * dcurvature(phi)
             / curvature(phi)
             + np.cos(theta) * (np.sin(theta) + np.cos(theta) * sigma(phi)) * dsigma(phi)
         )
-        d_theta_grp = (r / curvature(phi) ** 3 / eta ** 2) * (
+        d_theta_grp = (r / curvature(phi) ** 3 / eta**2) * (
             (
                 2 * np.cos(2 * theta) * curvature(phi) ** 4 * sigma(phi)
                 + np.sin(2 * theta)
-                * (eta ** 4 - curvature(phi) ** 4 * (-1 + sigma(phi) ** 2))
+                * (eta**4 - curvature(phi) ** 4 * (-1 + sigma(phi) ** 2))
             )
             * dcurvature(phi)
             + curvature(phi) ** 5
             * (np.cos(2 * theta) - np.sin(2 * theta) * sigma(phi))
             * dsigma(phi)
         )
-        d_phi_grp = (r / curvature(phi) ** 4 / eta ** 2) * (
+        d_phi_grp = (r / curvature(phi) ** 4 / eta**2) * (
             (
-                3 * eta ** 4 * np.cos(theta) ** 2
+                3 * eta**4 * np.cos(theta) ** 2
                 + curvature(phi) ** 4
                 * (np.sin(theta) + np.cos(theta) * sigma(phi)) ** 2
             )
@@ -771,7 +771,7 @@ def verifyMetric(count):
             * (np.sin(theta) + np.cos(theta) * sigma(phi))
             * dcurvature(phi)
             * dsigma(phi)
-            - eta ** 4 * np.cos(theta) ** 2 * curvature(phi) * ddcurvature(phi)
+            - eta**4 * np.cos(theta) ** 2 * curvature(phi) * ddcurvature(phi)
             + curvature(phi) ** 5
             * (np.sin(theta) + np.cos(theta) * sigma(phi)) ** 2
             * ddcurvature(phi)
@@ -785,9 +785,9 @@ def verifyMetric(count):
         return [d_r_grp, d_theta_grp, d_phi_grp]
 
     def dgtp(r, theta, phi):
-        d_r_gtp = (r * 2 / 2 / eta ** 2 / curvature(phi) ** 3) * (
-            2 * eta ** 2 * curvature(phi) ** 3 * torsion(phi) * d_l_d_phi(phi)
-            + eta ** 4 * np.sin(2 * theta) * dcurvature(phi)
+        d_r_gtp = (r * 2 / 2 / eta**2 / curvature(phi) ** 3) * (
+            2 * eta**2 * curvature(phi) ** 3 * torsion(phi) * d_l_d_phi(phi)
+            + eta**4 * np.sin(2 * theta) * dcurvature(phi)
             - curvature(phi) ** 4
             * (
                 -np.sin(2 * theta)
@@ -802,29 +802,29 @@ def verifyMetric(count):
             * dsigma(phi)
         )
         d_theta_gtp = (
-            r ** 2
+            r**2
             * (
                 (
                     -2 * np.sin(2 * theta) * curvature(phi) ** 4 * sigma(phi)
                     + np.cos(2 * theta)
-                    * (eta ** 4 - curvature(phi) ** 4 * (-1 + sigma(phi) ** 2))
+                    * (eta**4 - curvature(phi) ** 4 * (-1 + sigma(phi) ** 2))
                 )
                 * dcurvature(phi)
                 - curvature(phi) ** 5
                 * (np.sin(2 * theta) + np.cos(2 * theta) * sigma(phi))
                 * dsigma(phi)
             )
-            / eta ** 2
+            / eta**2
             / curvature(phi) ** 3
         )
         d_phi_gtp = (
-            r ** 2
+            r**2
             / 2
-            / eta ** 2
+            / eta**2
             / curvature(phi) ** 4
             * (
                 (
-                    -3 * eta ** 4 * np.sin(2 * theta)
+                    -3 * eta**4 * np.sin(2 * theta)
                     + curvature(phi) ** 4
                     * (
                         2 * np.cos(2 * theta) * sigma(phi)
@@ -838,10 +838,10 @@ def verifyMetric(count):
                 * dcurvature(phi)
                 * dsigma(phi)
                 + 2
-                * eta ** 2
+                * eta**2
                 * curvature(phi) ** 4
                 * (d_l_d_phi(phi) * dtorsion(phi) + torsion(phi) * dd_l_d_phi(phi))
-                + eta ** 4 * np.sin(2 * theta) * curvature(phi) * ddcurvature(phi)
+                + eta**4 * np.sin(2 * theta) * curvature(phi) * ddcurvature(phi)
                 + curvature(phi) ** 5
                 * (
                     2 * np.cos(2 * theta) * sigma(phi)

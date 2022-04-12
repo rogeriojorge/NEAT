@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes
 set -ex
-
+# Use flake8 to autopep files
 EXCLUDE="E226,E265,E266,E4,E5,E7,W,F"
 flake8  --ignore $EXCLUDE src/ || (exit 0)
 flake8  --ignore $EXCLUDE tests/ || (exit 0)
@@ -12,3 +12,9 @@ find examples/ -name '*.py' -exec autopep8 --ignore=$EXCLUDE --in-place '{}' \;
 flake8  --ignore $EXCLUDE src/
 flake8  --ignore $EXCLUDE tests/
 flake8  --ignore $EXCLUDE examples/
+# Apply black on .py files
+black src/
+black tests/
+black examples/
+# Get pylint score
+pylint --output-format=text src/ | tee pylint.txt 
