@@ -1,0 +1,73 @@
+name: Codestyle
+
+on: [push, pull_request]
+
+jobs:
+  CI:
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8]
+        test-type: [codestyle]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: which python3 after python setup
+      run: which python3
+
+    - name: which pip after python setup
+      run: pip --version
+
+    - name: env after adding python
+      run: env
+
+    - name: Install python dependencies
+      run: |
+        pip install flake8 pylint black anybadge
+
+    - name: Run flake8 tests
+      if: "contains(matrix.test-type, 'codestyle')"
+      run: |
+        export EXCLUDE="E226,E265,E266,E4,E5,E7,W,F"
+        flake8  --ignore $EXCLUDE src/
+        flake8  --ignore $EXCLUDE tests/
+        flake8  --ignore $EXCLUDE examples/
+
+    - name: Run black tests
+      if: "contains(matrix.test-type, 'codestyle')"
+      run: |
+        black --check src/
+        black --check tests/
+        black --check examples/
+
+    - name: Run pylint tests
+      if: "contains(matrix.test-type, 'codestyle')"
+      run: |
+        pylint src/
+        pylint tests/
+        pylint examples/
+      continue-on-error: true
+
+    - name: Add pylint badge
+      if: always()
+      run: |
+        pylint --output-format=text src/ | tee pylint.txt
+        score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
+        echo "Pylint score was $score"
+        anybadge -l pylint --value=$score --file=tests/pylint.svg 2=red 4=orange 8=yellow 10=green
+
+    - name: Upload pylint badge to github
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: pylint-badge
+        path: tests/pylint.svg
+        if-no-files-found: error

@@ -3,6 +3,7 @@
 **NEar-Axis opTimisation**
 
 ![GitHub](https://img.shields.io/github/license/rogeriojorge/neat)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/rogeriojorge/NEAT/CI)
 [![Documentation Status](https://readthedocs.org/projects/neat-docs/badge/?version=latest)](https://neat-docs.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/rogeriojorge/NEAT/branch/main/graph/badge.svg?token=8515A2RQL3)](https://codecov.io/gh/rogeriojorge/NEAT)
 
@@ -27,7 +28,11 @@ NEAT could be run either directly by installing the requirements pyQSC, gyronimo
 
 # Installation
 
-Make sure that you have installed all of the python packages listed in the file ```requirements.txt```
+Make sure that you have installed all of the python packages listed in the file [requirements.txt](requirements.txt). A simple way of doing so is by running
+
+```
+pip install -r requirements.txt
+```
 
 ## CMake
 
@@ -48,7 +53,25 @@ git clean -d -f -x
 
 This section explains how to build the docker container for NEAT. It can be used to compile gyronimo, install pyQSC, simsopt and compile NEAT in a docker image directly.
 
-0. Install docker
+### Using Docker Hub
+
+The easiest way to get simsopt docker image which comes with NEAT and all of its dependencies such as gyronimo and VMEC pre-installed is to use Docker Hub. After installing docker, you can run the simsopt container directly from the simsopt docker image uploaded to Docker Hub.
+
+```
+docker run -it --rm rjorge123/neat # Linux users, prefix the command with sudo
+```
+
+The above command should load the terminal that comes with the NEAT docker container. When you run it first time, the image is downloaded automatically, so be patient. You should now be able to import the module from python:
+
+```
+python3
+import neat
+```
+
+### Build locally
+
+To build the image locally, instead of downloading from DockerHub, you can use the commands below:
+
 
 1. Build the docker image by running the `docker build` command in the repo root directory:
    ```bash

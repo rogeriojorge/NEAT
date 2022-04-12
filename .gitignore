@@ -10,6 +10,8 @@ src/results
 results
 *.prof
 *.profile
+tests/pylint.svg
+pylint.txt
 
 ## Python, Docker, C++, CMake and other gitignore commands
 
@@ -236,3 +238,4 @@ _deps
 Doxyfile.doc
 CMakeDoxyfile.in
 CMakeDoxygenDefaults.cmake
+.vscode/settings.json

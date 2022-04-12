@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import sys
 import json
-import pathlib
 import os
+import pathlib
+import sys
+
 try:
     from skbuild import setup
 except ImportError:
