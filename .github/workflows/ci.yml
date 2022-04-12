@@ -44,7 +44,7 @@ jobs:
         alias pip=pip3
         alias python=python3
         python -m pip install --upgrade pip
-        pip install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml pylint anybadge
+        pip install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
     
     - name: env after adding python
       run: env
@@ -133,17 +133,3 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: true
         verbose: true
-
-    - name: Add pylint badge
-      run: |
-        pylint --output-format=text src/ | tee pylint.txt
-        score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
-        echo "Pylint score was $score"
-        anybadge --value=$score --file=tests/pylint.svg pylint 2=red 4=orange 8=yellow 10=green
-
-    - name: Upload pylint badge to github
-      uses: actions/upload-artifact@v2
-      with:
-        name: pylint-badge
-        path: tests/pylint.svg
-        if-no-files-found: error

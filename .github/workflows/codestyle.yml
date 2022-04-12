@@ -31,7 +31,7 @@ jobs:
 
     - name: Install python dependencies
       run: |
-        pip install flake8 pylint black
+        pip install flake8 pylint black anybadge
 
     - name: Run flake8 tests
       if: "contains(matrix.test-type, 'codestyle')"
@@ -54,3 +54,17 @@ jobs:
         pylint src/
         pylint tests/
         pylint examples/
+
+    - name: Add pylint badge
+      run: |
+        pylint --output-format=text src/ | tee pylint.txt
+        score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
+        echo "Pylint score was $score"
+        anybadge --value=$score --file=tests/pylint.svg pylint 2=red 4=orange 8=yellow 10=green
+
+    - name: Upload pylint badge to github
+      uses: actions/upload-artifact@v2
+      with:
+        name: pylint-badge
+        path: tests/pylint.svg
+        if-no-files-found: error
