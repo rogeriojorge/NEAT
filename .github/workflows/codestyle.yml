@@ -1,20 +1,16 @@
-name: Linting
+name: Codestyle
 
 on: [push, pull_request]
 
 jobs:
   CI:
-    runs-on: ubuntu-20.04
-
-    env:
-      OMPI_ALLOW_RUN_AS_ROOT: 1
-      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
       matrix:
         python-version: [3.8]
-        test-type: [linting]
+        test-type: [codestyle]
 
     steps:
     - uses: actions/checkout@v2
@@ -35,11 +31,26 @@ jobs:
 
     - name: Install python dependencies
       run: |
-        pip install flake8
-    - name: Run linting tests
-      if: "contains(matrix.test-type, 'linting')"
+        pip install flake8 pylint black
+
+    - name: Run flake8 tests
+      if: "contains(matrix.test-type, 'codestyle')"
       run: |
         export EXCLUDE="E226,E265,E266,E4,E5,E7,W,F"
         flake8  --ignore $EXCLUDE src/
         flake8  --ignore $EXCLUDE tests/
         flake8  --ignore $EXCLUDE examples/
+
+    - name: Run black tests
+      if: "contains(matrix.test-type, 'codestyle')"
+      run: |
+        black --check src/
+        black --check tests/
+        black --check examples/
+
+    - name: Run pylint tests
+      if: "contains(matrix.test-type, 'codestyle')"
+      run: |
+        pylint src/
+        pylint tests/
+        pylint examples/

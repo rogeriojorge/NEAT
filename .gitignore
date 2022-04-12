@@ -10,6 +10,7 @@ src/results
 results
 *.prof
 *.profile
+tests/pylint.svg
 
 ## Python, Docker, C++, CMake and other gitignore commands
 

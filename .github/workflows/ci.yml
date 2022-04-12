@@ -44,7 +44,7 @@ jobs:
         alias pip=pip3
         alias python=python3
         python -m pip install --upgrade pip
-        pip install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
+        pip install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml pylint anybadge
     
     - name: env after adding python
       run: env
@@ -133,3 +133,7 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: true
         verbose: true
+
+    - name: Add pylint badge
+      run: |
+        anybadge -l pylint -v 2.22 -f tests/pylint.svg 2=red 4=orange 8=yellow 10=green
