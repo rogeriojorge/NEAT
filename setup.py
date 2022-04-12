@@ -3,7 +3,15 @@ import sys
 import json
 import pathlib
 import os
-from skbuild import setup
+try:
+    from skbuild import setup
+except ImportError:
+    print(
+        "Please update pip, you need pip 10 or greater,\n"
+        " or you need to install the PEP 518 requirements in pyproject.toml yourself",
+        file=sys.stderr,
+    )
+    raise
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
