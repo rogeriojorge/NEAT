@@ -41,12 +41,12 @@ jobs:
         flake8  --ignore $EXCLUDE tests/
         flake8  --ignore $EXCLUDE examples/
 
-    - name: Run black tests
-      if: "contains(matrix.test-type, 'codestyle')"
-      run: |
-        black --check src/
-        black --check tests/
-        black --check examples/
+    # - name: Run black tests
+    #   if: "contains(matrix.test-type, 'codestyle')"
+    #   run: |
+    #     black --check src/
+    #     black --check tests/
+    #     black --check examples/
 
     - name: Run pylint tests
       if: "contains(matrix.test-type, 'codestyle')"
