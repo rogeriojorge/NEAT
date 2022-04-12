@@ -54,8 +54,10 @@ jobs:
         pylint src/
         pylint tests/
         pylint examples/
+      continue-on-error: true
 
     - name: Add pylint badge
+      if: always()
       run: |
         pylint --output-format=text src/ | tee pylint.txt
         score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
@@ -63,6 +65,7 @@ jobs:
         anybadge --value=$score --file=tests/pylint.svg pylint 2=red 4=orange 8=yellow 10=green
 
     - name: Upload pylint badge to github
+      if: always()
       uses: actions/upload-artifact@v2
       with:
         name: pylint-badge
