@@ -39,4 +39,4 @@ jobs:
           context: .
           file: docker/Dockerfile.ubuntu
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/neatci:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/neat:latest
