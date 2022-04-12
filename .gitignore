@@ -11,6 +11,7 @@ results
 *.prof
 *.profile
 tests/pylint.svg
+pylint.txt
 
 ## Python, Docker, C++, CMake and other gitignore commands
 
