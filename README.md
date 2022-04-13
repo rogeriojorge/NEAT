@@ -220,3 +220,13 @@ To test VMEC's installation, you can run
 ```
 python -c "import vmec; print('success')"
 ```
+
+# FAQ
+
+## pybind11 not found by cmake
+
+Please use the following command to install ```pybind11[global]``` instead of ```pybind11```
+
+```
+pip install "pybind11[global]"
+```
