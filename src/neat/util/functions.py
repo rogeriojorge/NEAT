@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from neatpp import gc_solver_qs
+from ..neatpp import gc_solver_qs
 
 
 # Function called in main.py to run each particle orbit using gyronimo

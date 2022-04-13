@@ -159,13 +159,16 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/neatpp.cpp
     # src/neatpp/NEAT_Mercier.cc
 )
-target_link_libraries(${PROJECT_NAME} PUBLIC gyronimo)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GSL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE gyronimo)
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src/neat)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 # Install neatpp
-install(TARGETS ${PROJECT_NAME} DESTINATION .)
+install(TARGETS ${PROJECT_NAME} DESTINATION src/neat
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
