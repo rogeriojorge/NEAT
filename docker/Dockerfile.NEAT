@@ -26,8 +26,7 @@ COPY . .
 
 # Install NEAT
 COPY cmake_config_files/ubuntu.json cmake_config_file.json
-RUN python3 setup.py build
-RUN python3 setup.py install
+RUN python3 -m pip install .
 
 # Install pyQSC
 WORKDIR /home/external
