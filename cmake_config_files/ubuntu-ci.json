@@ -4,6 +4,7 @@
             "-DCMAKE_C_COMPILER=mpicc",
             "-DCMAKE_CXX_COMPILER=g++-10",
             "-DCMAKE_Fortran_COMPILER=mpifort",
+            "-DCMAKE_INSTALL_LIBDIR=lib",
             "-DSCALAPACK_LIB_NAME=scalapack-openmpi",
             "-DNETCDF_INC_PATH=/usr/include",
             "-DNETCDF_LIB_PATH=/usr/lib/x86_64-linux-gnu",
