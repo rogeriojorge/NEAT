@@ -10,6 +10,7 @@
             "-DCMAKE_Fortran_COMPILER=mpif90",
             "-DNETCDF_INC_PATH=/opt/local/include",
             "-DNETCDF_LIB_PATH=/opt/local/lib",
-            "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch"
+            "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch",
+            "-DCMAKE_INSTALL_LIBDIR=lib"
         ]
 }
