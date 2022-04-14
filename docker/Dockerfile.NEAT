@@ -30,7 +30,7 @@ RUN git clone https://github.com/hiddensymmetries/VMEC2000.git vmec
 WORKDIR /home/external/vmec
 RUN cp cmake/machines/ubuntu.json cmake_config_file.json
 RUN sed -i -e '9i   "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch",\' cmake_config_file.json
-RUN pip install .
+RUN pip3 install .
 
 # Install pyQSC
 WORKDIR /home/external
@@ -40,9 +40,7 @@ RUN pip3 install .
 
 # Install NEAT
 WORKDIR /home
-RUN pip install .
-
-WORKDIR /home
+RUN pip3 install -e .
 
 # Run NEAT from entrypoint script /docker/docker-entrypoint.sh
 # RUN ["chmod", "+x", "/home/docker/docker-entrypoint.sh"]

@@ -46,8 +46,8 @@ jobs:
       run: |
         alias pip=pip3
         alias python=python3
-        python -m pip install --upgrade pip
-        pip install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
+        python3 -m pip install --upgrade pip
+        pip3 install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
     
     - name: env after adding python
       run: env
@@ -60,11 +60,11 @@ jobs:
 
     # - name: Install simsopt
     #   run: |
-    #     pip install simsopt
+    #     pip3 install simsopt
 
     # - name: Try running simsopt
     #   run: |
-    #     python -c "import simsopt; print('success')"
+    #     python3 -c "import simsopt; print('success')"
 
     # - name: ls
     #   run: ls
@@ -77,10 +77,10 @@ jobs:
     #     cd external/vmec
     #     cp cmake/machines/ubuntu.json cmake_config_file.json
     #     cat cmake_config_file.json
-    #     pip install .
+    #     pip3 install .
 
     # - name: Try importing vmec module
-    #   run: python -c "print(dir()); import vmec; print(dir()); print(dir(vmec)); print('package:', vmec.__package__); print('spec:', vmec.__spec__); print('doc:', vmec.__doc__); print('file:', vmec.__file__);"
+    #   run: python3 -c "print(dir()); import vmec; print(dir()); print(dir(vmec)); print('package:', vmec.__package__); print('spec:', vmec.__spec__); print('doc:', vmec.__doc__); print('file:', vmec.__file__);"
 
     # - name: ls
     #   run: ls
@@ -100,7 +100,7 @@ jobs:
         sed -i -e '7d' cmake_config_file.json
         sed -i -e '7i             "-DCMAKE_CXX_COMPILER=g++-10"\' cmake_config_file.json
         cat cmake_config_file.json
-        pip install .
+        pip3 install -e .
 
     - name: ls
       run: ls
@@ -112,11 +112,11 @@ jobs:
 
     - name: Run unit tests
       run: |
-        python -m unittest -v
+        python3 -m unittest -v
 
     - name: Install coverage dependencies
       if: contains(matrix.test-type, 'unit')
-      run: pip install coverage
+      run: pip3 install coverage
 
     - name: Run tests on 1 process using coverage
       if: contains(matrix.test-type, 'unit')
