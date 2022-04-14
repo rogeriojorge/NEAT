@@ -2,10 +2,6 @@
 	path = external/gyronimo
 	url = https://github.com/rogeriojorge/gyronimo.git
     branch = feature/gyronimo-without-makima-bspline3
-[submodule "external/vmec"]
-	path = external/vmec
-	url = https://github.com/rogeriojorge/VMEC2000.git
-    branch = feature/compile-out-of-source
 [submodule "external/simple"]
 	path = external/simple
 	url = https://github.com/rogeriojorge/SIMPLE.git

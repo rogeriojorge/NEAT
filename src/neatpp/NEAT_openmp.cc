@@ -2,8 +2,8 @@
 #include <cmath>
 #include <random>
 #include <chrono>
-#include <metrics_NEAT/metric_stellna_qs.hh>
-#include <fields_NEAT/equilibrium_stellna_qs.hh>
+#include "metric_stellna_qs.hh"
+#include "equilibrium_stellna_qs.hh"
 #include <gyronimo/core/codata.hh>
 #include <gyronimo/dynamics/guiding_centre.hh>
 #include <gyronimo/dynamics/odeint_adapter.hh>
