@@ -66,24 +66,24 @@ jobs:
     #   run: |
     #     python -c "import simsopt; print('success')"
 
-    - name: ls
-      run: ls
+    # - name: ls
+    #   run: ls
 
-    - name: Add to LD_LIBRARY_PATH so scalapack etc can be found
-      run: echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
+    # - name: Add to LD_LIBRARY_PATH so scalapack etc can be found
+    #   run: echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
 
-    - name: Configure and install VMEC2000 module
-      run: |
-        cd external/vmec
-        cp cmake/machines/ubuntu.json cmake_config_file.json
-        cat cmake_config_file.json
-        pip install .
+    # - name: Configure and install VMEC2000 module
+    #   run: |
+    #     cd external/vmec
+    #     cp cmake/machines/ubuntu.json cmake_config_file.json
+    #     cat cmake_config_file.json
+    #     pip install .
 
-    - name: Try importing vmec module
-      run: python -c "print(dir()); import vmec; print(dir()); print(dir(vmec)); print('package:', vmec.__package__); print('spec:', vmec.__spec__); print('doc:', vmec.__doc__); print('file:', vmec.__file__);"
+    # - name: Try importing vmec module
+    #   run: python -c "print(dir()); import vmec; print(dir()); print(dir(vmec)); print('package:', vmec.__package__); print('spec:', vmec.__spec__); print('doc:', vmec.__doc__); print('file:', vmec.__file__);"
 
-    - name: ls
-      run: ls
+    # - name: ls
+    #   run: ls
 
     - name: Install pyQSC
       run: |
@@ -97,8 +97,8 @@ jobs:
 
     - name: Install NEAT
       run: |
-        sed '7d' cmake_config_file.json
-        sed -i -e '6i            "-DCMAKE_CXX_COMPILER=g++-10"\' cmake_config_file.json
+        sed -i -e '7d' cmake_config_file.json
+        sed -i -e '6i            "-DCMAKE_CXX_COMPILER=g++-10",\' cmake_config_file.json
         cat cmake_config_file.json
         pip install .
 
