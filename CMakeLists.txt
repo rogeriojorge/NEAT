@@ -12,6 +12,7 @@ find_package(Python 3 COMPONENTS Interpreter Development.Module NumPy)
 # Use relative paths in MacOS
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_LIBDIR lib)
 # detect virtualenv and set Pip args accordingly
 # if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
 #   set(_pip_args)
@@ -44,19 +45,9 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif()
 
-
-# IF(DEFINED ENV{CI})
-#     message(STATUS "CI environment detected. Set compilation flags accordingly (target ivybridge which supports avx).")
-#     set(CMAKE_CXX_FLAGS "-O3 -march=ivybridge -mfma -ffp-contract=fast")
-# elseif(DEFINED ENV{CONDA_BUILD})
-#     message(STATUS "conda build environment detected. Let conda set compilation flags accordingly.")
-#     # set(CMAKE_CXX_FLAGS "-O3 -march=ivybridge -mfma -ffp-contract=fast")
-# else()
-#     message(STATUS "Local build detected. Set compilation flags accordingly (march=native).")
-#     set(CMAKE_CXX_FLAGS "-O3 -march=native -mfma -ffp-contract=fast")
-# endif()
-
-# find_package(OpenMP)
+if(SUPPORT_OPENMP)
+    find_package(OpenMP)
+endif()
 
 # Add BOOST
 find_package(Boost 1.71.0)
@@ -96,60 +87,24 @@ else()
     message(STATUS "Boost include dirs are ${Boost_INCLUDE_DIRS}")
 endif()
 
+# Add pybind11 include directories
+execute_process(
+    COMMAND "${PYTHON}" -c
+            "import pybind11; print(pybind11.get_cmake_dir())"
+    OUTPUT_VARIABLE _tmp_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
+    list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+
 # Add GSL
 find_package(GSL REQUIRED)
   include_directories(${GSL_INCLUDE_DIRS})
 
 # Compile git submodules
-if(INSTALL_VMEC)
-    message(STATUS "Install VMEC executable")
-    set(VMEC_PYTHON_DIR ".")
-    add_subdirectory(external/vmec)
-
-    # message(STATUS "Install VMEC python module")
-    # file(COPY ${PROJECT_SOURCE_DIR}/external/vmec/python/vmec DESTINATION ${CMAKE_BINARY_DIR}/external/vmec/python)
-    # file(COPY_FILE ${PROJECT_SOURCE_DIR}/cmake_config_file.json ${CMAKE_BINARY_DIR}/external/vmec/cmake_config_file.json)
-    # file(COPY_FILE ${PROJECT_SOURCE_DIR}/external/vmec/setup.py ${CMAKE_BINARY_DIR}/external/vmec/setup.py)
-    # file(COPY_FILE ${PROJECT_SOURCE_DIR}/external/vmec/Makefile ${CMAKE_BINARY_DIR}/external/vmec/Makefile)
-    # file(COPY_FILE ${PROJECT_SOURCE_DIR}/external/vmec/CMakeLists.txt ${CMAKE_BINARY_DIR}/external/vmec/CMakeLists.txt)
-    # set(SETUP_PY_IN "${CMAKE_BINARY_DIR}/external/vmec/setup.py")
-    # set(SETUP_PY    "${CMAKE_BINARY_DIR}/external/vmec/setup.py")
-    # set(DEPS        "${CMAKE_BINARY_DIR}/external/vmec/python/vmec/__init__.py")
-    # set(OUTPUT      "vmec")
-
-    # configure_file(${SETUP_PY_IN} ${SETUP_PY})
-
-    # add_custom_command(OUTPUT ${OUTPUT}
-    #                    COMMAND ${PYTHON}
-    #                    ARGS ${SETUP_PY} build
-    #                    DEPENDS ${DEPS}
-    #                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/vmec)
-
-    # add_custom_target(target ALL DEPENDS ${OUTPUT})
-
-    install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install --user WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/vmec)")
-
-endif()
-
 if(INSTALL_SIMPLE)
     add_subdirectory(external/simple)
 endif()
 
 add_subdirectory(external/gyronimo)
-
-# PYBIND11 specific configurations
-if(SKBUILD)
-  # Scikit-Build does not add your site-packages to the search path
-  # automatically, so we need to add it _or_ the pybind11 specific directory
-  # here.
-  execute_process(
-    COMMAND "${PYTHON}" -c
-            "import pybind11; print(pybind11.get_cmake_dir())"
-    OUTPUT_VARIABLE _tmp_dir
-    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
-  list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
-endif()
-  
 find_package(pybind11 CONFIG REQUIRED)
 
 # Build NEAT
@@ -159,13 +114,18 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/neatpp.cpp
     # src/neatpp/NEAT_Mercier.cc
 )
-target_link_libraries(${PROJECT_NAME} PUBLIC gyronimo)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GSL_LIBRARIES})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE gyronimo)
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src/neat)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 # Install neatpp
-install(TARGETS ${PROJECT_NAME} DESTINATION .)
+# install(TARGETS ${PROJECT_NAME} DESTINATION .)
+# install(TARGETS ${PROJECT_NAME} DESTINATION src/neat
+#         LIBRARY DESTINATION lib
+#         RUNTIME DESTINATION bin
+# )
