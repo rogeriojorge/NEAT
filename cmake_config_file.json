@@ -1,7 +1,7 @@
 {
     "comment": "This configuration file works on a macbook on which gcc and netcdf have been installed using macports.",
     "cmake_args": [
-            "-DINSTALL_SIMPLE=OFF",
+            "-DINSTALL_SIMPLE=ON",
             "-DSUPPORT_OPENMP=OFF",
             "-DSUPPORT_VMEC=OFF",
             "-DCMAKE_CXX_COMPILER=g++"
