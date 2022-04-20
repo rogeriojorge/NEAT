@@ -7,14 +7,25 @@ from scipy.interpolate import CubicSpline as spline
 
 logger = logging.getLogger(__name__)
 
-class charged_particle():
+
+class charged_particle:
     r"""
     Class that contains the physics information of a
     given charged particle, as well as its position
     and velocity
     """
-    def __init__(self, charge=1, rhom=1, mass=1, Lambda=0.4,
-                 energy=4e4, r0=0.05, theta0=0, phi0=0) -> None:
+
+    def __init__(
+        self,
+        charge=1,
+        rhom=1,
+        mass=1,
+        Lambda=0.4,
+        energy=4e4,
+        r0=0.05,
+        theta0=0,
+        phi0=0,
+    ) -> None:
         self.charge = charge
         self.rhom = rhom
         self.mass = mass
@@ -25,11 +36,19 @@ class charged_particle():
         self.phi0 = phi0
 
     def gyronimo_parameters(self):
-        return self.charge, self.rhom, self.mass,\
-               self.Lambda, self.energy, self.r0,\
-               self.theta0, self.phi0
+        return (
+            self.charge,
+            self.rhom,
+            self.mass,
+            self.Lambda,
+            self.energy,
+            self.r0,
+            self.theta0,
+            self.phi0,
+        )
 
-class particle_orbit():
+
+class particle_orbit:
     r"""
     Interface function with the C++ executable NEAT. Receives a pyQSC instance
     and outputs the characteristics of the orbit.
@@ -39,6 +58,7 @@ class particle_orbit():
             r0,theta0,phi0,charge,rhom,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
+
     def __init__(self, particle, field, nsamples=500, Tfinal=1000) -> None:
         solution = np.array(
             gc_solver_qs(
@@ -54,7 +74,7 @@ class particle_orbit():
         self.r_pos = solution[:, 1]
         self.theta_pos = solution[:, 2]
         self.varphi = solution[:, 3]
-        
+
         nu = field.varphi - field.phi
         nu_spline_of_varphi = spline(
             np.append(field.varphi, 2 * np.pi / field.nfp),
@@ -73,7 +93,10 @@ class particle_orbit():
         self.phidot = solution[:, 10]
         self.vppdot = solution[:, 11]
 
-        self.p_phi = canonical_angular_momentum(particle, field, self.r_pos, self.v_parallel, self.Bfield)
+        self.p_phi = canonical_angular_momentum(
+            particle, field, self.r_pos, self.v_parallel, self.Bfield
+        )
+
 
 def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
 
@@ -91,15 +114,17 @@ def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
         / Bfield
         / field.Bbar
     )
-    
+
     p_phi2 = particle.charge * e * r_pos**2 * field.Bbar / 2 * field.iotaN
     p_phi = p_phi1 - p_phi2
 
     return p_phi
 
-class trace_particles():
+
+class trace_particles:
     r"""
     Use gyronimo to trace particles
     """
+
     def __init__(self) -> None:
         pass
