@@ -45,9 +45,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif()
 
-if(SUPPORT_OPENMP)
-    find_package(OpenMP)
-endif()
+find_package(OpenMP)
 
 # Add BOOST
 find_package(Boost 1.71.0)
@@ -122,6 +120,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src/neat)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+add_compile_options(-DOPENMP)
 
 # Install neatpp
 # install(TARGETS ${PROJECT_NAME} DESTINATION .)

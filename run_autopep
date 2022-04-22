@@ -16,5 +16,9 @@ flake8  --ignore $EXCLUDE examples/
 black src/
 black tests/
 black examples/
+# Sort imports
+isort src/
+isort tests/
+isort examples/
 # Get pylint score
 pylint --output-format=text src/ | tee pylint.txt 

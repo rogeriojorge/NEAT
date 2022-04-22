@@ -1,8 +1,11 @@
 import logging
 import unittest
+
 import numpy as np
+
 from neat.gyronimo.fields import stellna_qs
-from neat.gyronimo.tracing import charged_particle, particle_orbit
+from neat.gyronimo.tracing import (charged_particle, charged_particle_ensemble,
+                                   particle_ensemble_orbit, particle_orbit)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,3 +32,11 @@ class NEATtests(unittest.TestCase):
         np.testing.assert_array_almost_equal(
             g_orbit.p_phi, [g_orbit.p_phi[0]] * (n_samples + 1), decimal=precision
         )
+
+    def test_orbit_ensemble(self):
+        """
+        Test serialization with OpenMP
+        """
+        g_field = stellna_qs.from_paper(1)
+        g_particle = charged_particle_ensemble()
+        g_orbit = particle_ensemble_orbit(g_particle, g_field, nthreads=8)

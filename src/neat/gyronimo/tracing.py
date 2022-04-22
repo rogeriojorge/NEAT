@@ -1,9 +1,12 @@
 import logging
+import os
+
 import numpy as np
-from .fields import stellna_qs
-from neatpp import gc_solver_qs
-from ..util.constants import PROTON_MASS, ELEMENTARY_CHARGE, MU_0
 from scipy.interpolate import CubicSpline as spline
+
+from neatpp import gc_solver_qs, gc_solver_qs_ensemble
+
+from ..util.constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +48,52 @@ class charged_particle:
             self.r0,
             self.theta0,
             self.phi0,
+        )
+
+
+class charged_particle_ensemble:
+    r"""
+    Class that contains the physics information of a
+    collection of charged particles, as well as their position
+    and velocities
+    """
+
+    def __init__(
+        self,
+        charge=1,
+        rhom=1,
+        mass=1,
+        energy=4e4,
+        r0=0.05,
+        theta0=0,
+        phi0=0,
+        nparticles=50,
+        vparallel_min=0.25,
+        vparallel_max=1.25,
+    ) -> None:
+        self.charge = charge
+        self.rhom = rhom
+        self.mass = mass
+        self.energy = energy
+        self.r0 = r0
+        self.theta0 = theta0
+        self.phi0 = phi0
+        self.nparticles = nparticles
+        self.vparallel_min = vparallel_min
+        self.vparallel_max = vparallel_max
+
+    def gyronimo_parameters(self):
+        return (
+            self.charge,
+            self.rhom,
+            self.mass,
+            self.energy,
+            self.r0,
+            self.theta0,
+            self.phi0,
+            self.vparallel_min,
+            self.vparallel_max,
+            int(self.nparticles),
         )
 
 
@@ -98,6 +147,30 @@ class particle_orbit:
         )
 
 
+class particle_ensemble_orbit:
+    r"""
+    Interface function with the C++ executable NEAT. Receives a pyQSC instance
+    and outputs the characteristics of the orbit.
+    Args:
+        stel: Qsc instance of pyQSC
+        params (dict): a Python dict() containing the following parameters:
+            r0,theta0,phi0,charge,rhom,mass,Lambda,energy,nsamples,Tfinal
+        B20real (bool): True if a constant B20real should be used, False otherwise
+    """
+
+    def __init__(self, particles, field, nsamples=500, Tfinal=1000, nthreads=8) -> None:
+        solution = np.array(
+            gc_solver_qs_ensemble(
+                *field.gyronimo_parameters(),
+                *particles.gyronimo_parameters(),
+                nsamples,
+                Tfinal,
+                nthreads
+            )
+        )
+        self.gyronimo_parameters = solution
+
+
 def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
 
     m_proton = PROTON_MASS
@@ -119,12 +192,3 @@ def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
     p_phi = p_phi1 - p_phi2
 
     return p_phi
-
-
-class trace_particles:
-    r"""
-    Use gyronimo to trace particles
-    """
-
-    def __init__(self) -> None:
-        pass

@@ -1,24 +1,12 @@
-// // // NEAT: NEar-Axis sTellarator Particle Tracer
-// This file is a python Wrapper
-// It allows gyronimo to be called directly from Python
-// Rogerio Jorge, July 2021, Greifswald
-// // //
-// Command to compile NEAT on a Macbook with gsl pre-installed with macports
-// g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../include -isysroot`xcrun --show-sdk-path` NEAT.cpp -o NEAT.so
-
-// g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -lblas -L../build -lgyronimo -I../external/pybind11/include -I../external/gyronimo/ -Wl,-rpath ../build -isysroot`xcrun --show-sdk-path` NEAT.cc -o NEAT.so
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 // // // //  USE CUBIC_GSL_PERIODIC
 #include <gyronimo/interpolators/cubic_gsl.hh>
 #include <gyronimo/interpolators/steffen_gsl.hh>
 #include "metric_stellna_qs.hh"
-// #include <gyronimo/metrics/metric_stellna.hh>
 #include <gyronimo/core/dblock.hh>
 #include <vector>
 #include "equilibrium_stellna_qs.hh"
-// #include <gyronimo/fields/equilibrium_stellna.hh>
 #include <gyronimo/dynamics/guiding_centre.hh>
 #include <boost/math/tools/roots.hpp>
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
@@ -26,7 +14,10 @@
 #include <boost/numeric/odeint/stepper/bulirsch_stoer.hpp>
 #include <gyronimo/dynamics/odeint_adapter.hh>
 #include <gyronimo/core/codata.hh>
-// namespace py = pybind11;
+#include <omp.h>
+#include <random>
+#include <chrono>
+namespace py = pybind11;
 using namespace gyronimo;
 
  std::vector< std::vector<double>> gc_solver_qs(
@@ -88,6 +79,112 @@ using namespace gyronimo;
       initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
 
   return x_vec;
+ }
+
+std::array<double,4> operator*(const double& a, const std::array<double,4>& v) {
+std::array<double, 4> result = {a*v[0], a*v[1], a*v[2], a*v[3]};
+return result;
+}
+std::array<double,4> operator+(
+    const std::array<double,4>& u, const std::array<double,4>& v) {
+std::array<double, 4> result = {u[0]+v[0],u[1]+v[1],u[2]+v[2],u[3]+v[3]};
+return result;
+}
+
+template<typename Gyron, size_t Size>
+class ensemble {
+// Gyron::state should be required to be a contiguous type!
+public:
+static const size_t size = Size;
+typedef std::array<typename Gyron::state, Size> state;
+ensemble(const Gyron* gyron) : gyron_(gyron) {};
+void operator()(const state& f, state& dfdx, double t) const {
+#pragma omp parallel for
+    for(std::size_t k = 0;k < Size;k++)
+    dfdx[k] = (*gyron_)(f[k], t);
+};
+private:
+const Gyron* gyron_;
+};
+
+  std::vector< std::vector<double>> gc_solver_qs_ensemble(
+  double G0, double G2, double I2, double iota,
+  double iotaN, double Bref, double B0, double B1c,
+  double B20, double B2c, double beta1s, double charge,
+  double rhom, double mass, double energy, double r0, double theta0,
+  double phi0, double vparallel_min, double vparallel_max,
+  int nparticles,  double nsamples, double Tfinal, int nthreads
+ )
+ {
+     // defines the ensemble size and dynamical system:
+     const int _nparticles = 5000;
+    typedef ensemble<gyronimo::guiding_centre, _nparticles> ensemble_type;
+
+// ODEInt observer object to print diagnostics at each time step.
+// class orbit_observer {
+// public:
+//   orbit_observer(const gyronimo::guiding_centre* g) : gc_pointer_(g) {};
+//   void operator()(const ensemble_type::state& z, double t) {
+//     std::cout  << t << " ";
+//     for(std::size_t k = 0;k < ensemble_type::size;k++){
+//       gyronimo::IR3 x = gc_pointer_->get_position(z[k]);
+//     //   double v_parallel = gc_pointer_->get_vpp(z[k]);
+//       std::cout
+//         << x[gyronimo::IR3::u] << " ";
+// //      << x[gyronimo::IR3::v] << " "
+// //      << x[gyronimo::IR3::w] << " "
+// //      << v_parallel << " ";
+//     }
+//     std::cout << "\n";
+//   };
+// private:
+//   const gyronimo::guiding_centre* gc_pointer_;
+// };
+
+  metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
+                     B0, B1c, B20, B2c, beta1s);
+
+  equilibrium_stellna_qs qsc(&g);
+
+  // Compute normalisation constants:
+  double Valfven = Bref/std::sqrt(gyronimo::codata::mu0*(rhom*gyronimo::codata::m_proton*1.e+19));
+  double Ualfven = 0.5*gyronimo::codata::m_proton*mass*Valfven*Valfven;
+  double energySI = energy*gyronimo::codata::e;
+
+  double lambda = 0;
+  guiding_centre gc(1, Valfven, charge/mass, std::abs(lambda)*energySI/Ualfven/Bref, &qsc);
+
+// gets the number of threads from the openmp environment:
+  omp_set_dynamic(0);  // explicitly disable dynamic teams
+  omp_set_num_threads(nthreads);
+
+// the clock starts ticking here...
+  auto begin = std::chrono::high_resolution_clock::now();
+
+// defines the ensemble initial state:
+  ensemble_type::state initial;
+  std::mt19937 rand_generator;
+  std::uniform_real_distribution<> vpp_distro(vparallel_min, vparallel_max);
+#pragma omp parallel for
+  for(std::size_t k = 0;k < ensemble_type::size;k++)
+    initial[k] = gc.generate_state(
+        {r0, 0.0, 0.0}, vpp_distro(rand_generator),
+        gyronimo::guiding_centre::vpp_sign::plus);
+
+// integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
+  boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
+  boost::numeric::odeint::integrate_const(
+      ode_stepper, ensemble_type(&gc),
+      initial, 0.0, Tfinal, Tfinal/nsamples //, observer
+      );
+
+// prints the elapsed time:
+  auto end = std::chrono::high_resolution_clock::now();
+  auto elapsed_mseconds =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+  py::print("With "+std::to_string(nthreads)+" threads took "+std::to_string(elapsed_mseconds.count())+"ms");
+     
+     return {{0}};
  }
 
 // std::vector< std::vector<double>> gc_solver(
@@ -170,4 +267,5 @@ PYBIND11_MODULE(neatpp, m) {
     m.doc() = "Gyronimo Wrapper for the Stellarator Near-Axis Expansion (STELLNA)";
     // m.def("gc_solver",&gc_solver);
     m.def("gc_solver_qs",&gc_solver_qs);
+    m.def("gc_solver_qs_ensemble",&gc_solver_qs_ensemble);
 }

@@ -1,5 +1,6 @@
 import logging
 import unittest
+
 from neat.gyronimo.fields import stellna_qs
 
 logging.basicConfig(level=logging.INFO)
