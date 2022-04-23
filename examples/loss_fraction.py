@@ -2,8 +2,6 @@
 
 import time
 
-import matplotlib.pyplot as plt
-
 from neat.gyronimo.fields import stellna_qs
 from neat.gyronimo.tracing import charged_particle_ensemble, particle_ensemble_orbit
 
