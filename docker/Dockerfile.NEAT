@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 # Install requirements
 RUN apt update
 RUN apt-get install -y git gfortran openmpi-bin libopenmpi-dev gfortran g++ libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev doxygen
-RUN apt-get install -y libblas-dev liblapack-dev python3 python3-numpy python3-h5py pgplot5 libncarg-dev libscalapack-openmpi-dev python3-pip libnetcdf-c++4-dev cmake
+RUN apt-get install -y libblas-dev liblapack-dev python3 python3-numpy python3-h5py pgplot5 libncarg-dev libscalapack-openmpi-dev python3-pip libnetcdf-c++4-dev cmake vim wget
 RUN pip3 install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
 
 # Add to LD_LIBRARY_PATH so scalapack etc can be found
