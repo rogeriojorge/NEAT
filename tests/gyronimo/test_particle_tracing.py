@@ -5,8 +5,12 @@ import unittest
 import numpy as np
 
 from neat.gyronimo.fields import stellna_qs
-from neat.gyronimo.tracing import (charged_particle, charged_particle_ensemble,
-                                   particle_ensemble_orbit, particle_orbit)
+from neat.gyronimo.tracing import (
+    charged_particle,
+    charged_particle_ensemble,
+    particle_ensemble_orbit,
+    particle_orbit,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
