@@ -1,4 +1,5 @@
 import logging
+import time
 import unittest
 
 import numpy as np
@@ -37,6 +38,41 @@ class NEATtests(unittest.TestCase):
         """
         Test serialization with OpenMP
         """
-        g_field = stellna_qs.from_paper(1)
+        nthreads_array = [1, 2, 4]
+        nthreads = 8
+        r_surface_max = 0.13
+
+        g_field = stellna_qs.from_paper(4)
         g_particle = charged_particle_ensemble()
-        g_orbit = particle_ensemble_orbit(g_particle, g_field, nthreads=8)
+        total_times = [
+            self.orbit_time_nthreads(nthread, g_particle, g_field)
+            for nthread in nthreads_array
+        ]
+        self.assertTrue(
+            total_times == sorted(total_times, reverse=True),
+            "The OpenMP parallelization is not working",
+        )
+        g_orbits = particle_ensemble_orbit(g_particle, g_field, nthreads=nthreads)
+        g_orbits.calculate_loss_fraction(r_surface_max=r_surface_max)
+        loss_fraction = g_orbits.loss_fraction
+        self.assertTrue(
+            all(
+                loss_fraction[i] <= loss_fraction[i + 1]
+                for i in range(len(loss_fraction) - 1)
+            ),
+            "Loss Fraction is not monotonically increasing",
+        )
+        self.assertTrue(
+            all(i <= 1 for i in loss_fraction), "Loss fraction is not smaller than 1"
+        )
+
+    def orbit_time_nthreads(self, nthreads, g_particle, g_field):
+        start_time = time.time()
+        particle_ensemble_orbit(g_particle, g_field, nthreads=nthreads)
+        total_time = time.time() - start_time
+        logger.info(f"  With {nthreads} threads took {total_time}s")
+        return total_time
+
+
+if __name__ == "__main__":
+    unittest.main()

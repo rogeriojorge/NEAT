@@ -17,7 +17,7 @@
 #include <omp.h>
 #include <random>
 #include <chrono>
-namespace py = pybind11;
+// namespace py = pybind11;
 using namespace gyronimo;
 
  std::vector< std::vector<double>> gc_solver_qs(
@@ -120,26 +120,27 @@ const Gyron* gyron_;
      const int _nparticles = 5000;
     typedef ensemble<gyronimo::guiding_centre, _nparticles> ensemble_type;
 
+std::vector<std::vector< double >> x_vec;
 // ODEInt observer object to print diagnostics at each time step.
-// class orbit_observer {
-// public:
-//   orbit_observer(const gyronimo::guiding_centre* g) : gc_pointer_(g) {};
-//   void operator()(const ensemble_type::state& z, double t) {
-//     std::cout  << t << " ";
-//     for(std::size_t k = 0;k < ensemble_type::size;k++){
-//       gyronimo::IR3 x = gc_pointer_->get_position(z[k]);
-//     //   double v_parallel = gc_pointer_->get_vpp(z[k]);
-//       std::cout
-//         << x[gyronimo::IR3::u] << " ";
-// //      << x[gyronimo::IR3::v] << " "
-// //      << x[gyronimo::IR3::w] << " "
-// //      << v_parallel << " ";
-//     }
-//     std::cout << "\n";
-//   };
-// private:
-//   const gyronimo::guiding_centre* gc_pointer_;
-// };
+class orbit_observer {
+public:
+  std::vector< std::vector< double > >& m_states;
+  orbit_observer( std::vector< std::vector< double > > &states, 
+      const IR3field_c1* e, const guiding_centre* g)
+  : m_states( states ), eq_pointer_(e), gc_pointer_(g) { };
+  void operator()(const ensemble_type::state& z, double t) {
+    std::vector<double> temp;
+    temp.push_back(t);
+    for(std::size_t k = 0;k < ensemble_type::size;k++){
+      IR3 x = gc_pointer_->get_position(z[k]);
+      temp.push_back(x[0]);
+    }
+    m_states.push_back(temp);
+  };
+private:
+  const IR3field_c1* eq_pointer_;
+  const guiding_centre* gc_pointer_;
+};
 
   metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
                      B0, B1c, B20, B2c, beta1s);
@@ -175,16 +176,10 @@ const Gyron* gyron_;
   boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
   boost::numeric::odeint::integrate_const(
       ode_stepper, ensemble_type(&gc),
-      initial, 0.0, Tfinal, Tfinal/nsamples //, observer
+      initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec,&qsc,&gc)
       );
 
-// prints the elapsed time:
-  auto end = std::chrono::high_resolution_clock::now();
-  auto elapsed_mseconds =
-      std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
-  py::print("With "+std::to_string(nthreads)+" threads took "+std::to_string(elapsed_mseconds.count())+"ms");
-     
-     return {{0}};
+     return x_vec;
  }
 
 // std::vector< std::vector<double>> gc_solver(

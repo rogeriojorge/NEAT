@@ -169,6 +169,22 @@ class particle_ensemble_orbit:
             )
         )
         self.gyronimo_parameters = solution
+        self.time = solution[:, 0]
+        self.nparticles = solution.shape[1] - 1
+        self.r_pos = solution[:, 1:].transpose()
+
+    def calculate_loss_fraction(self, r_surface_max=0.15):
+        self.lost_times_of_particles = [
+            self.time[np.argmax(particle_pos > r_surface_max)]
+            for particle_pos in self.r_pos
+        ]
+        loss_fraction = [0.0]
+        self.total_particles_lost = 0
+        for time in self.time[1:]:
+            self.total_particles_lost += self.lost_times_of_particles.count(time)
+            loss_fraction.append(self.total_particles_lost / self.nparticles)
+        self.loss_fraction = loss_fraction
+        return loss_fraction
 
 
 def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
