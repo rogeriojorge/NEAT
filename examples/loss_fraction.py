@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 import matplotlib.pyplot as plt
 
 from neat.gyronimo.fields import stellna_qs
@@ -15,10 +16,15 @@ r_surface_max = 0.13
 
 g_field = stellna_qs.from_paper(4)
 g_particle = charged_particle_ensemble()
+start_time = time.time()
+print("Starting particle tracer")
 g_orbits = particle_ensemble_orbit(g_particle, g_field, nthreads=nthreads)
+total_time = time.time() - start_time
+print(f"  Running with {nthreads} threads and {g_orbits.nparticles} particles took {total_time}s")
 g_orbits.calculate_loss_fraction(r_surface_max=r_surface_max)
 
-plt.plot(g_orbits.time, g_orbits.loss_fraction)
+plt.semilogx(g_orbits.time, g_orbits.loss_fraction)
 plt.xlabel("Time")
 plt.ylabel("Loss Fraction")
+plt.tight_layout()
 plt.show()
