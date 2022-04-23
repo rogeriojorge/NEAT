@@ -57,8 +57,7 @@ class NEATtests(unittest.TestCase):
             "The OpenMP parallelization is not working",
         )
         g_orbits = particle_ensemble_orbit(g_particle, g_field, nthreads=nthreads)
-        g_orbits.calculate_loss_fraction(r_surface_max=r_surface_max)
-        loss_fraction = g_orbits.loss_fraction
+        loss_fraction = g_orbits.loss_fraction(r_surface_max=r_surface_max)
         self.assertTrue(
             all(
                 loss_fraction[i] <= loss_fraction[i + 1]

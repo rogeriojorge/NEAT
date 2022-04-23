@@ -1,6 +1,6 @@
 import logging
-import os
 
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import CubicSpline as spline
 
@@ -173,7 +173,7 @@ class particle_ensemble_orbit:
         self.nparticles = solution.shape[1] - 1
         self.r_pos = solution[:, 1:].transpose()
 
-    def calculate_loss_fraction(self, r_surface_max=0.15):
+    def loss_fraction(self, r_surface_max=0.15):
         self.lost_times_of_particles = [
             self.time[np.argmax(particle_pos > r_surface_max)]
             for particle_pos in self.r_pos
@@ -185,6 +185,20 @@ class particle_ensemble_orbit:
             loss_fraction.append(self.total_particles_lost / self.nparticles)
         self.loss_fraction = loss_fraction
         return loss_fraction
+
+    def plot_loss_fraction(self):
+        try:
+            self.loss_fraction
+        except NameError:
+            print(
+                "First calculate the loss fraction using the self.loss_fraction() function"
+            )
+        else:
+            plt.semilogx(self.time, self.loss_fraction)
+            plt.xlabel("Time")
+            plt.ylabel("Loss Fraction")
+            plt.tight_layout()
+            plt.show()
 
 
 def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
