@@ -117,7 +117,7 @@ const Gyron* gyron_;
  )
  {
      // defines the ensemble size and dynamical system:
-     const int _nparticles = 5000;
+     const int _nparticles = 10000;
     typedef ensemble<gyronimo::guiding_centre, _nparticles> ensemble_type;
 
 std::vector<std::vector< double >> x_vec;
@@ -158,9 +158,6 @@ private:
 // gets the number of threads from the openmp environment:
   omp_set_dynamic(0);  // explicitly disable dynamic teams
   omp_set_num_threads(nthreads);
-
-// the clock starts ticking here...
-  auto begin = std::chrono::high_resolution_clock::now();
 
 // defines the ensemble initial state:
   ensemble_type::state initial;

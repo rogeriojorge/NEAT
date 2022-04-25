@@ -178,23 +178,23 @@ class particle_ensemble_orbit:
             self.time[np.argmax(particle_pos > r_surface_max)]
             for particle_pos in self.r_pos
         ]
-        loss_fraction = [0.0]
+        loss_fraction_array = [0.0]
         self.total_particles_lost = 0
         for time in self.time[1:]:
             self.total_particles_lost += self.lost_times_of_particles.count(time)
-            loss_fraction.append(self.total_particles_lost / self.nparticles)
-        self.loss_fraction = loss_fraction
-        return loss_fraction
+            loss_fraction_array.append(self.total_particles_lost / self.nparticles)
+        self.loss_fraction_array = loss_fraction_array
+        return loss_fraction_array
 
     def plot_loss_fraction(self):
         try:
-            self.loss_fraction
+            self.loss_fraction_array
         except NameError:
             print(
                 "First calculate the loss fraction using the self.loss_fraction() function"
             )
         else:
-            plt.semilogx(self.time, self.loss_fraction)
+            plt.semilogx(self.time, self.loss_fraction_array)
             plt.xlabel("Time")
             plt.ylabel("Loss Fraction")
             plt.tight_layout()
