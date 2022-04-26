@@ -7,6 +7,7 @@ from scipy.interpolate import CubicSpline as spline
 from neatpp import gc_solver_qs, gc_solver_qs_ensemble
 
 from ..util.constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
+from ..util.plotting import set_axes_equal
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +24,10 @@ class charged_particle:
         charge=1,
         rhom=1,
         mass=1,
-        Lambda=0.4,
+        Lambda=1.0,
         energy=4e4,
         r0=0.05,
-        theta0=0,
+        theta0=np.pi,
         phi0=0,
     ) -> None:
         self.charge = charge
@@ -65,11 +66,9 @@ class charged_particle_ensemble:
         mass=1,
         energy=4e4,
         r0=0.05,
-        theta0=0,
+        theta0=np.pi,
         phi0=0,
         nparticles=50,
-        vparallel_min=0.25,
-        vparallel_max=1.25,
     ) -> None:
         self.charge = charge
         self.rhom = rhom
@@ -79,8 +78,6 @@ class charged_particle_ensemble:
         self.theta0 = theta0
         self.phi0 = phi0
         self.nparticles = nparticles
-        self.vparallel_min = vparallel_min
-        self.vparallel_max = vparallel_max
 
     def gyronimo_parameters(self):
         return (
@@ -91,8 +88,6 @@ class charged_particle_ensemble:
             self.r0,
             self.theta0,
             self.phi0,
-            self.vparallel_min,
-            self.vparallel_max,
             int(self.nparticles),
         )
 
@@ -109,6 +104,12 @@ class particle_orbit:
     """
 
     def __init__(self, particle, field, nsamples=500, Tfinal=1000) -> None:
+
+        self.particle = particle
+        self.field = field
+        self.nsamples = nsamples
+        self.Tfinal = Tfinal
+
         solution = np.array(
             gc_solver_qs(
                 *field.gyronimo_parameters(),
@@ -122,7 +123,7 @@ class particle_orbit:
         self.time = solution[:, 0]
         self.r_pos = solution[:, 1]
         self.theta_pos = solution[:, 2]
-        self.varphi = solution[:, 3]
+        self.varphi_pos = solution[:, 3]
 
         nu = field.varphi - field.phi
         nu_spline_of_varphi = spline(
@@ -131,7 +132,7 @@ class particle_orbit:
             bc_type="periodic",
         )
 
-        self.phi_pos = self.varphi - nu_spline_of_varphi(self.varphi)
+        self.phi_pos = self.varphi_pos - nu_spline_of_varphi(self.varphi_pos)
         self.energy_parallel = solution[:, 4]
         self.energy_perpendicular = solution[:, 5]
         self.total_energy = self.energy_parallel + self.energy_perpendicular
@@ -146,6 +147,43 @@ class particle_orbit:
             particle, field, self.r_pos, self.v_parallel, self.Bfield
         )
 
+    def plot_orbit(self):
+        x = self.r_pos * np.cos(self.theta_pos)
+        y = self.r_pos * np.sin(self.theta_pos)
+        plt.plot(x, y)
+        plt.gca().set_aspect("equal", adjustable="box")
+        plt.xlabel(r"r cos($\theta$)")
+        plt.ylabel(r"r sin($\theta$)")
+        plt.tight_layout()
+        plt.show()
+
+    def plot_orbit_3D(self, distance=6):
+        points = np.array([self.r_pos, self.theta_pos, self.varphi_pos]).transpose()
+        rpos_cylindrical = np.array(self.field.stel.to_RZ(points))
+        rpos_cartesian = [
+            rpos_cylindrical[0] * np.cos(rpos_cylindrical[2]),
+            rpos_cylindrical[0] * np.sin(rpos_cylindrical[2]),
+            rpos_cylindrical[1],
+        ]
+        boundary = np.array(
+            self.field.stel.get_boundary(
+                r=0.9 * self.particle.r0,
+                nphi=90,
+                ntheta=25,
+                ntheta_fourier=16,
+                mpol=8,
+                ntor=15,
+            )
+        )
+        fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+        ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
+        ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+        set_axes_equal(ax)
+        ax.set_axis_off()
+        ax.dist = distance
+        plt.tight_layout()
+        plt.show()
+
 
 class particle_ensemble_orbit:
     r"""
@@ -159,6 +197,13 @@ class particle_ensemble_orbit:
     """
 
     def __init__(self, particles, field, nsamples=500, Tfinal=1000, nthreads=8) -> None:
+
+        self.particles = particles
+        self.field = field
+        self.nsamples = nsamples
+        self.Tfinal = Tfinal
+        self.nthreads = nthreads
+
         solution = np.array(
             gc_solver_qs_ensemble(
                 *field.gyronimo_parameters(),

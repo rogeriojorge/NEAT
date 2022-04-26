@@ -112,12 +112,11 @@ const Gyron* gyron_;
   double iotaN, double Bref, double B0, double B1c,
   double B20, double B2c, double beta1s, double charge,
   double rhom, double mass, double energy, double r0, double theta0,
-  double phi0, double vparallel_min, double vparallel_max,
-  int nparticles,  double nsamples, double Tfinal, int nthreads
+  double phi0, int nparticles,  double nsamples, double Tfinal, int nthreads
  )
  {
      // defines the ensemble size and dynamical system:
-     const int _nparticles = 10000;
+     const int _nparticles = 1000;
     typedef ensemble<gyronimo::guiding_centre, _nparticles> ensemble_type;
 
 std::vector<std::vector< double >> x_vec;
@@ -152,7 +151,7 @@ private:
   double Ualfven = 0.5*gyronimo::codata::m_proton*mass*Valfven*Valfven;
   double energySI = energy*gyronimo::codata::e;
 
-  double lambda = 0;
+  double lambda = B0;
   guiding_centre gc(1, Valfven, charge/mass, std::abs(lambda)*energySI/Ualfven/Bref, &qsc);
 
 // gets the number of threads from the openmp environment:
@@ -162,11 +161,11 @@ private:
 // defines the ensemble initial state:
   ensemble_type::state initial;
   std::mt19937 rand_generator;
-  std::uniform_real_distribution<> vpp_distro(vparallel_min, vparallel_max);
+  std::uniform_real_distribution<> angle_distro(0,2*std::atan(1)*4);
 #pragma omp parallel for
   for(std::size_t k = 0;k < ensemble_type::size;k++)
     initial[k] = gc.generate_state(
-        {r0, 0.0, 0.0}, vpp_distro(rand_generator),
+        {r0, angle_distro(rand_generator), angle_distro(rand_generator)}, energySI/Ualfven,
         gyronimo::guiding_centre::vpp_sign::plus);
 
 // integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.

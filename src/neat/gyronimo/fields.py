@@ -45,6 +45,7 @@ class stellna_qs:
         self.varphi = self.stel.varphi
         self.phi = self.stel.phi
         self.nfp = self.stel.nfp
+        self.N_helicity = self.stel.N_helicity
         if self.stel.order == "r1":
             self.B20 = 0
             self.B2c = 0
