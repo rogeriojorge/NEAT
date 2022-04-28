@@ -8,12 +8,14 @@
 #include <vector>
 #include "equilibrium_stellna_qs.hh"
 #include <gyronimo/dynamics/guiding_centre.hh>
+#include <gyronimo/core/linspace.hh>
 #include <boost/math/tools/roots.hpp>
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 #include <boost/numeric/odeint/stepper/bulirsch_stoer.hpp>
 #include <gyronimo/dynamics/odeint_adapter.hh>
 #include <gyronimo/core/codata.hh>
+#include <numbers>
 #include <omp.h>
 #include <random>
 #include <chrono>
@@ -112,7 +114,7 @@ const Gyron* gyron_;
   double iotaN, double Bref, double B0, double B1c,
   double B20, double B2c, double beta1s, double charge,
   double rhom, double mass, double energy, double r0, double theta0,
-  double phi0, int nparticles,  double nsamples, double Tfinal, int nthreads
+  double phi0, double nsamples, double Tfinal, int nthreads
  )
  {
      // defines the ensemble size and dynamical system:
@@ -151,7 +153,7 @@ private:
   double Ualfven = 0.5*gyronimo::codata::m_proton*mass*Valfven*Valfven;
   double energySI = energy*gyronimo::codata::e;
 
-  double lambda = B0;
+  double lambda = 1/B0;
   guiding_centre gc(1, Valfven, charge/mass, std::abs(lambda)*energySI/Ualfven/Bref, &qsc);
 
 // gets the number of threads from the openmp environment:
@@ -160,12 +162,12 @@ private:
 
 // defines the ensemble initial state:
   ensemble_type::state initial;
-  std::mt19937 rand_generator;
-  std::uniform_real_distribution<> angle_distro(0,2*std::atan(1)*4);
+  std::valarray<double> theta = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ensemble_type::size);
+  std::valarray<double> phi = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ensemble_type::size);
 #pragma omp parallel for
   for(std::size_t k = 0;k < ensemble_type::size;k++)
     initial[k] = gc.generate_state(
-        {r0, angle_distro(rand_generator), angle_distro(rand_generator)}, energySI/Ualfven,
+        {r0, theta[k], phi[k]}, energySI/Ualfven,
         gyronimo::guiding_centre::vpp_sign::plus);
 
 // integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.

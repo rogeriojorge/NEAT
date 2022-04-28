@@ -6,8 +6,8 @@ from scipy.interpolate import CubicSpline as spline
 
 from neatpp import gc_solver_qs, gc_solver_qs_ensemble
 
-from ..util.constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
-from ..util.plotting import set_axes_equal
+from .util.constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
+from .util.plotting import set_axes_equal
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,6 @@ class charged_particle_ensemble:
         r0=0.05,
         theta0=np.pi,
         phi0=0,
-        nparticles=50,
     ) -> None:
         self.charge = charge
         self.rhom = rhom
@@ -77,7 +76,6 @@ class charged_particle_ensemble:
         self.r0 = r0
         self.theta0 = theta0
         self.phi0 = phi0
-        self.nparticles = nparticles
 
     def gyronimo_parameters(self):
         return (
@@ -88,7 +86,6 @@ class charged_particle_ensemble:
             self.r0,
             self.theta0,
             self.phi0,
-            int(self.nparticles),
         )
 
 
@@ -103,7 +100,7 @@ class particle_orbit:
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
-    def __init__(self, particle, field, nsamples=500, Tfinal=1000) -> None:
+    def __init__(self, particle, field, nsamples=500, Tfinal=600) -> None:
 
         self.particle = particle
         self.field = field
@@ -159,17 +156,17 @@ class particle_orbit:
 
     def plot_orbit_3D(self, distance=6):
         points = np.array([self.r_pos, self.theta_pos, self.varphi_pos]).transpose()
-        rpos_cylindrical = np.array(self.field.stel.to_RZ(points))
+        rpos_cylindrical = np.array(self.field.to_RZ(points))
         rpos_cartesian = [
             rpos_cylindrical[0] * np.cos(rpos_cylindrical[2]),
             rpos_cylindrical[0] * np.sin(rpos_cylindrical[2]),
             rpos_cylindrical[1],
         ]
         boundary = np.array(
-            self.field.stel.get_boundary(
-                r=0.9 * self.particle.r0,
-                nphi=90,
-                ntheta=25,
+            self.field.get_boundary(
+                r=0.95 * self.particle.r0,
+                nphi=110,
+                ntheta=30,
                 ntheta_fourier=16,
                 mpol=8,
                 ntor=15,
@@ -196,7 +193,7 @@ class particle_ensemble_orbit:
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
-    def __init__(self, particles, field, nsamples=500, Tfinal=1000, nthreads=8) -> None:
+    def __init__(self, particles, field, nsamples=500, Tfinal=600, nthreads=8) -> None:
 
         self.particles = particles
         self.field = field

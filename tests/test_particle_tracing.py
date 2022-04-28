@@ -4,8 +4,8 @@ import unittest
 
 import numpy as np
 
-from neat.gyronimo.fields import stellna_qs
-from neat.gyronimo.tracing import (
+from neat.fields import stellna_qs
+from neat.tracing import (
     charged_particle,
     charged_particle_ensemble,
     particle_ensemble_orbit,

@@ -1,7 +1,7 @@
 import logging
 import unittest
 
-from neat.gyronimo.fields import stellna_qs
+from neat.fields import stellna_qs
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
