@@ -12,6 +12,9 @@ results
 *.profile
 tests/pylint.svg
 pylint.txt
+residuals_*
+simsopt_*
+*.mp4
 
 ## Python, Docker, C++, CMake and other gitignore commands
 

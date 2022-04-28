@@ -18,16 +18,24 @@ r0 = 0.1
 theta0 = np.pi
 energy = 1e4
 Lambda = 1
+nsamples = 600
+Tfinal = 2000
 
 g_particle = charged_particle(r0=r0, theta0=theta0, energy=energy, Lambda=1)
 print("Starting particle tracer")
 start_time = time.time()
-g_orbit = particle_orbit(g_particle, g_field, nsamples=500, Tfinal=1000)
+g_orbit = particle_orbit(g_particle, g_field, nsamples=nsamples, Tfinal=Tfinal)
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
+print("Creating parameter plot")
+g_orbit.plot(show=False)
+
 print("Creating 2D plot")
-g_orbit.plot_orbit()
+g_orbit.plot_orbit(show=False)
 
 print("Creating 3D plot")
-g_orbit.plot_orbit_3D()
+g_orbit.plot_orbit_3D(show=False)
+
+print("Creating animation plot")
+g_orbit.plot_animation(show=True)
