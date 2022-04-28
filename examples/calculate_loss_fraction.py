@@ -12,16 +12,20 @@ in a quasisymmetric stellarator
 
 nthreads_array = [1, 2, 4, 8]
 r_surface_max = 0.1
-r_initial = 0.06
+r_initial = 0.05
 energy = 4e4
+nsamples = 2000
+Tfinal = 0.001
 
-g_field = stellna_qs.from_paper(4)
+g_field = stellna_qs.from_paper(2)
 g_particle = charged_particle_ensemble(r0=r_initial, energy=energy)
 print("Starting particle tracer")
 threads_vs_time = []
 for nthreads in nthreads_array:
     start_time = time.time()
-    g_orbits = particle_ensemble_orbit(g_particle, g_field, nthreads=nthreads)
+    g_orbits = particle_ensemble_orbit(
+        g_particle, g_field, nsamples=nsamples, Tfinal=Tfinal, nthreads=nthreads
+    )
     total_time = time.time() - start_time
     print(
         f"  Running with {nthreads} threads and {g_orbits.nparticles} particles took {total_time}s"

@@ -23,7 +23,7 @@ class NEATtests(unittest.TestCase):
         conserves energy and angular momentum
         """
         n_samples = 600
-        Tfinal = 1000
+        Tfinal = 0.0001
         precision = 6
 
         g_field = stellna_qs.from_paper(1)
@@ -79,7 +79,7 @@ class NEATtests(unittest.TestCase):
 
     def test_plotting(self):
         n_samples = 100
-        Tfinal = 300
+        Tfinal = 0.0001
         g_field = stellna_qs.from_paper(1)
         g_particle = charged_particle()
         g_orbit = particle_orbit(g_particle, g_field, nsamples=n_samples, Tfinal=Tfinal)

@@ -1,11 +1,9 @@
 import logging
-import time
 
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
-from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import CubicSpline as spline
 
@@ -133,27 +131,29 @@ class particle_orbit:
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
-    def __init__(self, particle, field, nsamples=500, Tfinal=600) -> None:
+    def __init__(self, particle, field, nsamples=1000, Tfinal=0.0001) -> None:
 
         self.particle = particle
         self.field = field
         self.nsamples = nsamples
-        self.Tfinal = Tfinal
+
+        Valfven = self.field.B0 / np.sqrt(
+            MU_0 * self.particle.rhom * PROTON_MASS * 1.0e19
+        )
+        Ualfven = 0.5 * PROTON_MASS * self.particle.mass * Valfven * Valfven
+
+        self.Tfinal = Tfinal * Valfven / self.field.rc[0]
 
         solution = np.array(
             gc_solver_qs(
-                *field.gyronimo_parameters(),
-                *particle.gyronimo_parameters(),
-                nsamples,
-                Tfinal
+                *self.field.gyronimo_parameters(),
+                *self.particle.gyronimo_parameters(),
+                self.nsamples,
+                self.Tfinal
             )
         )
-        self.gyronimo_parameters = solution
 
-        self.time = solution[:, 0]
-        self.r_pos = solution[:, 1]
-        self.theta_pos = solution[:, 2]
-        self.varphi_pos = solution[:, 3]
+        self.gyronimo_parameters = solution
 
         nu = field.varphi - field.phi
         nu_spline_of_varphi = spline(
@@ -162,16 +162,21 @@ class particle_orbit:
             bc_type="periodic",
         )
 
+        self.time = solution[:, 0] * self.field.rc[0] / Valfven
+        self.r_pos = solution[:, 1]
+        self.theta_pos = solution[:, 2]
+        self.varphi_pos = solution[:, 3]
         self.phi_pos = self.varphi_pos - nu_spline_of_varphi(self.varphi_pos)
-        self.energy_parallel = solution[:, 4]
-        self.energy_perpendicular = solution[:, 5]
+        self.energy_parallel = solution[:, 4] * Ualfven
+        self.energy_perpendicular = solution[:, 5] * Ualfven
         self.total_energy = self.energy_parallel + self.energy_perpendicular
+
         self.Bfield = solution[:, 6]
-        self.v_parallel = solution[:, 7]
-        self.rdot = solution[:, 8]
-        self.thetadot = solution[:, 9]
-        self.varphidot = solution[:, 10]
-        self.vparalleldot = solution[:, 11]
+        self.v_parallel = solution[:, 7] * Valfven
+        self.rdot = solution[:, 8] * Valfven / self.field.rc[0]
+        self.thetadot = solution[:, 9] * Valfven / self.field.rc[0]
+        self.varphidot = solution[:, 10] * Valfven / self.field.rc[0]
+        self.vparalleldot = solution[:, 11] * Valfven * Valfven / self.field.rc[0]
 
         self.p_phi = canonical_angular_momentum(
             particle, field, self.r_pos, self.v_parallel, self.Bfield
@@ -254,36 +259,36 @@ class particle_orbit:
         fig = plt.figure(figsize=(10, 6))
         plt.subplot(3, 3, 1)
         plt.plot(self.time, self.r_pos)
-        plt.xlabel(r"$t$")
+        plt.xlabel(r"$t (s)$")
         plt.ylabel(r"$r$")
         plt.subplot(3, 3, 2)
         plt.plot(self.time, self.theta_pos)
-        plt.xlabel(r"$t$")
+        plt.xlabel(r"$t (s)$")
         plt.ylabel(r"$\theta$")
         plt.subplot(3, 3, 3)
         plt.plot(self.time, self.varphi_pos)
-        plt.xlabel(r"$t$")
+        plt.xlabel(r"$t (s)$")
         plt.ylabel(r"$\varphi$")
         plt.subplot(3, 3, 4)
         plt.plot(self.time, self.v_parallel)
-        plt.xlabel(r"$t$")
+        plt.xlabel(r"$t (s)$")
         plt.ylabel(r"$v_\parallel$")
         plt.subplot(3, 3, 5)
         plt.plot(
             self.time, (self.total_energy - self.total_energy[0]) / self.total_energy[0]
         )
-        plt.xlabel(r"$t$")
+        plt.xlabel(r"$t (s)$")
         plt.ylabel(r"$(E-E_0)/E_0$")
         plt.subplot(3, 3, 6)
         plt.plot(self.time, (self.p_phi - self.p_phi[0]) / self.p_phi[0])
-        plt.xlabel(r"$t$")
+        plt.xlabel(r"$t (s)$")
         plt.ylabel(r"$(p_\phi-p_{\phi0})/p_{\phi0}$")
         plt.subplot(3, 3, 7)
         plt.plot(self.time, self.rdot, label=r"$\dot r$")
         plt.plot(self.time, self.thetadot, label=r"$\dot \theta$")
         plt.plot(self.time, self.varphidot, label=r"$\dot \varphi$")
         plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
-        plt.xlabel(r"$t$")
+        plt.xlabel(r"$t (s)$")
         plt.legend()
         plt.subplot(3, 3, 8)
         plt.plot(
@@ -301,11 +306,9 @@ class particle_orbit:
             plt.show()
 
     def plot_animation(self, show=True, SaveMovie=False):
-        fig = plt.figure(frameon=False, figsize=(10, 5))
-        # fig.set_size_inches(10, 5)
-        ax = p3.Axes3D(fig)
+        fig = plt.figure(figsize=(10, 3))
+        ax = fig.add_subplot(131, projection="3d")
 
-        start_time = time.time()
         boundary = np.array(
             self.field.get_boundary(
                 r=0.95 * self.particle.r0,
@@ -365,7 +368,6 @@ class particle_orbit:
             plt.show()
 
         if SaveMovie:
-            start_time = time.time()
             ani.save(
                 "particle_Orbit.mp4",
                 fps=30,
@@ -387,25 +389,33 @@ class particle_ensemble_orbit:
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
-    def __init__(self, particles, field, nsamples=500, Tfinal=600, nthreads=8) -> None:
+    def __init__(
+        self, particles, field, nsamples=2500, Tfinal=0.005, nthreads=8
+    ) -> None:
 
         self.particles = particles
         self.field = field
         self.nsamples = nsamples
-        self.Tfinal = Tfinal
         self.nthreads = nthreads
+
+        Valfven = self.field.B0 / np.sqrt(
+            MU_0 * self.particles.rhom * PROTON_MASS * 1.0e19
+        )
+        Ualfven = 0.5 * PROTON_MASS * self.particles.mass * Valfven * Valfven
+
+        self.Tfinal = Tfinal * Valfven / self.field.rc[0]
 
         solution = np.array(
             gc_solver_qs_ensemble(
-                *field.gyronimo_parameters(),
-                *particles.gyronimo_parameters(),
-                nsamples,
-                Tfinal,
-                nthreads
+                *self.field.gyronimo_parameters(),
+                *self.particles.gyronimo_parameters(),
+                self.nsamples,
+                self.Tfinal,
+                self.nthreads
             )
         )
         self.gyronimo_parameters = solution
-        self.time = solution[:, 0]
+        self.time = solution[:, 0] * self.field.rc[0] / Valfven
         self.nparticles = solution.shape[1] - 1
         self.r_pos = solution[:, 1:].transpose()
 
@@ -424,7 +434,7 @@ class particle_ensemble_orbit:
 
     def plot_loss_fraction(self, show=True):
         plt.semilogx(self.time, self.loss_fraction_array)
-        plt.xlabel("Time")
+        plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
         if show:

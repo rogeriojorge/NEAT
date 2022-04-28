@@ -12,15 +12,14 @@ Trace the orbit of a single particle in a
 quasisymmetric stellarator                 
 """
 
-g_field = stellna_qs.from_paper(1)
-
-r0 = 0.1
+r0 = 0.05
 theta0 = np.pi
-energy = 1e4
+energy = 4e4
 Lambda = 1
-nsamples = 600
-Tfinal = 2000
+nsamples = 2000
+Tfinal = 0.001
 
+g_field = stellna_qs.from_paper(2)
 g_particle = charged_particle(r0=r0, theta0=theta0, energy=energy, Lambda=1)
 print("Starting particle tracer")
 start_time = time.time()

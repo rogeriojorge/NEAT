@@ -10,12 +10,16 @@ class loss_fraction_residual(Optimizable):
         self,
         field: Qsc,
         particles: particle_ensemble_orbit,
+        nsamples=500,
+        Tfinal=0.0003,
         nthreads=8,
-        r_surface_max=0.15,
+        r_surface_max=0.12,
     ) -> None:
 
         self.field = field
         self.particles = particles
+        self.nsamples = nsamples
+        self.Tfinal = Tfinal
         self.nthreads = nthreads
         self.r_surface_max = r_surface_max
 
@@ -23,24 +27,39 @@ class loss_fraction_residual(Optimizable):
 
     def compute(self):
         self.orbits = particle_ensemble_orbit(
-            self.particles, self.field, nthreads=self.nthreads
+            self.particles, self.field, self.nsamples, self.Tfinal, self.nthreads
         )
         self.orbits.loss_fraction(r_surface_max=self.r_surface_max)
 
     def J(self):
         self.compute()
-        return 100 * self.orbits.loss_fraction_array[-1]
+        return self.orbits.loss_fraction_array[-1]
 
 
 class optimize_loss_fraction:
-    def __init__(self, field, particles, r_surface_max=0.15, nthreads=8) -> None:
+    def __init__(
+        self,
+        field,
+        particles,
+        r_surface_max=0.12,
+        nsamples=500,
+        Tfinal=0.0003,
+        nthreads=8,
+    ) -> None:
         self.field = field
         self.particles = particles
+        self.nsamples = nsamples
+        self.Tfinal = Tfinal
         self.nthreads = nthreads
         self.r_surface_max = r_surface_max
 
         self.loss_fraction = loss_fraction_residual(
-            self.field, self.particles, self.nthreads, self.r_surface_max
+            self.field,
+            self.particles,
+            self.nsamples,
+            self.Tfinal,
+            self.nthreads,
+            self.r_surface_max,
         )
 
         self.field.fix_all()
@@ -56,7 +75,7 @@ class optimize_loss_fraction:
         # Define objective function
         self.prob = LeastSquaresProblem.from_tuples(
             [
-                (self.loss_fraction.J, 0, 10),
+                (self.loss_fraction.J, 0, 1),
                 (self.field.get_elongation, 0.0, 0.1),
                 (self.field.get_inv_L_grad_B, 0, 0.1),
             ]
