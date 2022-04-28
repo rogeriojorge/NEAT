@@ -86,7 +86,7 @@ class NEATtests(unittest.TestCase):
         g_orbit.plot(show=True)
         g_orbit.plot_orbit(show=True)
         g_orbit.plot_orbit_3D(show=True)
-        g_orbit.plot_animation(show=True, SaveMovie=True)
+        g_orbit.plot_animation(show=True, SaveMovie=False)
 
 
 if __name__ == "__main__":
