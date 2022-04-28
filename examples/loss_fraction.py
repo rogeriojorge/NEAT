@@ -11,11 +11,11 @@ in a quasisymmetric stellarator
 """
 
 nthreads_array = [1, 2, 4, 8]
-r_surface_max = 0.15
-r_initial = 0.1
-energy = 1e4
+r_surface_max = 0.1
+r_initial = 0.06
+energy = 4e4
 
-g_field = stellna_qs.from_paper(1)
+g_field = stellna_qs.from_paper(4)
 g_particle = charged_particle_ensemble(r0=r_initial, energy=energy)
 print("Starting particle tracer")
 threads_vs_time = []

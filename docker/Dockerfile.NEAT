@@ -38,6 +38,10 @@ RUN git clone https://github.com/landreman/pyQSC.git
 WORKDIR /home/external/pyQSC
 RUN pip3 install .
 
+# Install SIMSOPT
+WORKDIR /home/external
+RUN pip3 install simsopt
+
 # Install NEAT
 WORKDIR /home
 RUN pip3 install -e .

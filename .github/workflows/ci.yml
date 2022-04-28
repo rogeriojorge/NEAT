@@ -58,13 +58,13 @@ jobs:
     - name: ls
       run: ls
 
-    # - name: Install simsopt
-    #   run: |
-    #     pip3 install simsopt
+    - name: Install simsopt
+      run: |
+        pip3 install simsopt
 
-    # - name: Try running simsopt
-    #   run: |
-    #     python3 -c "import simsopt; print('success')"
+    - name: Try running simsopt
+      run: |
+        python3 -c "import simsopt; print('success')"
 
     # - name: ls
     #   run: ls
