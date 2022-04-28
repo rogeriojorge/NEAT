@@ -29,7 +29,7 @@ class loss_fraction_residual(Optimizable):
 
     def J(self):
         self.compute()
-        return 100*self.orbits.loss_fraction_array[-1]
+        return 100 * self.orbits.loss_fraction_array[-1]
 
 
 class optimize_loss_fraction:
