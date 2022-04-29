@@ -221,6 +221,15 @@ To test VMEC's installation, you can run
 python -c "import vmec; print('success')"
 ```
 
+# Normalizations
+
+All units are in SI, except:
+- The mass of the particle, which is in units of the mass of the proton
+- The charge of the particle is normalized to the charge of the proton
+- The energy is in eV
+
+Lambda = mu (SI) / Energy (SI) * B (reference SI)
+
 # FAQ
 
 ## pybind11 not found by cmake

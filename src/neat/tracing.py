@@ -53,19 +53,19 @@ class charged_particle:
     def __init__(
         self,
         charge=1,
-        rhom=1,
         mass=1,
         Lambda=1.0,
+        vpp_sign=1.0,
         energy=4e4,
         r0=0.05,
         theta0=np.pi,
         phi0=0,
     ) -> None:
         self.charge = charge
-        self.rhom = rhom
         self.mass = mass
         self.energy = energy
         self.Lambda = Lambda
+        self.vpp_sign = vpp_sign
         self.r0 = r0
         self.theta0 = theta0
         self.phi0 = phi0
@@ -73,9 +73,9 @@ class charged_particle:
     def gyronimo_parameters(self):
         return (
             self.charge,
-            self.rhom,
             self.mass,
             self.Lambda,
+            self.vpp_sign,
             self.energy,
             self.r0,
             self.theta0,
@@ -93,7 +93,6 @@ class charged_particle_ensemble:
     def __init__(
         self,
         charge=1,
-        rhom=1,
         mass=1,
         energy=4e4,
         r0=0.05,
@@ -101,7 +100,6 @@ class charged_particle_ensemble:
         phi0=0,
     ) -> None:
         self.charge = charge
-        self.rhom = rhom
         self.mass = mass
         self.energy = energy
         self.r0 = r0
@@ -111,7 +109,6 @@ class charged_particle_ensemble:
     def gyronimo_parameters(self):
         return (
             self.charge,
-            self.rhom,
             self.mass,
             self.energy,
             self.r0,
@@ -127,7 +124,7 @@ class particle_orbit:
     Args:
         stel: Qsc instance of pyQSC
         params (dict): a Python dict() containing the following parameters:
-            r0,theta0,phi0,charge,rhom,mass,Lambda,energy,nsamples,Tfinal
+            r0,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
@@ -136,13 +133,7 @@ class particle_orbit:
         self.particle = particle
         self.field = field
         self.nsamples = nsamples
-
-        Valfven = self.field.B0 / np.sqrt(
-            MU_0 * self.particle.rhom * PROTON_MASS * 1.0e19
-        )
-        Ualfven = 0.5 * PROTON_MASS * self.particle.mass * Valfven * Valfven
-
-        self.Tfinal = Tfinal * Valfven / self.field.rc[0]
+        self.Tfinal = Tfinal
 
         solution = np.array(
             gc_solver_qs(
@@ -162,21 +153,21 @@ class particle_orbit:
             bc_type="periodic",
         )
 
-        self.time = solution[:, 0] * self.field.rc[0] / Valfven
+        self.time = solution[:, 0]
         self.r_pos = solution[:, 1]
         self.theta_pos = solution[:, 2]
         self.varphi_pos = solution[:, 3]
         self.phi_pos = self.varphi_pos - nu_spline_of_varphi(self.varphi_pos)
-        self.energy_parallel = solution[:, 4] * Ualfven
-        self.energy_perpendicular = solution[:, 5] * Ualfven
+        self.energy_parallel = solution[:, 4]
+        self.energy_perpendicular = solution[:, 5]
         self.total_energy = self.energy_parallel + self.energy_perpendicular
 
         self.Bfield = solution[:, 6]
-        self.v_parallel = solution[:, 7] * Valfven
-        self.rdot = solution[:, 8] * Valfven / self.field.rc[0]
-        self.thetadot = solution[:, 9] * Valfven / self.field.rc[0]
-        self.varphidot = solution[:, 10] * Valfven / self.field.rc[0]
-        self.vparalleldot = solution[:, 11] * Valfven * Valfven / self.field.rc[0]
+        self.v_parallel = solution[:, 7]
+        self.rdot = solution[:, 8]
+        self.thetadot = solution[:, 9]
+        self.varphidot = solution[:, 10]
+        self.vparalleldot = solution[:, 11]
 
         self.p_phi = canonical_angular_momentum(
             particle, field, self.r_pos, self.v_parallel, self.Bfield
@@ -385,7 +376,7 @@ class particle_ensemble_orbit:
     Args:
         stel: Qsc instance of pyQSC
         params (dict): a Python dict() containing the following parameters:
-            r0,theta0,phi0,charge,rhom,mass,Lambda,energy,nsamples,Tfinal
+            r0,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
@@ -397,13 +388,7 @@ class particle_ensemble_orbit:
         self.field = field
         self.nsamples = nsamples
         self.nthreads = nthreads
-
-        Valfven = self.field.B0 / np.sqrt(
-            MU_0 * self.particles.rhom * PROTON_MASS * 1.0e19
-        )
-        Ualfven = 0.5 * PROTON_MASS * self.particles.mass * Valfven * Valfven
-
-        self.Tfinal = Tfinal * Valfven / self.field.rc[0]
+        self.Tfinal = Tfinal
 
         solution = np.array(
             gc_solver_qs_ensemble(
@@ -415,7 +400,7 @@ class particle_ensemble_orbit:
             )
         )
         self.gyronimo_parameters = solution
-        self.time = solution[:, 0] * self.field.rc[0] / Valfven
+        self.time = solution[:, 0]
         self.nparticles = solution.shape[1] - 1
         self.r_pos = solution[:, 1:].transpose()
 
@@ -445,14 +430,11 @@ def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
 
     m_proton = PROTON_MASS
     e = ELEMENTARY_CHARGE
-    mu0 = MU_0
-    Valfven = field.Bbar / np.sqrt(mu0 * particle.rhom * m_proton * 1.0e19)
 
     p_phi1 = (
         particle.mass
         * m_proton
         * v_parallel
-        * Valfven
         * (field.G0 + r_pos**2 * (field.G2 + (field.iota - field.iotaN) * field.I2))
         / Bfield
         / field.Bbar

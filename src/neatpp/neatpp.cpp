@@ -26,16 +26,16 @@ using namespace gyronimo;
   double G0, double G2, double I2, double iota,
   double iotaN, double Bref, double B0, double B1c,
   double B20, double B2c, double beta1s, double charge,
-  double rhom, double mass, double lambda,
+  double mass, double lambda, double vpp_sign,
   double energy, double r0, double theta0, 
   double phi0, double nsamples, double Tfinal
  )
  {
   // Compute normalisation constants:
-  double Valfven = Bref/std::sqrt(gyronimo::codata::mu0*(rhom*gyronimo::codata::m_proton*1.e+19));
-  double Ualfven = 0.5*gyronimo::codata::m_proton*mass*Valfven*Valfven;
+  double Lref = 1.0;
+  double Vref = 1.0;
+  double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
   double energySI = energy*gyronimo::codata::e;
-  double vpp_sign = std::copysign(1.0, lambda);
 
   // Prepare metric, equilibrium and particles
   metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
@@ -43,9 +43,9 @@ using namespace gyronimo;
 
   equilibrium_stellna_qs qsc(&g);
 
-  guiding_centre gc(1, Valfven, charge/mass, std::abs(lambda)*energySI/Ualfven/Bref, &qsc);
+  guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref, &qsc);
   guiding_centre::state initial_state = gc.generate_state(
-      {r0, theta0, phi0}, energySI/Ualfven,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
+      {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
 
   // Define variables for integration
   std::vector<std::vector< double >> x_vec;
@@ -113,7 +113,7 @@ const Gyron* gyron_;
   double G0, double G2, double I2, double iota,
   double iotaN, double Bref, double B0, double B1c,
   double B20, double B2c, double beta1s, double charge,
-  double rhom, double mass, double energy, double r0, double theta0,
+  double mass, double energy, double r0, double theta0,
   double phi0, double nsamples, double Tfinal, int nthreads
  )
  {
@@ -149,12 +149,13 @@ private:
   equilibrium_stellna_qs qsc(&g);
 
   // Compute normalisation constants:
-  double Valfven = Bref/std::sqrt(gyronimo::codata::mu0*(rhom*gyronimo::codata::m_proton*1.e+19));
-  double Ualfven = 0.5*gyronimo::codata::m_proton*mass*Valfven*Valfven;
+  double Lref = 1.0;
+  double Vref = 1.0;
+  double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
   double energySI = energy*gyronimo::codata::e;
 
-  double lambda = 1/B0;
-  guiding_centre gc(1, Valfven, charge/mass, std::abs(lambda)*energySI/Ualfven/Bref, &qsc);
+  double lambda = 1;
+  guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref, &qsc);
 
 // gets the number of threads from the openmp environment:
   omp_set_dynamic(0);  // explicitly disable dynamic teams
@@ -167,7 +168,7 @@ private:
 #pragma omp parallel for
   for(std::size_t k = 0;k < ensemble_type::size;k++)
     initial[k] = gc.generate_state(
-        {r0, theta[k], phi[k]}, energySI/Ualfven,
+        {r0, theta[k], phi[k]}, energySI/Uref,
         gyronimo::guiding_centre::vpp_sign::plus);
 
 // integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
