@@ -52,11 +52,11 @@ class charged_particle:
 
     def __init__(
         self,
-        charge=1,
-        mass=1,
+        charge=2,
+        mass=4,
         Lambda=1.0,
-        vpp_sign=1.0,
-        energy=4e4,
+        vpp_sign=1,
+        energy=3.52e6,
         r0=0.05,
         theta0=np.pi,
         phi0=0,
@@ -92,28 +92,31 @@ class charged_particle_ensemble:
 
     def __init__(
         self,
-        charge=1,
-        mass=1,
-        energy=4e4,
+        charge=2,
+        mass=4,
+        energy=3.52e6,
+        nlambda=10,
         r0=0.05,
-        theta0=np.pi,
-        phi0=0,
+        ntheta=10,
+        nphi=10,
     ) -> None:
         self.charge = charge
         self.mass = mass
         self.energy = energy
+        self.nlambda = nlambda
         self.r0 = r0
-        self.theta0 = theta0
-        self.phi0 = phi0
+        self.ntheta = ntheta
+        self.nphi = nphi
 
     def gyronimo_parameters(self):
         return (
             self.charge,
             self.mass,
             self.energy,
+            self.nlambda,
             self.r0,
-            self.theta0,
-            self.phi0,
+            self.ntheta,
+            self.nphi,
         )
 
 
@@ -297,8 +300,8 @@ class particle_orbit:
             plt.show()
 
     def plot_animation(self, show=True, SaveMovie=False):
-        fig = plt.figure(figsize=(10, 3))
-        ax = fig.add_subplot(131, projection="3d")
+        fig = plt.figure(figsize=(6, 4))
+        ax = fig.add_subplot(111, projection="3d")
 
         boundary = np.array(
             self.field.get_boundary(
@@ -333,7 +336,7 @@ class particle_orbit:
         ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         ax.set_axis_off()
-        ax.dist = 6.5
+        ax.dist = 6
 
         ani = []
 
@@ -352,7 +355,7 @@ class particle_orbit:
             update,
             self.nsamples,
             fargs=(self.rpos_cartesian, line),
-            interval=self.Tfinal / self.nsamples,
+            interval=self.nsamples / 200,
         )
 
         if show:

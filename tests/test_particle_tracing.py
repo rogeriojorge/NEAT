@@ -23,19 +23,19 @@ class NEATtests(unittest.TestCase):
         conserves energy and angular momentum
         """
         n_samples = 600
-        Tfinal = 0.0001
-        precision = 6
+        Tfinal = 0.001
+        precision = 7
 
-        g_field = stellna_qs.from_paper(1)
+        g_field = stellna_qs.from_paper(1, B0=2)
         g_particle = charged_particle()
         g_orbit = particle_orbit(g_particle, g_field, nsamples=n_samples, Tfinal=Tfinal)
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             g_orbit.total_energy,
             [g_orbit.total_energy[0]] * (n_samples + 1),
-            decimal=precision,
+            rtol=precision,
         )
-        np.testing.assert_array_almost_equal(
-            g_orbit.p_phi, [g_orbit.p_phi[0]] * (n_samples + 1), decimal=precision
+        np.testing.assert_allclose(
+            g_orbit.p_phi, [g_orbit.p_phi[0]] * (n_samples + 1), rtol=precision
         )
 
     def test_orbit_ensemble(self):

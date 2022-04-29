@@ -1,3 +1,4 @@
+#include <iterator>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 // // // //  USE CUBIC_GSL_PERIODIC
@@ -23,12 +24,12 @@
 using namespace gyronimo;
 
  std::vector< std::vector<double>> gc_solver_qs(
-  double G0, double G2, double I2, double iota,
-  double iotaN, double Bref, double B0, double B1c,
+  double G0, double G2, double I2, double nfp, double iota,
+  double iotaN, double B0, double B1c,
   double B20, double B2c, double beta1s, double charge,
-  double mass, double lambda, double vpp_sign,
+  double mass, double lambda, int vpp_sign,
   double energy, double r0, double theta0, 
-  double phi0, double nsamples, double Tfinal
+  double phi0, size_t nsamples, double Tfinal
  )
  {
   // Compute normalisation constants:
@@ -38,12 +39,13 @@ using namespace gyronimo;
   double energySI = energy*gyronimo::codata::e;
 
   // Prepare metric, equilibrium and particles
+  double Bref = B0;
   metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
                      B0, B1c, B20, B2c, beta1s);
 
   equilibrium_stellna_qs qsc(&g);
 
-  guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref, &qsc);
+  guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref/Bref, &qsc);
   guiding_centre::state initial_state = gc.generate_state(
       {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
 
@@ -93,56 +95,65 @@ std::array<double, 4> result = {u[0]+v[0],u[1]+v[1],u[2]+v[2],u[3]+v[3]};
 return result;
 }
 
-template<typename Gyron, size_t Size>
+template<typename Gyron>
 class ensemble {
 // Gyron::state should be required to be a contiguous type!
 public:
-static const size_t size = Size;
-typedef std::array<typename Gyron::state, Size> state;
-ensemble(const Gyron* gyron) : gyron_(gyron) {};
-void operator()(const state& f, state& dfdx, double t) const {
-#pragma omp parallel for
-    for(std::size_t k = 0;k < Size;k++)
-    dfdx[k] = (*gyron_)(f[k], t);
-};
+    typedef std::vector<typename Gyron::state> state;
+    ensemble(const std::vector<Gyron>& gyron, const std::size_t n_particles_per_lambda) : gyron_(gyron), n_particles_per_lambda_(n_particles_per_lambda) {};
+    void operator()(const state& f, state& dfdx, double t) const {
+    #pragma omp parallel for
+    for(std::size_t j = 0;j < n_particles_per_lambda_;j++){
+        for(std::size_t k = 0;k < gyron_.size();k++){
+                dfdx[j + k*n_particles_per_lambda_] = gyron_[k](f[j + k*n_particles_per_lambda_], t);
+            }
+        }
+    };
+    size_t size() const {return gyron_.size()*n_particles_per_lambda_;};
+    size_t n_particles_per_lambda() const {return n_particles_per_lambda_;};
+    const std::vector<Gyron>& gyron() const {return gyron_;};
 private:
-const Gyron* gyron_;
+const std::vector<Gyron> gyron_;
+const size_t n_particles_per_lambda_;
 };
 
   std::vector< std::vector<double>> gc_solver_qs_ensemble(
-  double G0, double G2, double I2, double iota,
-  double iotaN, double Bref, double B0, double B1c,
+  double G0, double G2, double I2, double nfp, double iota,
+  double iotaN, double B0, double B1c,
   double B20, double B2c, double beta1s, double charge,
-  double mass, double energy, double r0, double theta0,
-  double phi0, double nsamples, double Tfinal, int nthreads
+  double mass, double energy, size_t nlambda, double r0, size_t ntheta,
+  size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
  )
  {
-     // defines the ensemble size and dynamical system:
-     const int _nparticles = 1000;
-    typedef ensemble<gyronimo::guiding_centre, _nparticles> ensemble_type;
+
+// gets the number of threads from the openmp environment:
+  omp_set_dynamic(0);  // explicitly disable dynamic teams
+  omp_set_num_threads(nthreads);
+
+     // defines the ensemble and dynamical system:
+    typedef ensemble<gyronimo::guiding_centre> ensemble_type;
 
 std::vector<std::vector< double >> x_vec;
 // ODEInt observer object to print diagnostics at each time step.
 class orbit_observer {
 public:
   std::vector< std::vector< double > >& m_states;
-  orbit_observer( std::vector< std::vector< double > > &states, 
-      const IR3field_c1* e, const guiding_centre* g)
-  : m_states( states ), eq_pointer_(e), gc_pointer_(g) { };
+  orbit_observer( std::vector< std::vector< double > > &states, const ensemble_type& particle_ensemble)
+  : m_states( states ), particle_ensemble_(particle_ensemble) { };
   void operator()(const ensemble_type::state& z, double t) {
     std::vector<double> temp;
     temp.push_back(t);
-    for(std::size_t k = 0;k < ensemble_type::size;k++){
-      IR3 x = gc_pointer_->get_position(z[k]);
+    for(std::size_t k = 0;k < particle_ensemble_.size();k++){
+      IR3 x = particle_ensemble_.gyron()[k/particle_ensemble_.n_particles_per_lambda()].get_position(z[k]);
       temp.push_back(x[0]);
     }
     m_states.push_back(temp);
   };
 private:
-  const IR3field_c1* eq_pointer_;
-  const guiding_centre* gc_pointer_;
+ const ensemble_type& particle_ensemble_;
 };
 
+  double Bref = B0;
   metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
                      B0, B1c, B20, B2c, beta1s);
 
@@ -153,29 +164,41 @@ private:
   double Vref = 1.0;
   double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
   double energySI = energy*gyronimo::codata::e;
+  double B_max = abs(B0) + abs(r0 * B1c) + r0 * r0 * (abs(B20) + abs(B2c));
+  double B_min = abs(B0) - abs(r0 * B1c) - r0 * r0 * (abs(B20) + abs(B2c));
 
-  double lambda = 1;
-  guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref, &qsc);
+  std::valarray<double> theta = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ntheta);
+  std::valarray<double> phi = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi/nfp, nphi);
+  std::valarray<double> lambda = linspace<std::valarray<double>>(0.9*B0/B_max, B0/B_min, nlambda);
 
-// gets the number of threads from the openmp environment:
-  omp_set_dynamic(0);  // explicitly disable dynamic teams
-  omp_set_num_threads(nthreads);
+  std::vector<guiding_centre> guiding_centre_vector;
+//   #pragma omp parallel for
+  for(std::size_t k = 0;k < nlambda;k++){
+    guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda[k]*energySI/Uref/Bref, &qsc));
+  }
 
-// defines the ensemble initial state:
+  // defines the ensemble initial state:
   ensemble_type::state initial;
-  std::valarray<double> theta = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ensemble_type::size);
-  std::valarray<double> phi = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ensemble_type::size);
-#pragma omp parallel for
-  for(std::size_t k = 0;k < ensemble_type::size;k++)
-    initial[k] = gc.generate_state(
-        {r0, theta[k], phi[k]}, energySI/Uref,
-        gyronimo::guiding_centre::vpp_sign::plus);
+//   #pragma omp parallel for
+    for(std::size_t k = 0;k < nlambda;k++){
+        for(std::size_t j = 0;j < ntheta;j++){
+            for(std::size_t l = 0;l < nphi;l++){
+                // pybind11::print(l + j * nphi + k * ntheta * nphi);
+                initial.push_back(guiding_centre_vector[k].generate_state(
+                    {r0, theta[j], phi[l]}, energySI/Uref,
+                    gyronimo::guiding_centre::vpp_sign::plus));
+            }
+        }
+    }
+
+// create ensemble object
+ensemble_type ensemble_object(guiding_centre_vector, ntheta * nphi);
 
 // integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
   boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
   boost::numeric::odeint::integrate_const(
-      ode_stepper, ensemble_type(&gc),
-      initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec,&qsc,&gc)
+      ode_stepper, ensemble_object,
+      initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
       );
 
      return x_vec;
