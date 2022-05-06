@@ -15,6 +15,8 @@ pylint.txt
 residuals_*
 simsopt_*
 *.mp4
+jac_log_*
+objective_20*
 
 ## Python, Docker, C++, CMake and other gitignore commands
 

@@ -95,16 +95,20 @@ class charged_particle_ensemble:
         charge=2,
         mass=4,
         energy=3.52e6,
-        nlambda=10,
+        nlambda_trapped=10,
+        nlambda_passing=3,
         r0=0.05,
+        r_max=0.1,
         ntheta=10,
         nphi=10,
     ) -> None:
         self.charge = charge
         self.mass = mass
         self.energy = energy
-        self.nlambda = nlambda
+        self.nlambda_trapped = nlambda_trapped
+        self.nlambda_passing = nlambda_passing
         self.r0 = r0
+        self.r_max = r_max
         self.ntheta = ntheta
         self.nphi = nphi
 
@@ -113,8 +117,10 @@ class charged_particle_ensemble:
             self.charge,
             self.mass,
             self.energy,
-            self.nlambda,
+            self.nlambda_trapped,
+            self.nlambda_passing,
             self.r0,
+            self.r_max,
             self.ntheta,
             self.nphi,
         )
@@ -384,7 +390,7 @@ class particle_ensemble_orbit:
     """
 
     def __init__(
-        self, particles, field, nsamples=2500, Tfinal=0.005, nthreads=8
+        self, particles, field, nsamples=800, Tfinal=0.0001, nthreads=8
     ) -> None:
 
         self.particles = particles
@@ -407,9 +413,9 @@ class particle_ensemble_orbit:
         self.nparticles = solution.shape[1] - 1
         self.r_pos = solution[:, 1:].transpose()
 
-    def loss_fraction(self, r_surface_max=0.15):
+    def loss_fraction(self, r_max=0.15):
         self.lost_times_of_particles = [
-            self.time[np.argmax(particle_pos > r_surface_max)]
+            self.time[np.argmax(particle_pos > r_max)]
             for particle_pos in self.r_pos
         ]
         loss_fraction_array = [0.0]

@@ -39,3 +39,9 @@ class stellna_qs(Qsc, Optimizable):
 
     def get_elongation(self):
         return self.elongation / self.nphi
+
+    def get_B20_mean(self):
+        return self.B20_mean
+
+    def get_grad_grad_B_inverse_scale_length_vs_varphi(self):
+        return self.grad_grad_B_inverse_scale_length_vs_varphi / self.nphi

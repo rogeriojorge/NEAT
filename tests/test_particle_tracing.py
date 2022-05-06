@@ -23,7 +23,7 @@ class NEATtests(unittest.TestCase):
         conserves energy and angular momentum
         """
         n_samples = 600
-        Tfinal = 0.001
+        Tfinal = 0.0001
         precision = 7
 
         g_field = stellna_qs.from_paper(1, B0=2)

@@ -11,31 +11,34 @@ in a quasisymmetric stellarator
 """
 
 # Initialize an ensemble of alpha particles at a radius = r_initial
-# Calculate loss fraction at a radius = r_surface_max
+# Calculate loss fraction at a radius = r_max
 # Test OpenMP parallelization with an array of threads = nthreads_array
-# The total number of particles is ntheta * nphi * nphi
+# The total number of particles is ntheta * nphi * (nlambda_passing+nlambda_trapped) * 2 (particles with v_parallel = +1, -1)
 r_initial = 0.05  # meters
-r_surface_max = 0.1  # meters
-B0 = 3  # Tesla, magnetic field on-axis
+r_max = 0.1  # meters
+B0 = 4  # Tesla, magnetic field on-axis
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-ntheta = 12  # resolution in theta
-nphi = 12  # resolution in phi
-nlambda = 12  # resolution in lambda
+ntheta = 14  # resolution in theta
+nphi = 10  # resolution in phi
+nlambda_trapped = 20  # number of pitch angles for trapped particles
+nlambda_passing = 3  # number of pitch angles for passing particles
 nsamples = 1000  # resolution in time
 Tfinal = 1e-4  # seconds
 nthreads_array = [1, 2, 4, 8]
 
-g_field = stellna_qs.from_paper(2, B0=B0)
+g_field = stellna_qs.from_paper(2, B0=B0, etabar=0.1)
 g_particle = charged_particle_ensemble(
     r0=r_initial,
+    r_max=r_max,
     energy=energy,
     charge=charge,
     mass=mass,
     ntheta=ntheta,
     nphi=nphi,
-    nlambda=nlambda,
+    nlambda_trapped=nlambda_trapped,
+    nlambda_passing=nlambda_passing,
 )
 print("Starting particle tracer")
 threads_vs_time = []
@@ -49,6 +52,6 @@ for nthreads in nthreads_array:
         f"  Running with {nthreads} threads and {g_orbits.nparticles} particles took {total_time}s"
     )
     threads_vs_time.append([nthreads, total_time])
-g_orbits.loss_fraction(r_surface_max=r_surface_max)
+g_orbits.loss_fraction(r_max=r_max)
 print(f"Final loss fraction = {g_orbits.loss_fraction_array[-1]*100}%")
 g_orbits.plot_loss_fraction()

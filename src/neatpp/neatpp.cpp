@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <iterator>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -119,10 +120,10 @@ const size_t n_particles_per_lambda_;
 
   std::vector< std::vector<double>> gc_solver_qs_ensemble(
   double G0, double G2, double I2, double nfp, double iota,
-  double iotaN, double B0, double B1c,
-  double B20, double B2c, double beta1s, double charge,
-  double mass, double energy, size_t nlambda, double r0, size_t ntheta,
-  size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
+  double iotaN, double B0, double B1c, double B20, double B2c,
+  double beta1s, double charge, double mass, double energy,
+  size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
+  size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
  )
  {
 
@@ -164,35 +165,41 @@ private:
   double Vref = 1.0;
   double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
   double energySI = energy*gyronimo::codata::e;
-  double B_max = abs(B0) + abs(r0 * B1c) + r0 * r0 * (abs(B20) + abs(B2c));
-  double B_min = abs(B0) - abs(r0 * B1c) - r0 * r0 * (abs(B20) + abs(B2c));
+  double B_max = abs(B0) + abs(r_max * B1c) + r_max * r_max * (abs(B20) + abs(B2c));
+  double B_min = abs(B0) - abs(r_max * B1c) - r_max * r_max * (abs(B20) + abs(B2c));
 
   std::valarray<double> theta = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ntheta);
   std::valarray<double> phi = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi/nfp, nphi);
-  std::valarray<double> lambda = linspace<std::valarray<double>>(0.9*B0/B_max, B0/B_min, nlambda);
+  std::valarray<double> lambda_trapped = linspace<std::valarray<double>>(B0/B_max, B0/B_min, nlambda_trapped);
+  std::valarray<double> lambda_passing = linspace<std::valarray<double>>(B0/B_max*1.0/nlambda_passing, B0/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
 
   std::vector<guiding_centre> guiding_centre_vector;
 //   #pragma omp parallel for
-  for(std::size_t k = 0;k < nlambda;k++){
-    guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda[k]*energySI/Uref/Bref, &qsc));
+  for(std::size_t k = 0;k < nlambda_trapped;k++){
+    guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI/Uref/Bref, &qsc));
+  }
+  for(std::size_t k = 0;k < nlambda_passing;k++){
+    guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_passing[k]*energySI/Uref/Bref, &qsc));
   }
 
   // defines the ensemble initial state:
   ensemble_type::state initial;
 //   #pragma omp parallel for
-    for(std::size_t k = 0;k < nlambda;k++){
+    for(std::size_t k = 0;k < nlambda_trapped + nlambda_passing;k++){
         for(std::size_t j = 0;j < ntheta;j++){
             for(std::size_t l = 0;l < nphi;l++){
-                // pybind11::print(l + j * nphi + k * ntheta * nphi);
                 initial.push_back(guiding_centre_vector[k].generate_state(
                     {r0, theta[j], phi[l]}, energySI/Uref,
                     gyronimo::guiding_centre::vpp_sign::plus));
+                initial.push_back(guiding_centre_vector[k].generate_state(
+                    {r0, theta[j], phi[l]}, energySI/Uref,
+                    gyronimo::guiding_centre::vpp_sign::minus));
             }
         }
     }
 
 // create ensemble object
-ensemble_type ensemble_object(guiding_centre_vector, ntheta * nphi);
+ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
 
 // integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
   boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
