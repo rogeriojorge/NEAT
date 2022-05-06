@@ -415,8 +415,7 @@ class particle_ensemble_orbit:
 
     def loss_fraction(self, r_max=0.15):
         self.lost_times_of_particles = [
-            self.time[np.argmax(particle_pos > r_max)]
-            for particle_pos in self.r_pos
+            self.time[np.argmax(particle_pos > r_max)] for particle_pos in self.r_pos
         ]
         loss_fraction_array = [0.0]
         self.total_particles_lost = 0

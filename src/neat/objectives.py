@@ -1,11 +1,13 @@
+import logging
+
 from qsc import Qsc
 from simsopt import LeastSquaresProblem, least_squares_serial_solve
-from simsopt.solve.mpi import least_squares_mpi_solve
 from simsopt._core.optimizable import Optimizable
-from simsopt.util.mpi import MpiPartition
+from simsopt.solve.mpi import least_squares_mpi_solve
+from simsopt.util.mpi import MpiPartition, log
+
 from neat.tracing import particle_ensemble_orbit
-from simsopt.util.mpi import log
-import logging
+
 
 class loss_fraction_residual(Optimizable):
     def __init__(
@@ -49,6 +51,7 @@ class loss_fraction_residual(Optimizable):
     # or the objective function for each particle can be weighted by the volume jacobian
     # Jacobian in Boozer coordinates = (G/B^2)(r_0,theta_0,phi_0), ((G-N*I)/B^2)(r_0,theta_0,phi_0) if theta is theta-N phi (check!)
 
+
 class optimize_loss_fraction:
     def __init__(
         self,
@@ -70,7 +73,7 @@ class optimize_loss_fraction:
         self.nthreads = nthreads
         self.r_max = r_max
         self.parallel = parallel
-        
+
         self.mpi = MpiPartition()
 
         self.loss_fraction = loss_fraction_residual(
@@ -107,5 +110,14 @@ class optimize_loss_fraction:
         # Algorithms that do not use derivatives
         # Relative/Absolute step size ~ 1/n_particles
         # with MPI, to see more info do mpi.write()
-        if self.parallel: least_squares_mpi_solve(self.prob, self.mpi, grad=True, rel_step=rel_step, abs_step=abs_step, max_nfev=nIterations)
-        else: least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=nIterations)
+        if self.parallel:
+            least_squares_mpi_solve(
+                self.prob,
+                self.mpi,
+                grad=True,
+                rel_step=rel_step,
+                abs_step=abs_step,
+                max_nfev=nIterations,
+            )
+        else:
+            least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=nIterations)
