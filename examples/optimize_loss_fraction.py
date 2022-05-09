@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
+import logging
+
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-import logging
-
+from simsopt import LeastSquaresProblem, least_squares_serial_solve
 from simsopt.solve.mpi import least_squares_mpi_solve
 from simsopt.util.mpi import MpiPartition, log
-from simsopt import LeastSquaresProblem, least_squares_serial_solve
 
 from neat.fields import stellna_qs
-from neat.objectives import loss_fraction_residual, effective_velocity_residual
+from neat.objectives import effective_velocity_residual, loss_fraction_residual
 from neat.tracing import charged_particle, charged_particle_ensemble, particle_orbit
 
 r_initial = 0.025
@@ -22,6 +22,7 @@ B2c = B0 / 8
 nsamples = 800
 Tfinal = 0.00003
 stellarator_index = 2
+
 
 class optimize_loss_fraction:
     def __init__(
@@ -94,6 +95,7 @@ class optimize_loss_fraction:
         else:
             least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=nIterations)
 
+
 g_field = stellna_qs.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
 g_particle = charged_particle_ensemble(r0=r_initial, r_max=r_max)
 optimizer = optimize_loss_fraction(
@@ -110,7 +112,7 @@ if optimizer.mpi.proc0_world:
         " Max Inverse L gradgrad B: ", optimizer.field.grad_grad_B_inverse_scale_length
     )
     print(" Initial Mean residual: ", np.mean(optimizer.residual.J()))
-    print(" Initial Loss Fraction: ",optimizer.residual.orbits.loss_fraction_array[-1])
+    print(" Initial Loss Fraction: ", optimizer.residual.orbits.loss_fraction_array[-1])
     print(" Objective function: ", optimizer.prob.objective())
     print(" Initial equilibrium: ")
     print(
@@ -137,7 +139,7 @@ if optimizer.mpi.proc0_world:
         " Max Inverse L gradgrad B: ", optimizer.field.grad_grad_B_inverse_scale_length
     )
     print(" Final Mean residual: ", np.mean(optimizer.residual.J()))
-    print(" Final Loss Fraction: ",optimizer.residual.orbits.loss_fraction_array[-1])
+    print(" Final Loss Fraction: ", optimizer.residual.orbits.loss_fraction_array[-1])
     print(" Objective function: ", optimizer.prob.objective())
     print(" Final equilibrium: ")
     print(
