@@ -168,6 +168,10 @@ private:
   double B_max = abs(B0) + abs(r_max * B1c) + r_max * r_max * (abs(B20) + abs(B2c));
   double B_min = abs(B0) - abs(r_max * B1c) - r_max * r_max * (abs(B20) + abs(B2c));
 
+// # As we work in Boozer coordinates, not in spacial coordinates, we don't initialize particles
+// # uniformly in cartesian coordinates, in real space. To alleviate that, each particle initialization
+// # or the objective function for each particle can be weighted by the volume jacobian
+// # Jacobian in Boozer coordinates = (G/B^2)(r_0,theta_0,phi_0), ((G-N*I)/B^2)(r_0,theta_0,phi_0) if theta is theta-N phi (check!)        
   std::valarray<double> theta = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ntheta);
   std::valarray<double> phi = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi/nfp, nphi);
   std::valarray<double> lambda_trapped = linspace<std::valarray<double>>(B0/B_max, B0/B_min, nlambda_trapped);

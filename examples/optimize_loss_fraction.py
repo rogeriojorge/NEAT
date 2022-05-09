@@ -3,13 +3,18 @@
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+import logging
+
+from simsopt.solve.mpi import least_squares_mpi_solve
+from simsopt.util.mpi import MpiPartition, log
+from simsopt import LeastSquaresProblem, least_squares_serial_solve
 
 from neat.fields import stellna_qs
-from neat.objectives import optimize_loss_fraction
+from neat.objectives import loss_fraction_residual, effective_velocity_residual
 from neat.tracing import charged_particle, charged_particle_ensemble, particle_orbit
 
-r_initial = 0.07
-r_max = 0.1
+r_initial = 0.025
+r_max = 0.07
 nIterations = 20
 ftol = 1e-5
 B0 = 5
@@ -17,6 +22,77 @@ B2c = B0 / 8
 nsamples = 800
 Tfinal = 0.00003
 stellarator_index = 2
+
+class optimize_loss_fraction:
+    def __init__(
+        self,
+        field,
+        particles,
+        r_max=0.12,
+        nsamples=800,
+        Tfinal=0.0001,
+        nthreads=8,
+        parallel=False,
+    ) -> None:
+
+        # log(level=logging.DEBUG)
+
+        self.field = field
+        self.particles = particles
+        self.nsamples = nsamples
+        self.Tfinal = Tfinal
+        self.nthreads = nthreads
+        self.r_max = r_max
+        self.parallel = parallel
+
+        self.mpi = MpiPartition()
+
+        # self.residual = loss_fraction_residual(
+        self.residual = effective_velocity_residual(
+            self.field,
+            self.particles,
+            self.nsamples,
+            self.Tfinal,
+            self.nthreads,
+            self.r_max,
+        )
+
+        self.field.fix_all()
+        # self.field.unfix("etabar")
+        # self.field.unfix("rc(1)")
+        # self.field.unfix("zs(1)")
+        self.field.unfix("rc(2)")
+        # self.field.unfix("zs(2)")
+        self.field.unfix("rc(3)")
+        # self.field.unfix("zs(3)")
+        # self.field.unfix("B2c")
+
+        # Define objective function
+        self.prob = LeastSquaresProblem.from_tuples(
+            [
+                (self.residual.J, 0, 1),
+                # (self.field.get_elongation, 0.0, 3),
+                # (self.field.get_inv_L_grad_B, 0, 2),
+                # (self.field.get_grad_grad_B_inverse_scale_length_vs_varphi, 0, 2),
+                # (self.field.get_B20_mean, 0, 0.01),
+            ]
+        )
+
+    def run(self, ftol=1e-6, nIterations=100, rel_step=1e-3, abs_step=1e-5):
+        # Algorithms that do not use derivatives
+        # Relative/Absolute step size ~ 1/n_particles
+        # with MPI, to see more info do mpi.write()
+        if self.parallel:
+            least_squares_mpi_solve(
+                self.prob,
+                self.mpi,
+                grad=True,
+                rel_step=rel_step,
+                abs_step=abs_step,
+                max_nfev=nIterations,
+            )
+        else:
+            least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=nIterations)
 
 g_field = stellna_qs.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
 g_particle = charged_particle_ensemble(r0=r_initial, r_max=r_max)
@@ -33,7 +109,8 @@ if optimizer.mpi.proc0_world:
     print(
         " Max Inverse L gradgrad B: ", optimizer.field.grad_grad_B_inverse_scale_length
     )
-    print(" Initial loss fraction: ", optimizer.loss_fraction.J())
+    print(" Initial Mean residual: ", np.mean(optimizer.residual.J()))
+    print(" Initial Loss Fraction: ",optimizer.residual.orbits.loss_fraction_array[-1])
     print(" Objective function: ", optimizer.prob.objective())
     print(" Initial equilibrium: ")
     print(
@@ -45,7 +122,7 @@ if optimizer.mpi.proc0_world:
     print("        etabar = ", optimizer.field.etabar)
     print("        B2c = ", optimizer.field.B2c)
     print("        B20 = ", optimizer.field.B20_mean)
-    optimizer.loss_fraction.orbits.plot_loss_fraction(show=False)
+    optimizer.residual.orbits.plot_loss_fraction(show=False)
 initial_orbit = particle_orbit(test_particle, g_field, nsamples=nsamples, Tfinal=Tfinal)
 initial_field = stellna_qs.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
 ##################
@@ -59,7 +136,8 @@ if optimizer.mpi.proc0_world:
     print(
         " Max Inverse L gradgrad B: ", optimizer.field.grad_grad_B_inverse_scale_length
     )
-    print(" Final loss fraction: ", optimizer.loss_fraction.J())
+    print(" Final Mean residual: ", np.mean(optimizer.residual.J()))
+    print(" Final Loss Fraction: ",optimizer.residual.orbits.loss_fraction_array[-1])
     print(" Objective function: ", optimizer.prob.objective())
     print(" Final equilibrium: ")
     print(
@@ -71,7 +149,7 @@ if optimizer.mpi.proc0_world:
     print("        etabar = ", optimizer.field.etabar)
     print("        B2c = ", optimizer.field.B2c)
     print("        B20 = ", optimizer.field.B20_mean)
-    optimizer.loss_fraction.orbits.plot_loss_fraction(show=False)
+    optimizer.residual.orbits.plot_loss_fraction(show=False)
     initial_patch = mpatches.Patch(color="#1f77b4", label="Initial")
     final_patch = mpatches.Patch(color="#ff7f0e", label="Final")
     plt.legend(handles=[initial_patch, final_patch])
