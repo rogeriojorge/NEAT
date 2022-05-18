@@ -65,9 +65,11 @@ class effective_velocity_residual(Optimizable):
 
         def radial_pos_of_particles(i, particle_pos):
             if self.orbits.lost_times_of_particles[i] == 0:
-                return max(particle_pos) # subtract min(particle_pos), particle_pos[0]?
+                return max(particle_pos)  # subtract min(particle_pos), particle_pos[0]?
             else:
-                return self.r_max # a bit more accurate -> particle_pos[np.argmax(particle_pos > self.r_max)]
+                return (
+                    self.r_max
+                )  # a bit more accurate -> particle_pos[np.argmax(particle_pos > self.r_max)]
 
         maximum_radial_pos_of_particles = np.array(
             [
