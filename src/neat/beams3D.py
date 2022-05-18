@@ -89,6 +89,8 @@ class beams3D_from_vmec():
         self.read_vmec()
         self.compute_jacobian()
         self.compute_initial_conditions()
+        self.create_outfile()
+        self.create_beams3dfile()
         self.plot_phitheta()
 
     def read_vmec(self):
@@ -306,7 +308,7 @@ class beams3D_from_vmec():
         f.write('! Using volume Jacobian\n')
         mystr = 'R_START_IN = '
         for j in range(nparticles):
-            mystr += fmt_master.format(rs[j])
+            mystr += fmt_master.format(self.rs[j])
             if np.mod(j, 5) == 4:
                 mystr += '\n'
             f.write(mystr)
