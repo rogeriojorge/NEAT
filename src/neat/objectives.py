@@ -65,23 +65,24 @@ class effective_velocity_residual(Optimizable):
 
         def radial_pos_of_particles(i, particle_pos):
             if self.orbits.lost_times_of_particles[i] == 0:
-                return max(particle_pos)
+                return max(particle_pos) # subtract min(particle_pos), particle_pos[0]?
             else:
-                return particle_pos[np.argmax(particle_pos > self.r_max)]
-
-        time_of_particles = np.array(
-            [
-                max(self.orbits.time)
-                if self.orbits.lost_times_of_particles[i] == 0
-                else self.orbits.lost_times_of_particles[i]
-                for i in range(self.orbits.nparticles)
-            ]
-        )
+                return self.r_max # a bit more accurate -> particle_pos[np.argmax(particle_pos > self.r_max)]
 
         maximum_radial_pos_of_particles = np.array(
             [
                 radial_pos_of_particles(i, particle_pos)
                 for i, particle_pos in enumerate(self.orbits.r_pos)
+            ]
+        )
+
+        tfinal = max(self.orbits.time)
+        time_of_particles = np.array(
+            [
+                tfinal
+                if self.orbits.lost_times_of_particles[i] == 0
+                else self.orbits.lost_times_of_particles[i]
+                for i in range(self.orbits.nparticles)
             ]
         )
 
@@ -94,7 +95,7 @@ class effective_velocity_residual(Optimizable):
         # J = delta s/ delta t or delta s^2/delta t
         # average radial diffusion coefficient/radial velocity. Make it as smal as possible
         self.compute()
-        return 3e-3 * self.effective_velocity / self.orbits.nparticles
+        return 3e-3 * self.effective_velocity / np.sqrt(self.orbits.nparticles)
 
 
 class optimize_loss_fraction_skeleton:

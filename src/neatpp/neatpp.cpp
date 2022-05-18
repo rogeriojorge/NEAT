@@ -176,8 +176,10 @@ private:
   std::valarray<double> phi = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi/nfp, nphi);
   std::valarray<double> lambda_trapped = linspace<std::valarray<double>>(B0/B_max, B0/B_min, nlambda_trapped);
   std::valarray<double> lambda_passing = linspace<std::valarray<double>>(B0/B_max*1.0/nlambda_passing, B0/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
-
+  // lambda minimo = 0?
+  
   std::vector<guiding_centre> guiding_centre_vector;
+  // de modo a poder paralelizar estes ciclos, dimensionar o array initial com o tamanho (nlambda_trapped+nlambda_passing)*ntheta*nphi
 //   #pragma omp parallel for
   for(std::size_t k = 0;k < nlambda_trapped;k++){
     guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI/Uref/Bref, &qsc));
@@ -188,6 +190,7 @@ private:
 
   // defines the ensemble initial state:
   ensemble_type::state initial;
+  // de modo a poder paralelizar estes ciclos, dimensionar o array initial com o tamanho (nlambda_trapped+nlambda_passing)
 //   #pragma omp parallel for
     for(std::size_t k = 0;k < nlambda_trapped + nlambda_passing;k++){
         for(std::size_t j = 0;j < ntheta;j++){
