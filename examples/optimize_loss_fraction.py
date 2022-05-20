@@ -24,6 +24,7 @@ B2c = B0 / 8
 nsamples = 800
 Tfinal = 0.00003
 stellarator_index = 2
+nthreads = 8
 
 
 class optimize_loss_fraction:
@@ -34,7 +35,7 @@ class optimize_loss_fraction:
         r_max=0.12,
         nsamples=800,
         Tfinal=0.0001,
-        nthreads=8,
+        nthreads=nthreads,
         parallel=False,
     ) -> None:
 

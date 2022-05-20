@@ -13,7 +13,7 @@ class loss_fraction_residual(Optimizable):
         particles: particle_ensemble_orbit,
         nsamples=500,
         Tfinal=0.0003,
-        nthreads=8,
+        nthreads=1,
         r_max=0.12,
     ) -> None:
 
@@ -44,7 +44,7 @@ class effective_velocity_residual(Optimizable):
         particles: particle_ensemble_orbit,
         nsamples=500,
         Tfinal=0.0003,
-        nthreads=8,
+        nthreads=1,
         r_max=0.12,
     ) -> None:
 
@@ -108,7 +108,7 @@ class optimize_loss_fraction_skeleton:
         r_max=0.12,
         nsamples=800,
         Tfinal=0.0001,
-        nthreads=8,
+        nthreads=1,
         parallel=False,
     ) -> None:
 
