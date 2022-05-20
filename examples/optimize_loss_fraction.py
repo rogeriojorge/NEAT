@@ -8,6 +8,8 @@ import numpy as np
 from simsopt import LeastSquaresProblem, least_squares_serial_solve
 from simsopt.solve.mpi import least_squares_mpi_solve
 from simsopt.util.mpi import MpiPartition, log
+import glob
+import os
 
 from neat.fields import stellna_qs
 from neat.objectives import effective_velocity_residual, loss_fraction_residual
@@ -179,3 +181,9 @@ initial_orbit.plot_orbit_3D(show=False)
 # initial_orbit.plot_animation(show=False)
 # final_orbit.plot_animation(show=True)
 plt.show()
+
+# Remove output files from simsopt
+for f in glob.glob('residuals_202*'):
+    os.remove(f)
+for f in glob.glob('simsopt_202*'):
+    os.remove(f)

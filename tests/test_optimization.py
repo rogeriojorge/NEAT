@@ -1,4 +1,6 @@
 import unittest
+import glob
+import os
 
 from neat.fields import stellna_qs
 from neat.objectives import optimize_loss_fraction_skeleton
@@ -20,3 +22,9 @@ class NEATtests(unittest.TestCase):
         print(" Initial loss fraction: ", initial_loss_fraction)
         print(" Final loss fraction: ", final_loss_fraction)
         assert final_loss_fraction <= initial_loss_fraction
+
+        # Remove output files from simsopt
+        for f in glob.glob('residuals_202*'):
+            os.remove(f)
+        for f in glob.glob('simsopt_202*'):
+            os.remove(f)
