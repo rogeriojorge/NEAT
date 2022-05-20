@@ -2,9 +2,6 @@
 #include <iterator>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-// // // //  USE CUBIC_GSL_PERIODIC
-#include <gyronimo/interpolators/cubic_gsl.hh>
-#include <gyronimo/interpolators/steffen_gsl.hh>
 #include "metric_stellna_qs.hh"
 #include <gyronimo/core/dblock.hh>
 #include <vector>
@@ -14,13 +11,10 @@
 #include <boost/math/tools/roots.hpp>
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
-#include <boost/numeric/odeint/stepper/bulirsch_stoer.hpp>
 #include <gyronimo/dynamics/odeint_adapter.hh>
 #include <gyronimo/core/codata.hh>
 #include <numbers>
 #include <omp.h>
-#include <random>
-#include <chrono>
 // namespace py = pybind11;
 using namespace gyronimo;
 
@@ -77,8 +71,8 @@ using namespace gyronimo;
   };
 
   // Integrate for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
-//   boost::numeric::odeint::runge_kutta4<gyronimo::guiding_centre::state> integration_algorithm;
-  boost::numeric::odeint::bulirsch_stoer<gyronimo::guiding_centre::state> integration_algorithm;
+  boost::numeric::odeint::runge_kutta4<gyronimo::guiding_centre::state> integration_algorithm;
+//   boost::numeric::odeint::bulirsch_stoer<gyronimo::guiding_centre::state> integration_algorithm;
   boost::numeric::odeint::integrate_const(
       integration_algorithm, odeint_adapter(&gc),
       initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
@@ -209,6 +203,7 @@ private:
 ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
 
 // integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
+//   boost::numeric::odeint::bulirsch_stoer<ensemble_type::state> ode_stepper;
   boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
   boost::numeric::odeint::integrate_const(
       ode_stepper, ensemble_object,
@@ -218,6 +213,11 @@ ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
      return x_vec;
  }
 
+
+// #include <boost/numeric/odeint/stepper/bulirsch_stoer.hpp>
+// #include <gyronimo/interpolators/cubic_periodic_gsl.hh>
+// #include <gyronimo/interpolators/cubic_gsl.hh>
+// #include <gyronimo/interpolators/steffen_gsl.hh>
 // std::vector< std::vector<double>> gc_solver(
 //   int field_periods,
 //   double G0, double G2, double I2,
@@ -244,6 +244,7 @@ ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
 
 //   // Prepare metric, equilibrium and particles
 // //   cubic_gsl_factory ifactory;
+//   cubic_gsl_factory
 //   steffen_gsl_factory ifactory;
 //   metric_stellna g(field_periods, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN,
 //                    dblock_adapter(B0), dblock_adapter(B1c), dblock_adapter(B1s),
