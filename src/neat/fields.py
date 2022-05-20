@@ -12,6 +12,8 @@ class stellna_qs(Qsc, Optimizable):
             names=self.names,
         )
 
+        self.B1c = self.etabar * self.B0
+
         if self.order == "r1":
             self.B20 = 0
             self.B20_mean = 0
@@ -28,7 +30,7 @@ class stellna_qs(Qsc, Optimizable):
             self.iota,
             self.iotaN,
             self.B0,
-            self.etabar * self.B0,
+            self.B1c,
             self.B20_mean,
             self.B2c,
             self.beta_1s,

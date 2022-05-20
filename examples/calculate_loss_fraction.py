@@ -2,6 +2,8 @@
 
 import time
 
+import matplotlib.pyplot as plt
+
 from neat.fields import stellna_qs
 from neat.tracing import charged_particle_ensemble, particle_ensemble_orbit
 
@@ -14,21 +16,22 @@ in a quasisymmetric stellarator
 # Calculate loss fraction at a radius = r_max
 # Test OpenMP parallelization with an array of threads = nthreads_array
 # The total number of particles is ntheta * nphi * (nlambda_passing+nlambda_trapped) * 2 (particles with v_parallel = +1, -1)
-r_initial = 0.05  # meters
+r_initial = 0.07  # meters
 r_max = 0.1  # meters
 B0 = 4  # Tesla, magnetic field on-axis
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 ntheta = 14  # resolution in theta
-nphi = 10  # resolution in phi
+nphi = 8  # resolution in phi
 nlambda_trapped = 20  # number of pitch angles for trapped particles
 nlambda_passing = 3  # number of pitch angles for passing particles
 nsamples = 1000  # resolution in time
 Tfinal = 1e-4  # seconds
-nthreads_array = [1, 2, 4, 8]
+# nthreads_array = [1, 2, 4, 8]
+nthreads_array = [8]
 
-g_field = stellna_qs.from_paper(2, B0=B0, etabar=0.1)
+g_field = stellna_qs.from_paper(2, B0=B0, etabar=0.8, nphi=151)
 g_particle = charged_particle_ensemble(
     r0=r_initial,
     r_max=r_max,
@@ -52,6 +55,24 @@ for nthreads in nthreads_array:
         f"  Running with {nthreads} threads and {g_orbits.nparticles} particles took {total_time}s"
     )
     threads_vs_time.append([nthreads, total_time])
-g_orbits.loss_fraction(r_max=r_max)
-print(f"Final loss fraction = {g_orbits.loss_fraction_array[-1]*100}%")
-g_orbits.plot_loss_fraction()
+g_orbits.loss_fraction(r_max=r_max, jacobian_weight=True)
+plt.semilogx(g_orbits.time, g_orbits.loss_fraction_array, label="With jacobian weights")
+print(
+    f"Final loss fraction with jacobian weights = {g_orbits.loss_fraction_array[-1]*100}%"
+)
+# g_orbits.plot_loss_fraction()
+
+g_orbits.loss_fraction(r_max=r_max, jacobian_weight=False)
+plt.semilogx(
+    g_orbits.time, g_orbits.loss_fraction_array, label="Without jacobian weights"
+)
+print(
+    f"Final loss fraction without jacobian weights = {g_orbits.loss_fraction_array[-1]*100}%"
+)
+# g_orbits.plot_loss_fraction()
+
+plt.xlabel("Time (s)")
+plt.ylabel("Loss Fraction")
+plt.tight_layout()
+plt.legend()
+plt.show()

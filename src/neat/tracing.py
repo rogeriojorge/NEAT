@@ -10,6 +10,7 @@ from scipy.interpolate import CubicSpline as spline
 from neatpp import gc_solver_qs, gc_solver_qs_ensemble
 
 from .constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
+from .fields import stellna_qs
 
 logger = logging.getLogger(__name__)
 
@@ -390,7 +391,12 @@ class particle_ensemble_orbit:
     """
 
     def __init__(
-        self, particles, field, nsamples=800, Tfinal=0.0001, nthreads=8
+        self,
+        particles: charged_particle_ensemble,
+        field: stellna_qs,
+        nsamples=800,
+        Tfinal=0.0001,
+        nthreads=8,
     ) -> None:
 
         self.particles = particles
@@ -413,17 +419,101 @@ class particle_ensemble_orbit:
         self.nparticles = solution.shape[1] - 1
         self.r_pos = solution[:, 1:].transpose()
 
-    def loss_fraction(self, r_max=0.15):
+        # Save the values of theta, phi and lambda used
+        r_max = self.particles.r_max
+        self.B_max = (
+            abs(field.B0)
+            + abs(r_max * field.B1c)
+            + r_max * r_max * (abs(field.B20_mean) + abs(field.B2c))
+        )
+        self.B_min = max(
+            0.01,
+            abs(field.B0)
+            - abs(r_max * field.B1c)
+            - r_max * r_max * (abs(field.B20_mean) + abs(field.B2c)),
+        )
+        self.theta = np.linspace(0.0, 2 * np.pi, particles.ntheta)
+        self.phi = np.linspace(0.0, 2 * np.pi / field.nfp, particles.nphi)
+        self.lambda_trapped = np.linspace(
+            field.B0 / self.B_max, field.B0 / self.B_min, particles.nlambda_trapped
+        )
+        self.lambda_passing = np.linspace(
+            0.0,
+            field.B0 / self.B_max * (1.0 - 1.0 / particles.nlambda_passing),
+            particles.nlambda_passing,
+        )
+        self.lambda_all = np.concatenate([self.lambda_trapped, self.lambda_passing])
+
+        # Store the initial values for each particle in a single ordered array
+        self.initial_lambda_theta_phi_vppsign = []
+        for Lambda in self.lambda_all:
+            for theta in self.theta:
+                for phi in self.phi:
+                    self.initial_lambda_theta_phi_vppsign.append(
+                        [Lambda, theta, phi, +1]
+                    )
+                    self.initial_lambda_theta_phi_vppsign.append(
+                        [Lambda, theta, phi, -1]
+                    )
+
+        # Compute the Jacobian for each particle at time t=0
+        ## Jacobian in (r, vartheta, varphi) coordinates is given by J = (G+iota*I)*r*Bbar/B^2
+        self.initial_jacobian = []
+        for initial_lambda_theta_phi_vppsign in self.initial_lambda_theta_phi_vppsign:
+            Lambda = initial_lambda_theta_phi_vppsign[0]
+            theta = initial_lambda_theta_phi_vppsign[1]
+            phi = initial_lambda_theta_phi_vppsign[2]
+            r = particles.r0
+            magB = (
+                field.B0
+                + r * (field.B1c * np.cos(theta))
+                + r * r * (field.B20_mean + field.B2c * np.cos(2 * theta))
+            )
+            self.initial_jacobian.append(
+                (field.G0 + r * r * field.G2 + field.iota * field.I2)
+                * r
+                * field.B0
+                / magB
+            )
+
+    def loss_fraction(self, r_max=0.15, jacobian_weight=True):
+        """
+        Weight each particle by its Jacobian in order to attribute to each particle
+        a marker representing a set of particles. The higher the value of the Jacobian
+        at the initial time, the higher the number of particles should be there. For
+        this reason, the loss_fraction is weighted by the Jacobian at initial time if
+        the flag jacobian_weight is set to True.
+        """
         self.lost_times_of_particles = [
             self.time[np.argmax(particle_pos > r_max)] for particle_pos in self.r_pos
         ]
-        loss_fraction_array = [0.0]
+        self.loss_fraction_array = [0.0]
         self.total_particles_lost = 0
-        for time in self.time[1:]:
-            self.total_particles_lost += self.lost_times_of_particles.count(time)
-            loss_fraction_array.append(self.total_particles_lost / self.nparticles)
-        self.loss_fraction_array = loss_fraction_array
-        return loss_fraction_array
+        if jacobian_weight:
+            for time in self.time[1:]:
+                index_particles_lost = [
+                    i for i, x in enumerate(self.lost_times_of_particles) if x == time
+                ]
+                initial_jacobian_particles_lost_at_this_time = (
+                    [0]
+                    if not index_particles_lost
+                    else [self.initial_jacobian[i] for i in index_particles_lost]
+                )
+                self.total_particles_lost += np.sum(
+                    initial_jacobian_particles_lost_at_this_time
+                )
+                self.loss_fraction_array.append(
+                    self.total_particles_lost / np.sum(self.initial_jacobian)
+                )
+        else:
+            for time in self.time[1:]:
+                particles_lost_at_this_time = self.lost_times_of_particles.count(time)
+                self.total_particles_lost += particles_lost_at_this_time
+                self.loss_fraction_array.append(
+                    self.total_particles_lost / self.nparticles
+                )
+
+        return self.loss_fraction_array
 
     def plot_loss_fraction(self, show=True):
         plt.semilogx(self.time, self.loss_fraction_array)
