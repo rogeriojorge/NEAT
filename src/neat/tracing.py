@@ -396,7 +396,7 @@ class particle_ensemble_orbit:
         field: stellna_qs,
         nsamples=800,
         Tfinal=0.0001,
-        nthreads=1,
+        nthreads=2,
     ) -> None:
 
         self.particles = particles
