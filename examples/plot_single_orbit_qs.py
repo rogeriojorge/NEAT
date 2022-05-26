@@ -21,8 +21,10 @@ energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 1.0  # = mu * B0 / energy
+vpp_sign = -1 # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
 Tfinal = 1e-4  # seconds
+B20_constant = False # use a constant B20 (mean value) or the real function 
 
 g_field = stellna_qs.from_paper(2, B0=B0)
 g_particle = charged_particle(
@@ -36,7 +38,7 @@ g_particle = charged_particle(
 )
 print("Starting particle tracer")
 start_time = time.time()
-g_orbit = particle_orbit(g_particle, g_field, nsamples=nsamples, Tfinal=Tfinal)
+g_orbit = particle_orbit(g_particle, g_field, nsamples=nsamples, Tfinal=Tfinal, B20_constant=B20_constant)
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 

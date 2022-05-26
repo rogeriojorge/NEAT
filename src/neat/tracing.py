@@ -7,8 +7,6 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import CubicSpline as spline
 
-from neatpp import gc_solver_qs, gc_solver_qs_ensemble
-
 from .constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
 from .fields import stellna_qs
 
@@ -138,15 +136,17 @@ class particle_orbit:
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
-    def __init__(self, particle, field, nsamples=1000, Tfinal=0.0001) -> None:
+    def __init__(self, particle, field, nsamples=1000, Tfinal=0.0001, B20_constant=False) -> None:
 
         self.particle = particle
         self.field = field
         self.nsamples = nsamples
         self.Tfinal = Tfinal
 
+        self.field.B20_constant = B20_constant
+
         solution = np.array(
-            gc_solver_qs(
+            self.field.neatpp_solver(
                 *self.field.gyronimo_parameters(),
                 *self.particle.gyronimo_parameters(),
                 self.nsamples,
@@ -209,10 +209,10 @@ class particle_orbit:
         if show:
             plt.show()
 
-    def plot_orbit_3D(self, distance=6, show=True):
+    def plot_orbit_3D(self, r_surface=0.1, distance=6, show=True):
         boundary = np.array(
             self.field.get_boundary(
-                r=0.95 * self.particle.r0,
+                r=r_surface,
                 nphi=110,
                 ntheta=30,
                 ntheta_fourier=16,
@@ -306,13 +306,13 @@ class particle_orbit:
         if show:
             plt.show()
 
-    def plot_animation(self, show=True, SaveMovie=False):
+    def plot_animation(self, r_surface=0.1, distance=7, show=True, SaveMovie=False):
         fig = plt.figure(figsize=(6, 4))
         ax = fig.add_subplot(111, projection="3d")
 
         boundary = np.array(
             self.field.get_boundary(
-                r=0.95 * self.particle.r0,
+                r=r_surface,
                 nphi=110,
                 ntheta=30,
                 ntheta_fourier=16,
@@ -343,7 +343,7 @@ class particle_orbit:
         ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         ax.set_axis_off()
-        ax.dist = 6
+        ax.dist = distance
 
         ani = []
 
@@ -406,7 +406,7 @@ class particle_ensemble_orbit:
         self.Tfinal = Tfinal
 
         solution = np.array(
-            gc_solver_qs_ensemble(
+            self.field.neatpp_solver_ensemble(
                 *self.field.gyronimo_parameters(),
                 *self.particles.gyronimo_parameters(),
                 self.nsamples,
