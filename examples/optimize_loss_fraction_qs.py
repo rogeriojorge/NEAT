@@ -15,16 +15,16 @@ from neat.fields import stellna_qs
 from neat.objectives import effective_velocity_residual, loss_fraction_residual
 from neat.tracing import charged_particle, charged_particle_ensemble, particle_orbit
 
-r_initial = 0.025
-r_max = 0.08
-nIterations = 20
+r_initial = 0.05
+r_max = 0.1
+nIterations = 10
 ftol = 1e-5
 B0 = 5
 B2c = B0 / 8
 nsamples = 800
-Tfinal = 0.00003
+Tfinal = 0.00004
 stellarator_index = 2
-nthreads = 4
+nthreads = 8
 
 
 class optimize_loss_fraction:
@@ -32,9 +32,9 @@ class optimize_loss_fraction:
         self,
         field,
         particles,
-        r_max=0.12,
-        nsamples=800,
-        Tfinal=0.0001,
+        r_max=r_max,
+        nsamples=nsamples,
+        Tfinal=Tfinal,
         nthreads=nthreads,
         parallel=False,
     ) -> None:
@@ -69,16 +69,16 @@ class optimize_loss_fraction:
         # self.field.unfix("zs(2)")
         self.field.unfix("rc(3)")
         # self.field.unfix("zs(3)")
-        # self.field.unfix("B2c")
+        self.field.unfix("B2c")
 
         # Define objective function
         self.prob = LeastSquaresProblem.from_tuples(
             [
-                (self.residual.J, 0, 1),
-                # (self.field.get_elongation, 0.0, 3),
-                # (self.field.get_inv_L_grad_B, 0, 2),
-                # (self.field.get_grad_grad_B_inverse_scale_length_vs_varphi, 0, 2),
-                # (self.field.get_B20_mean, 0, 0.01),
+                (self.residual.J, 0, 40),
+                # (self.field.get_elongation, 0.0, 2),
+                (self.field.get_inv_L_grad_B, 0, 0.1),
+                (self.field.get_grad_grad_B_inverse_scale_length_vs_varphi, 0, 0.1),
+                # (self.field.get_B20_mean, 0, 0.1),
             ]
         )
 
@@ -177,8 +177,8 @@ plt.legend()
 plt.xlabel(r"r cos($\theta$)")
 plt.ylabel(r"r sin($\theta$)")
 plt.tight_layout()
-initial_orbit.plot_orbit_3D(show=False)
-initial_orbit.plot_orbit_3D(show=False)
+initial_orbit.plot_orbit_3D(show=False, r_surface=r_max)
+final_orbit.plot_orbit_3D(show=False, r_surface=r_max)
 # initial_orbit.plot_animation(show=False)
 # final_orbit.plot_animation(show=True)
 plt.show()

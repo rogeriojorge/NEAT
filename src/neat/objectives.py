@@ -1,7 +1,8 @@
-import numpy as np
-from qsc import Qsc
-from qic import Qic
 from typing import Union
+
+import numpy as np
+from qic import Qic
+from qsc import Qsc
 from simsopt import LeastSquaresProblem, least_squares_serial_solve
 from simsopt._core.optimizable import Optimizable
 
@@ -99,7 +100,7 @@ class effective_velocity_residual(Optimizable):
         # J = delta s/ delta t or delta s^2/delta t
         # average radial diffusion coefficient/radial velocity. Make it as smal as possible
         self.compute()
-        return 3e-3 * self.effective_velocity / np.sqrt(self.orbits.nparticles)
+        return 1e-5 * self.effective_velocity / np.sqrt(self.orbits.nparticles)
 
 
 class optimize_loss_fraction_skeleton:
