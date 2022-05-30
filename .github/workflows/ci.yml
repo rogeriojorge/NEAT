@@ -92,6 +92,13 @@ jobs:
         cd pyQSC
         pip3 install .
 
+    - name: Install pyQIC
+      run: |
+        cd external
+        git clone https://github.com/rogeriojorge/pyQIC.git
+        cd pyQIC
+        pip3 install .
+
     - name: ls
       run: ls
 

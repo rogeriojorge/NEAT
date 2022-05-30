@@ -53,6 +53,7 @@ class optimize_loss_fraction:
 
         # self.residual = loss_fraction_residual(
         self.residual = effective_velocity_residual(
+            # loss_fraction_residual(
             self.field,
             self.particles,
             self.nsamples,
