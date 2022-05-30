@@ -136,7 +136,9 @@ class particle_orbit:
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
-    def __init__(self, particle, field, nsamples=1000, Tfinal=0.0001, B20_constant=False) -> None:
+    def __init__(
+        self, particle, field, nsamples=1000, Tfinal=0.0001, B20_constant=True
+    ) -> None:
 
         self.particle = particle
         self.field = field

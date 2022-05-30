@@ -2,7 +2,11 @@ import numpy as np
 from qsc import Qsc
 from simsopt._core.optimizable import Optimizable
 
-from neatpp import gc_solver, gc_solver_qs, gc_solver_qs_partial, gc_solver_qs_ensemble
+from neatpp import (
+    gc_solver,
+    gc_solver_qs,  # , gc_solver_qs_partial
+    gc_solver_qs_ensemble,
+)
 
 
 class stellna(Qsc, Optimizable):
@@ -19,7 +23,9 @@ class stellna(Qsc, Optimizable):
             self.B0, "__len__"
         ), f"The stellna field requires a non-quasisymmetric magnetic field with B0 a function of phi"
 
-        self.B20_constant = False # This variable may be changed later if B20 should be constant
+        self.B20_constant = (
+            False  # This variable may be changed later if B20 should be constant
+        )
 
     def gyronimo_parameters(self):
         if self.order == "r1":
@@ -91,7 +97,9 @@ class stellna_qs(Qsc, Optimizable):
             self.beta_1s = 0
             self.G2 = 0
 
-        self.B20_constant = False # This variable may be changed later if B20 should be constant
+        self.B20_constant = (
+            True  # This variable may be changed later if B20 should be constant
+        )
 
     def gyronimo_parameters(self):
         if self.B20_constant:
@@ -116,7 +124,8 @@ class stellna_qs(Qsc, Optimizable):
         if self.B20_constant:
             return gc_solver_qs(*args, *kwargs)
         else:
-            return gc_solver_qs_partial(*args, *kwargs)
+            print("gs_solver_partial not implemented yet")
+            # return gc_solver_qs_partial(*args, *kwargs)
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
         return gc_solver_qs_ensemble(*args, *kwargs)
