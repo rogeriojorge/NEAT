@@ -71,6 +71,18 @@ class stellna(Qic, Optimizable):
     # def neatpp_solver_ensemble(self, *args, **kwargs):
     #     return gc_solver_ensemble(*args, *kwargs)
 
+    def get_inv_L_grad_B(self):
+        return self.inv_L_grad_B / np.sqrt(self.nphi)
+
+    def get_elongation(self):
+        return self.elongation / np.sqrt(self.nphi)
+
+    def get_B20_mean(self):
+        return self.B20_mean
+
+    def get_grad_grad_B_inverse_scale_length_vs_varphi(self):
+        return self.grad_grad_B_inverse_scale_length_vs_varphi / np.sqrt(self.nphi)
+
 
 class stellna_qs(Qsc, Optimizable):
     def __init__(self, *args, **kwargs) -> None:
