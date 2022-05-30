@@ -1,5 +1,7 @@
 import numpy as np
 from qsc import Qsc
+from qic import Qic
+from typing import Union
 from simsopt import LeastSquaresProblem, least_squares_serial_solve
 from simsopt._core.optimizable import Optimizable
 
@@ -9,7 +11,7 @@ from neat.tracing import particle_ensemble_orbit
 class loss_fraction_residual(Optimizable):
     def __init__(
         self,
-        field: Qsc,
+        field: Union[Qsc, Qic],
         particles: particle_ensemble_orbit,
         nsamples=500,
         Tfinal=0.0003,
@@ -40,7 +42,7 @@ class loss_fraction_residual(Optimizable):
 class effective_velocity_residual(Optimizable):
     def __init__(
         self,
-        field: Qsc,
+        field: Union[Qsc, Qic],
         particles: particle_ensemble_orbit,
         nsamples=500,
         Tfinal=0.0003,

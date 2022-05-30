@@ -28,8 +28,7 @@ nlambda_trapped = 20  # number of pitch angles for trapped particles
 nlambda_passing = 3  # number of pitch angles for passing particles
 nsamples = 1000  # resolution in time
 Tfinal = 1e-4  # seconds
-# nthreads_array = [1, 2, 4, 8]
-nthreads_array = [8]
+nthreads_array = [1, 2, 4]
 
 g_field = stellna_qs.from_paper(2, B0=B0, etabar=0.8, nphi=151)
 g_particle = charged_particle_ensemble(

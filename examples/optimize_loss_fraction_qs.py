@@ -16,7 +16,7 @@ from neat.objectives import effective_velocity_residual, loss_fraction_residual
 from neat.tracing import charged_particle, charged_particle_ensemble, particle_orbit
 
 r_initial = 0.025
-r_max = 0.07
+r_max = 0.08
 nIterations = 20
 ftol = 1e-5
 B0 = 5
@@ -24,7 +24,7 @@ B2c = B0 / 8
 nsamples = 800
 Tfinal = 0.00003
 stellarator_index = 2
-nthreads = 8
+nthreads = 4
 
 
 class optimize_loss_fraction:

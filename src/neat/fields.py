@@ -1,5 +1,6 @@
 import numpy as np
 from qsc import Qsc
+from qic import Qic
 from simsopt._core.optimizable import Optimizable
 
 from neatpp import (
@@ -9,13 +10,13 @@ from neatpp import (
 )
 
 
-class stellna(Qsc, Optimizable):
+class stellna(Qic, Optimizable):
     def __init__(self, *args, **kwargs) -> None:
-        Qsc.__init__(self, *args, **kwargs)
+        Qic.__init__(self, *args, **kwargs)
         Optimizable.__init__(
             self,
-            x0=Qsc.get_dofs(self),
-            external_dof_setter=Qsc.set_dofs,
+            x0=Qic.get_dofs(self),
+            external_dof_setter=Qic.set_dofs,
             names=self.names,
         )
 
