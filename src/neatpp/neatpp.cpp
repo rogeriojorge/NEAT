@@ -84,73 +84,73 @@ using namespace gyronimo;
   return x_vec;
  }
 
-#include "metric_stellna_qs_partial.hh"
-#include "equilibrium_stellna_qs_partial.hh"
- std::vector< std::vector<double>> gc_solver_qs_partial(
-  double G0, double G2, double I2, double nfp, double iota,
-  double iotaN, double B0, double B1c,
-  const std::vector<double>& B20,
-  double B2c, double beta1s, double charge,
-  double mass, double lambda, int vpp_sign,
-  double energy, double r0, double theta0, 
-  double phi0, size_t nsamples, double Tfinal
- )
- {
-  // Compute normalisation constants:
-  double Lref = 1.0;
-  double Vref = 1.0;
-  double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
-  double energySI = energy*gyronimo::codata::e;
+// #include "metric_stellna_qs_partial.hh"
+// #include "equilibrium_stellna_qs_partial.hh"
+//  std::vector< std::vector<double>> gc_solver_qs_partial(
+//   double G0, double G2, double I2, double nfp, double iota,
+//   double iotaN, double B0, double B1c,
+//   const std::vector<double>& B20,
+//   double B2c, double beta1s, double charge,
+//   double mass, double lambda, int vpp_sign,
+//   double energy, double r0, double theta0, 
+//   double phi0, size_t nsamples, double Tfinal
+//  )
+//  {
+//   // Compute normalisation constants:
+//   double Lref = 1.0;
+//   double Vref = 1.0;
+//   double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
+//   double energySI = energy*gyronimo::codata::e;
 
-  // Prepare metric, equilibrium and particles
-  double Bref = B0;
-  cubic_periodic_gsl_factory ifactory;
-//   cubic_gsl_factory ifactory;
-//   steffen_gsl_factory ifactory;
-  metric_stellna_qs_partial g(Bref, G0, G2, I2, iota, iotaN, B0, B1c,
-                              dblock_adapter(B20), B2c, beta1s, &ifactory);
+//   // Prepare metric, equilibrium and particles
+//   double Bref = B0;
+//   cubic_periodic_gsl_factory ifactory;
+// //   cubic_gsl_factory ifactory;
+// //   steffen_gsl_factory ifactory;
+//   metric_stellna_qs_partial g(Bref, G0, G2, I2, iota, iotaN, B0, B1c,
+//                               dblock_adapter(B20), B2c, beta1s, &ifactory);
 
-  equilibrium_stellna_qs_partial qsc(&g);
+//   equilibrium_stellna_qs_partial qsc(&g);
 
-  guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref/Bref, &qsc);
-  guiding_centre::state initial_state = gc.generate_state(
-      {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
+//   guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref/Bref, &qsc);
+//   guiding_centre::state initial_state = gc.generate_state(
+//       {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
 
-  // Define variables for integration
-  std::vector<std::vector< double >> x_vec;
-  class push_back_state_and_time{
-  public:
-    std::vector< std::vector< double > >& m_states;
-    push_back_state_and_time( std::vector< std::vector< double > > &states, 
-      const IR3field_c1* e, const guiding_centre* g)
-    : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
-    void operator()(const guiding_centre::state& s, double t){
-      IR3 x = gc_pointer_->get_position(s);
-      double B = eq_pointer_->magnitude(x, t);
-      guiding_centre::state dots = (*gc_pointer_)(s, t);
-      IR3 y = gc_pointer_->get_position(dots);
-      m_states.push_back({
-        t,x[0],x[1],x[2],
-        gc_pointer_->energy_parallel(s),
-        gc_pointer_->energy_perpendicular(s, t),
-        B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
-        gc_pointer_->get_vpp(dots)
-      });
-    }
-  private:
-    const IR3field_c1* eq_pointer_;
-    const guiding_centre* gc_pointer_;
-  };
+//   // Define variables for integration
+//   std::vector<std::vector< double >> x_vec;
+//   class push_back_state_and_time{
+//   public:
+//     std::vector< std::vector< double > >& m_states;
+//     push_back_state_and_time( std::vector< std::vector< double > > &states, 
+//       const IR3field_c1* e, const guiding_centre* g)
+//     : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
+//     void operator()(const guiding_centre::state& s, double t){
+//       IR3 x = gc_pointer_->get_position(s);
+//       double B = eq_pointer_->magnitude(x, t);
+//       guiding_centre::state dots = (*gc_pointer_)(s, t);
+//       IR3 y = gc_pointer_->get_position(dots);
+//       m_states.push_back({
+//         t,x[0],x[1],x[2],
+//         gc_pointer_->energy_parallel(s),
+//         gc_pointer_->energy_perpendicular(s, t),
+//         B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
+//         gc_pointer_->get_vpp(dots)
+//       });
+//     }
+//   private:
+//     const IR3field_c1* eq_pointer_;
+//     const guiding_centre* gc_pointer_;
+//   };
 
-  // Integrate for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
-  boost::numeric::odeint::runge_kutta4<gyronimo::guiding_centre::state> integration_algorithm;
-//   boost::numeric::odeint::bulirsch_stoer<gyronimo::guiding_centre::state> integration_algorithm;
-  boost::numeric::odeint::integrate_const(
-      integration_algorithm, odeint_adapter(&gc),
-      initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
+//   // Integrate for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
+//   boost::numeric::odeint::runge_kutta4<gyronimo::guiding_centre::state> integration_algorithm;
+// //   boost::numeric::odeint::bulirsch_stoer<gyronimo::guiding_centre::state> integration_algorithm;
+//   boost::numeric::odeint::integrate_const(
+//       integration_algorithm, odeint_adapter(&gc),
+//       initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
 
-  return x_vec;
- }
+//   return x_vec;
+//  }
 
 std::array<double,4> operator*(const double& a, const std::array<double,4>& v) {
 std::array<double, 4> result = {a*v[0], a*v[1], a*v[2], a*v[3]};
@@ -374,6 +374,6 @@ PYBIND11_MODULE(neatpp, m) {
     m.doc() = "Gyronimo Wrapper for the Stellarator Near-Axis Expansion (STELLNA)";
     m.def("gc_solver",&gc_solver);
     m.def("gc_solver_qs",&gc_solver_qs);
-    m.def("gc_solver_qs_partial",&gc_solver_qs_partial);
+    // m.def("gc_solver_qs_partial",&gc_solver_qs_partial);
     m.def("gc_solver_qs_ensemble",&gc_solver_qs_ensemble);
 }
