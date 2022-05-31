@@ -9,8 +9,7 @@
 #include "metric_stellna.hh"
 #include <gyronimo/core/error.hh>
 #include <iostream>
-
-namespace gyronimo{
+using namespace gyronimo;
 
 metric_stellna::metric_stellna(int field_periods, double Bref, const dblock& phi_grid,
     double G0, double G2, double I2, double iota, double iotaN,
@@ -57,6 +56,7 @@ metric_stellna::~metric_stellna() {
 double metric_stellna::reduce_phi(double phi) const {
   phi = std::fmod(phi-this->phi0_, phi_modulus_factor_);
   return (phi < 0 ? phi + phi_modulus_factor_ : phi)+this->phi0_;
+  // return phi;
 }
 
 SM3 metric_stellna::operator()(const IR3& position) const {
@@ -77,7 +77,7 @@ dSM3 metric_stellna::del(const IR3& position) const {
 double metric_stellna::jacobian(const IR3& position) const {
   double r     = position[IR3::u], theta = position[IR3::v];
   double coso  = std::cos(theta),   sino = std::sin(theta);
-  double cos2o = std::cos(2*theta), sin2o = std::sin(2*theta);
+  double cos2o = coso*coso-sino*sino, sin2o = 2*coso*sino;
   double phi   = this->reduce_phi(position[IR3::w]);
   double magB  = (*B0_)(phi)+r*((*B1c_)(phi)*coso+(*B1s_)(phi)*sino)+r*r*((*B20_)(phi)+(*B2c_)(phi)*cos2o+(*B2s_)(phi)*sin2o);
   double G     = G0_+r*r*G2_;
@@ -89,7 +89,7 @@ double metric_stellna::jacobian(const IR3& position) const {
 IR3 metric_stellna::del_jacobian(const IR3& position) const {
   double r        = position[IR3::u], theta = position[IR3::v];
   double coso     = std::cos(theta),   sino = std::sin(theta);
-  double cos2o    = std::cos(2*theta), sin2o = std::sin(2*theta);
+  double cos2o    = coso*coso-sino*sino, sin2o = 2*coso*sino;
   double phi      = this->reduce_phi(position[IR3::w]);
   double magB     = (*B0_)(phi)+r*( (*B1c_)(phi)*coso+(*B1s_)(phi)*sino)+r*r*((*B20_)(phi)+(*B2c_)(phi)*cos2o+ (*B2s_)(phi)*sin2o);
   double d_u_magB =              (  (*B1c_)(phi)*coso+(*B1s_)(phi)*sino)+2*r*((*B20_)(phi)+(*B2c_)(phi)*cos2o+ (*B2s_)(phi)*sin2o);
@@ -103,5 +103,3 @@ IR3 metric_stellna::del_jacobian(const IR3& position) const {
   double d_w_jac  = -2*d_w_magB*jac/magB;
   return {d_u_jac,d_v_jac,d_w_jac};
 }
-
-} // end namespace gyronimo

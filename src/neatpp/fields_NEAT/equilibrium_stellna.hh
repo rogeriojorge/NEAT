@@ -9,8 +9,7 @@
 
 #include <gyronimo/fields/IR3field_c1.hh>
 #include <metric_stellna.hh>
-
-namespace gyronimo{
+using namespace gyronimo;
 
 //! Quasi-symmetric stellarator equilibrium field in near-axis coordinates.
 /*!
@@ -37,7 +36,5 @@ class equilibrium_stellna : public IR3field_c1{
   private:
     const metric_stellna *metric_;
 };
-
-}// end namespace gyronimo.
 
 #endif // GYRONIMO_EQUILIBRIUM_STELLNA

@@ -2,6 +2,7 @@
 // An object-oriented library for gyromotion applications in plasma physics.
 // Copyright (C) 2021 Paulo Rodrigues, Rogerio Jorge.
 
+// @equilibrium_stellna_qs.cc
 
 #include <numbers>
 #include "equilibrium_stellna_qs.hh"

@@ -3,7 +3,7 @@ from qic import Qic
 from qsc import Qsc
 from simsopt._core.optimizable import Optimizable
 
-from neatpp import gc_solver_qs  # , gc_solver_qs_partial
+from neatpp import gc_solver_qs, gc_solver_qs_partial
 from neatpp import gc_solver, gc_solver_qs_ensemble
 
 
@@ -113,9 +113,9 @@ class stellna_qs(Qsc, Optimizable):
 
     def gyronimo_parameters(self):
         if self.B20_constant:
-            B20 = self.B20_mean
+            self.B20_gyronimo = self.B20_mean
         else:
-            B20 = np.append(self.B20, self.B20[0])
+            self.B20_gyronimo = np.append(self.B20, self.B20[0])
         return (
             self.G0,
             self.G2,
@@ -123,9 +123,10 @@ class stellna_qs(Qsc, Optimizable):
             self.nfp,
             self.iota,
             self.iotaN,
+            np.append(self.varphi, 2 * np.pi / self.nfp + self.varphi[0]),
             self.B0,
             self.B1c,
-            B20,
+            self.B20_gyronimo,
             self.B2c,
             self.beta_1s,
         )
@@ -134,8 +135,7 @@ class stellna_qs(Qsc, Optimizable):
         if self.B20_constant:
             return gc_solver_qs(*args, *kwargs)
         else:
-            print("gs_solver_partial not implemented yet")
-            # return gc_solver_qs_partial(*args, *kwargs)
+            return gc_solver_qs_partial(*args, *kwargs)
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
         return gc_solver_qs_ensemble(*args, *kwargs)

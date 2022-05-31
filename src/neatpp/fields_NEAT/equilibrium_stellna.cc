@@ -7,8 +7,7 @@
 #include <numbers>
 #include "equilibrium_stellna.hh"
 #include <valarray>
-
-namespace gyronimo{
+using namespace gyronimo;
 
 equilibrium_stellna::equilibrium_stellna(
     const metric_stellna *g)
@@ -26,7 +25,6 @@ IR3 equilibrium_stellna::contravariant(const IR3& position, double time) const {
 
 dIR3 equilibrium_stellna::del_contravariant(const IR3& position, double time) const {
   double r = position[IR3::u];
-  double phi = metric_->reduce_phi(position[IR3::w]);
   double jac = metric_->jacobian(position);
   double d_u_jac = metric_->del_jacobian(position)[IR3::u];
   double d_v_jac = metric_->del_jacobian(position)[IR3::v];
@@ -87,7 +85,6 @@ double equilibrium_stellna::magnitude(const IR3& position, double time) const {
   double r = position[IR3::u], theta = position[IR3::v];
   double phi = metric_->reduce_phi(position[IR3::w]);
   double coso  = std::cos(theta),   sino = std::sin(theta);
-//   double cos2o = std::cos(2*theta), sin2o = std::sin(2*theta);
   double cos2o = 2*coso*coso-1, sin2o = 2*sino*coso;
   double magB  = (*metric_->B0())(phi)+r*((*metric_->B1c())(phi)*coso+(*metric_->B1s())(phi)*sino)+r*r*((*metric_->B20())(phi)+(*metric_->B2c())(phi)*cos2o+(*metric_->B2s())(phi)*sin2o);
   return magB;
@@ -97,11 +94,9 @@ IR3 equilibrium_stellna::del_magnitude(const IR3& position, double time) const {
   double r = position[IR3::u], theta = position[IR3::v];
   double phi = metric_->reduce_phi(position[IR3::w]);
   double coso  = std::cos(theta),   sino = std::sin(theta);
-  double cos2o = std::cos(2*theta), sin2o = std::sin(2*theta);
+  double cos2o = 2*coso*coso-1, sin2o = 2*sino*coso;
   double d_u_magB =   ( (*metric_->B1c())(phi)*coso+(*metric_->B1s())(phi)*sino)+2*r*((*metric_->B20())(phi)+(*metric_->B2c())(phi)*cos2o+  (*metric_->B2s())(phi)*sin2o);
   double d_v_magB = r*(-(*metric_->B1c())(phi)*sino+(*metric_->B1s())(phi)*coso)+r*r*(          -2*(*metric_->B2c())(phi)*sin2o+2*(*metric_->B2s())(phi)*cos2o);
   double d_w_magB = (*metric_->B0()).derivative(phi)+r*((*metric_->B1c()).derivative(phi)*coso+(*metric_->B1s()).derivative(phi)*sino)+r*r*((*metric_->B20()).derivative(phi)+(*metric_->B2c()).derivative(phi)*cos2o+(*metric_->B2s()).derivative(phi)*sin2o);
   return {d_u_magB,d_v_magB,d_w_magB};
 }
-
-}// end namespace gyronimo.

@@ -9,8 +9,7 @@
 
 #include <gyronimo/metrics/metric_covariant.hh>
 #include <gyronimo/interpolators/interpolator1d.hh>
-
-namespace gyronimo{
+using namespace gyronimo;
 
 //! Covariant metric in stellarator near-axis coordinates.
 /*!
@@ -56,7 +55,5 @@ class metric_stellna : public metric_covariant {
     double Bref_, G0_, G2_, I2_, iota_, iotaN_, field_periods_, phi0_;
     interpolator1d *B0_, *B1c_, *B1s_, *B20_, *B2c_, *B2s_, *beta0_, *beta1c_, *beta1s_;
 };
-
-} // end namespace gyronimo
 
 #endif // GYRONIMO_METRIC_STELLNA

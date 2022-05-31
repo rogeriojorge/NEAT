@@ -2,10 +2,8 @@
 #include <iterator>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "metric_stellna_qs.hh"
 #include <gyronimo/core/dblock.hh>
 #include <vector>
-#include "equilibrium_stellna_qs.hh"
 #include <gyronimo/dynamics/guiding_centre.hh>
 #include <gyronimo/core/linspace.hh>
 #include <boost/math/tools/roots.hpp>
@@ -22,9 +20,13 @@
 // namespace py = pybind11;
 using namespace gyronimo;
 
+#include "metric_stellna_qs.hh"
+#include "equilibrium_stellna_qs.hh"
  std::vector< std::vector<double>> gc_solver_qs(
   double G0, double G2, double I2, double nfp, double iota,
-  double iotaN, double B0, double B1c,
+  double iotaN,
+  const std::vector<double>& phi_grid,
+  double B0, double B1c,
   double B20, double B2c, double beta1s, double charge,
   double mass, double lambda, int vpp_sign,
   double energy, double r0, double theta0, 
@@ -34,8 +36,8 @@ using namespace gyronimo;
   // Compute normalisation constants:
   double Lref = 1.0;
   double Vref = 1.0;
-  double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
-  double energySI = energy*gyronimo::codata::e;
+  double Uref = 0.5*codata::m_proton*mass*Vref*Vref;
+  double energySI = energy*codata::e;
 
   // Prepare metric, equilibrium and particles
   double Bref = B0;
@@ -46,7 +48,7 @@ using namespace gyronimo;
 
   guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref/Bref, &qsc);
   guiding_centre::state initial_state = gc.generate_state(
-      {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
+      {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
   // Define variables for integration
   std::vector<std::vector< double >> x_vec;
@@ -75,8 +77,8 @@ using namespace gyronimo;
   };
 
   // Integrate for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
-  boost::numeric::odeint::runge_kutta4<gyronimo::guiding_centre::state> integration_algorithm;
-//   boost::numeric::odeint::bulirsch_stoer<gyronimo::guiding_centre::state> integration_algorithm;
+  boost::numeric::odeint::runge_kutta4<guiding_centre::state> integration_algorithm;
+//   boost::numeric::odeint::bulirsch_stoer<guiding_centre::state> integration_algorithm;
   boost::numeric::odeint::integrate_const(
       integration_algorithm, odeint_adapter(&gc),
       initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
@@ -84,73 +86,74 @@ using namespace gyronimo;
   return x_vec;
  }
 
-// #include "metric_stellna_qs_partial.hh"
-// #include "equilibrium_stellna_qs_partial.hh"
-//  std::vector< std::vector<double>> gc_solver_qs_partial(
-//   double G0, double G2, double I2, double nfp, double iota,
-//   double iotaN, double B0, double B1c,
-//   const std::vector<double>& B20,
-//   double B2c, double beta1s, double charge,
-//   double mass, double lambda, int vpp_sign,
-//   double energy, double r0, double theta0, 
-//   double phi0, size_t nsamples, double Tfinal
-//  )
-//  {
-//   // Compute normalisation constants:
-//   double Lref = 1.0;
-//   double Vref = 1.0;
-//   double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
-//   double energySI = energy*gyronimo::codata::e;
+#include "metric_stellna_qs_partial.hh"
+#include "equilibrium_stellna_qs_partial.hh"
+ std::vector< std::vector<double>> gc_solver_qs_partial(
+  double G0, double G2, double I2, double nfp,
+  double iota, double iotaN,
+  const std::vector<double>& phi_grid,
+  double B0, double B1c,
+  const std::vector<double>& B20,
+  double B2c, double beta1s, double charge,
+  double mass, double lambda, int vpp_sign,
+  double energy, double r0, double theta0, 
+  double phi0, size_t nsamples, double Tfinal
+ )
+ {
+  // Compute normalisation constants:
+  double Lref = 1.0;
+  double Vref = 1.0;
+  double Uref = 0.5*codata::m_proton*mass*Vref*Vref;
+  double energySI = energy*codata::e;
 
-//   // Prepare metric, equilibrium and particles
-//   double Bref = B0;
-//   cubic_periodic_gsl_factory ifactory;
-// //   cubic_gsl_factory ifactory;
-// //   steffen_gsl_factory ifactory;
-//   metric_stellna_qs_partial g(Bref, G0, G2, I2, iota, iotaN, B0, B1c,
-//                               dblock_adapter(B20), B2c, beta1s, &ifactory);
+  // Prepare metric, equilibrium and particles
+  double Bref = B0;
+  cubic_periodic_gsl_factory ifactory;
+//   cubic_gsl_factory ifactory;
+//   steffen_gsl_factory ifactory;
+  metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
+                              dblock_adapter(B20), B2c, beta1s, &ifactory);
+  equilibrium_stellna_qs_partial qsc(&g);
 
-//   equilibrium_stellna_qs_partial qsc(&g);
+  guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref/Bref, &qsc);
+  guiding_centre::state initial_state = gc.generate_state(
+      {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
-//   guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref/Bref, &qsc);
-//   guiding_centre::state initial_state = gc.generate_state(
-//       {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
+  // Define variables for integration
+  std::vector<std::vector< double >> x_vec;
+  class push_back_state_and_time{
+  public:
+    std::vector< std::vector< double > >& m_states;
+    push_back_state_and_time( std::vector< std::vector< double > > &states, 
+      const IR3field_c1* e, const guiding_centre* g)
+    : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
+    void operator()(const guiding_centre::state& s, double t){
+      IR3 x = gc_pointer_->get_position(s);
+      double B = eq_pointer_->magnitude(x, t);
+      guiding_centre::state dots = (*gc_pointer_)(s, t);
+      IR3 y = gc_pointer_->get_position(dots);
+      m_states.push_back({
+        t,x[0],x[1],x[2],
+        gc_pointer_->energy_parallel(s),
+        gc_pointer_->energy_perpendicular(s, t),
+        B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
+        gc_pointer_->get_vpp(dots)
+      });
+    }
+  private:
+    const IR3field_c1* eq_pointer_;
+    const guiding_centre* gc_pointer_;
+  };
 
-//   // Define variables for integration
-//   std::vector<std::vector< double >> x_vec;
-//   class push_back_state_and_time{
-//   public:
-//     std::vector< std::vector< double > >& m_states;
-//     push_back_state_and_time( std::vector< std::vector< double > > &states, 
-//       const IR3field_c1* e, const guiding_centre* g)
-//     : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
-//     void operator()(const guiding_centre::state& s, double t){
-//       IR3 x = gc_pointer_->get_position(s);
-//       double B = eq_pointer_->magnitude(x, t);
-//       guiding_centre::state dots = (*gc_pointer_)(s, t);
-//       IR3 y = gc_pointer_->get_position(dots);
-//       m_states.push_back({
-//         t,x[0],x[1],x[2],
-//         gc_pointer_->energy_parallel(s),
-//         gc_pointer_->energy_perpendicular(s, t),
-//         B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
-//         gc_pointer_->get_vpp(dots)
-//       });
-//     }
-//   private:
-//     const IR3field_c1* eq_pointer_;
-//     const guiding_centre* gc_pointer_;
-//   };
+  // Integrate for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
+  boost::numeric::odeint::runge_kutta4<guiding_centre::state> integration_algorithm;
+//   boost::numeric::odeint::bulirsch_stoer<guiding_centre::state> integration_algorithm;
+  boost::numeric::odeint::integrate_const(
+      integration_algorithm, odeint_adapter(&gc),
+      initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
 
-//   // Integrate for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
-//   boost::numeric::odeint::runge_kutta4<gyronimo::guiding_centre::state> integration_algorithm;
-// //   boost::numeric::odeint::bulirsch_stoer<gyronimo::guiding_centre::state> integration_algorithm;
-//   boost::numeric::odeint::integrate_const(
-//       integration_algorithm, odeint_adapter(&gc),
-//       initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
-
-//   return x_vec;
-//  }
+  return x_vec;
+ }
 
 std::array<double,4> operator*(const double& a, const std::array<double,4>& v) {
 std::array<double, 4> result = {a*v[0], a*v[1], a*v[2], a*v[3]};
@@ -198,7 +201,7 @@ size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
   omp_set_num_threads(nthreads);
 
      // defines the ensemble and dynamical system:
-    typedef ensemble<gyronimo::guiding_centre> ensemble_type;
+    typedef ensemble<guiding_centre> ensemble_type;
 
 std::vector<std::vector< double >> x_vec;
 // ODEInt observer object to print diagnostics at each time step.
@@ -229,8 +232,8 @@ private:
   // Compute normalisation constants:
   double Lref = 1.0;
   double Vref = 1.0;
-  double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
-  double energySI = energy*gyronimo::codata::e;
+  double Uref = 0.5*codata::m_proton*mass*Vref*Vref;
+  double energySI = energy*codata::e;
   double B_max = abs(B0) + abs(r_max * B1c) + r_max * r_max * (abs(B20) + abs(B2c));
   double B_min = std::max( 0.01, abs(B0) - abs(r_max * B1c) - r_max * r_max * (abs(B20) + abs(B2c)) );
 
@@ -263,10 +266,10 @@ private:
             for(std::size_t l = 0;l < nphi;l++){
                 initial.push_back(guiding_centre_vector[k].generate_state(
                     {r0, theta[j], phi[l]}, energySI/Uref,
-                    gyronimo::guiding_centre::vpp_sign::plus));
+                    guiding_centre::vpp_sign::plus));
                 initial.push_back(guiding_centre_vector[k].generate_state(
                     {r0, theta[j], phi[l]}, energySI/Uref,
-                    gyronimo::guiding_centre::vpp_sign::minus));
+                    guiding_centre::vpp_sign::minus));
             }
         }
     }
@@ -307,11 +310,11 @@ std::vector< std::vector<double>> gc_solver(
   // Compute normalisation constants:
   double Lref = 1.0;
   double Vref = 1.0;
-  double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref;
-  double energySI = energy*gyronimo::codata::e;
-//   double Valfven = Bref/std::sqrt(gyronimo::codata::mu0*(rhom*gyronimo::codata::m_proton*1.e+19));
-//   double Ualfven = 0.5*gyronimo::codata::m_proton*mass*Valfven*Valfven;
-//   double energySI = energy*gyronimo::codata::e;
+  double Uref = 0.5*codata::m_proton*mass*Vref*Vref;
+  double energySI = energy*codata::e;
+//   double Valfven = Bref/std::sqrt(codata::mu0*(rhom*codata::m_proton*1.e+19));
+//   double Ualfven = 0.5*codata::m_proton*mass*Valfven*Valfven;
+//   double energySI = energy*codata::e;
 //   double vpp_sign = std::copysign(1.0, lambda);
 
   // Prepare metric, equilibrium and particles
@@ -328,10 +331,10 @@ std::vector< std::vector<double>> gc_solver(
 
   guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI/Uref/Bref, &qsc);
   guiding_centre::state initial_state = gc.generate_state(
-      {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
+      {r0, theta0, phi0}, energySI/Uref,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 //   guiding_centre gc(1, Valfven, charge/mass, std::abs(lambda)*energySI/Ualfven/Bref, &qsc);
 //   guiding_centre::state initial_state = gc.generate_state(
-//       {r0, theta0, phi0}, energySI/Ualfven,(vpp_sign > 0 ? gyronimo::guiding_centre::plus : gyronimo::guiding_centre::minus));
+//       {r0, theta0, phi0}, energySI/Ualfven,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
   // Define variables for integration
   std::vector<std::vector< double >> x_vec;
@@ -360,8 +363,8 @@ std::vector< std::vector<double>> gc_solver(
   };
 
   // Integrate for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
-  boost::numeric::odeint::runge_kutta4<gyronimo::guiding_centre::state> integration_algorithm;
-//   boost::numeric::odeint::bulirsch_stoer<gyronimo::guiding_centre::state> integration_algorithm;
+  boost::numeric::odeint::runge_kutta4<guiding_centre::state> integration_algorithm;
+//   boost::numeric::odeint::bulirsch_stoer<guiding_centre::state> integration_algorithm;
   boost::numeric::odeint::integrate_const(
       integration_algorithm, odeint_adapter(&gc),
       initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
@@ -374,6 +377,6 @@ PYBIND11_MODULE(neatpp, m) {
     m.doc() = "Gyronimo Wrapper for the Stellarator Near-Axis Expansion (STELLNA)";
     m.def("gc_solver",&gc_solver);
     m.def("gc_solver_qs",&gc_solver_qs);
-    // m.def("gc_solver_qs_partial",&gc_solver_qs_partial);
+    m.def("gc_solver_qs_partial",&gc_solver_qs_partial);
     m.def("gc_solver_qs_ensemble",&gc_solver_qs_ensemble);
 }

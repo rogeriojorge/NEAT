@@ -42,9 +42,9 @@ class NEATtests(unittest.TestCase):
         """
         Test serialization with OpenMP
         """
-        nthreads_array = [1, 2, 4]
+        nthreads_array = [1, 2]
         nthreads = 8
-        r_max = 0.13
+        r_max = 0.12
 
         g_field = stellna_qs.from_paper(4)
         g_particle = charged_particle_ensemble()

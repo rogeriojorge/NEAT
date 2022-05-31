@@ -13,17 +13,17 @@ quasisymmetric stellarator
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.05  # meters
-theta0 = np.pi  # initial poloidal angle
-phi0 = 0  # initial poloidal angle
-B0 = 4  # Tesla, magnetic field on-axis
+r_initial = 0.1  # meters
+theta0 = np.pi / 2  # initial poloidal angle
+phi0 = np.pi  # initial poloidal angle
+B0 = 5  # Tesla, magnetic field on-axis
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 1.0  # = mu * B0 / energy
+Lambda = 0.98  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
-Tfinal = 1e-4  # seconds
+Tfinal = 6e-5  # seconds
 B20_constant = True  # use a constant B20 (mean value) or the real function
 
 g_field = stellna_qs.from_paper(2, B0=B0)
