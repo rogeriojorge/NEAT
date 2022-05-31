@@ -189,7 +189,8 @@ const size_t n_particles_per_lambda_;
 
 std::vector< std::vector<double>> gc_solver_qs_ensemble(
 double G0, double G2, double I2, double nfp, double iota,
-double iotaN, double B0, double B1c, double B20, double B2c,
+double iotaN, const std::vector<double>& phi_grid,
+double B0, double B1c, double B20, double B2c,
 double beta1s, double charge, double mass, double energy,
 size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
 size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads

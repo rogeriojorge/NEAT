@@ -24,9 +24,9 @@ Lambda = 0.98  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
 Tfinal = 6e-5  # seconds
-B20_constant = True  # use a constant B20 (mean value) or the real function
+B20_constant = False  # use a constant B20 (mean value) or the real function
 
-g_field = stellna_qs.from_paper(2, B0=B0)
+g_field = stellna_qs.from_paper(1, B0=B0)
 g_particle = charged_particle(
     r0=r_initial,
     theta0=theta0,
