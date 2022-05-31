@@ -3,8 +3,7 @@ from qic import Qic
 from qsc import Qsc
 from simsopt._core.optimizable import Optimizable
 
-from neatpp import gc_solver_qs, gc_solver_qs_partial
-from neatpp import gc_solver, gc_solver_qs_ensemble
+from neatpp import gc_solver, gc_solver_qs, gc_solver_qs_ensemble, gc_solver_qs_partial
 
 
 class stellna(Qic, Optimizable):

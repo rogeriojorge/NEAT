@@ -22,7 +22,7 @@ ftol = 1e-5
 B0 = 5
 nsamples = 800
 Tfinal = 0.00004
-stellarator_index = 'QI Jorge'
+stellarator_index = "QI Jorge"
 nthreads = 8
 
 
@@ -97,6 +97,7 @@ class optimize_loss_fraction:
             )
         else:
             least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=nIterations)
+
 
 g_field_temp = stellna.from_paper(stellarator_index, nphi=201)
 g_field = stellna.from_paper(
