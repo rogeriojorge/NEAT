@@ -17,8 +17,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Fetch all history for all tags and branches
-        run: git fetch --prune --unshallow
+      # - name: Fetch all history for all tags and branches
+      #   run: git fetch --prune --unshallow
 
       - name: Setup docker Buildx
         uses: docker/setup-buildx-action@v1
