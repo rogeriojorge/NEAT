@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import time
-import numpy as np
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from neat.fields import stellna
 from neat.tracing import charged_particle_ensemble, particle_ensemble_orbit
@@ -31,7 +31,7 @@ nsamples = 1000  # resolution in time
 Tfinal = 1e-4  # seconds
 nthreads_array = [1, 2, 4]
 B20_constant = False  # use a constant B20 (mean value) or the real function
-stellarator_index = 'QI Jorge'
+stellarator_index = "QI Jorge"
 
 g_field_temp = stellna.from_paper(stellarator_index, nphi=201)
 g_field = stellna.from_paper(
@@ -53,7 +53,12 @@ threads_vs_time = []
 for nthreads in nthreads_array:
     start_time = time.time()
     g_orbits = particle_ensemble_orbit(
-        g_particle, g_field, nsamples=nsamples, Tfinal=Tfinal, nthreads=nthreads, B20_constant=B20_constant
+        g_particle,
+        g_field,
+        nsamples=nsamples,
+        Tfinal=Tfinal,
+        nthreads=nthreads,
+        B20_constant=B20_constant,
     )
     total_time = time.time() - start_time
     print(

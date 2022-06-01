@@ -64,7 +64,12 @@ class effective_velocity_residual(Optimizable):
 
     def compute(self):
         self.orbits = particle_ensemble_orbit(
-            self.particles, self.field, self.nsamples, self.Tfinal, self.nthreads, B20_constant=self.B20_constant
+            self.particles,
+            self.field,
+            self.nsamples,
+            self.Tfinal,
+            self.nthreads,
+            B20_constant=self.B20_constant,
         )
         self.orbits.loss_fraction(r_max=self.r_max)
 

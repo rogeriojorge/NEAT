@@ -1,5 +1,6 @@
 import logging
 from typing import Union
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
@@ -8,7 +9,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import CubicSpline as spline
 
 from .constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
-from .fields import stellna_qs, stellna
+from .fields import stellna, stellna_qs
 
 logger = logging.getLogger(__name__)
 
@@ -429,13 +430,25 @@ class particle_ensemble_orbit:
         self.B_max = (
             abs(np.max(field.B0))
             + r_max * (abs(np.max(field.B1c)) + abs(np.max(field.B1s)))
-            + r_max * r_max * (abs(np.max(field.B20)) + abs(np.max(field.B2c_array)) + abs(np.max(field.B2s_array)))
+            + r_max
+            * r_max
+            * (
+                abs(np.max(field.B20))
+                + abs(np.max(field.B2c_array))
+                + abs(np.max(field.B2s_array))
+            )
         )
         self.B_min = max(
             0.01,
             abs(np.max(field.B0))
             - r_max * (abs(np.max(field.B1c)) + abs(np.max(field.B1s)))
-            - r_max * r_max * (abs(np.max(field.B20)) + abs(np.max(field.B2c_array)) + abs(np.max(field.B2s_array)))
+            - r_max
+            * r_max
+            * (
+                abs(np.max(field.B20))
+                + abs(np.max(field.B2c_array))
+                + abs(np.max(field.B2s_array))
+            ),
         )
         self.theta = np.linspace(0.0, 2 * np.pi, particles.ntheta)
         self.phi = np.linspace(0.0, 2 * np.pi / field.nfp, particles.nphi)
@@ -474,7 +487,8 @@ class particle_ensemble_orbit:
                 (field.G0 + r * r * field.G2 + field.iota * field.I2)
                 * r
                 * field.Bbar
-                / magB / magB
+                / magB
+                / magB
             )
 
     def loss_fraction(self, r_max=0.15, jacobian_weight=True):

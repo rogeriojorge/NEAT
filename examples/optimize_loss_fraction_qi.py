@@ -32,6 +32,7 @@ nphi = 6  # resolution in phi
 nlambda_trapped = 18  # number of pitch angles for trapped particles
 nlambda_passing = 3  # number of pitch angles for passing particles
 
+
 class optimize_loss_fraction:
     def __init__(
         self,
@@ -64,7 +65,7 @@ class optimize_loss_fraction:
             self.Tfinal,
             self.nthreads,
             self.r_max,
-            B20_constant=B20_constant
+            B20_constant=B20_constant,
         )
 
         self.field.fix_all()
@@ -119,11 +120,18 @@ g_particle = charged_particle_ensemble(
     nphi=nphi,
     nlambda_trapped=nlambda_trapped,
     nlambda_passing=nlambda_passing,
-    )
-optimizer = optimize_loss_fraction(
-    g_field, g_particle, r_max=r_max, Tfinal=Tfinal, nsamples=nsamples, B20_constant=B20_constant
 )
-test_particle = charged_particle(r0=r_initial, theta0=np.pi/2, phi0=np.pi, Lambda=0.97)
+optimizer = optimize_loss_fraction(
+    g_field,
+    g_particle,
+    r_max=r_max,
+    Tfinal=Tfinal,
+    nsamples=nsamples,
+    B20_constant=B20_constant,
+)
+test_particle = charged_particle(
+    r0=r_initial, theta0=np.pi / 2, phi0=np.pi, Lambda=0.97
+)
 ##################
 if optimizer.mpi.proc0_world:
     print("Before run:")

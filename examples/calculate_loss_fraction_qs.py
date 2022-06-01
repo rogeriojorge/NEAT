@@ -48,7 +48,12 @@ threads_vs_time = []
 for nthreads in nthreads_array:
     start_time = time.time()
     g_orbits = particle_ensemble_orbit(
-        g_particle, g_field, nsamples=nsamples, Tfinal=Tfinal, nthreads=nthreads, B20_constant=B20_constant
+        g_particle,
+        g_field,
+        nsamples=nsamples,
+        Tfinal=Tfinal,
+        nthreads=nthreads,
+        B20_constant=B20_constant,
     )
     total_time = time.time() - start_time
     print(

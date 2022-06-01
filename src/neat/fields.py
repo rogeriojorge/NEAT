@@ -3,7 +3,13 @@ from qic import Qic
 from qsc import Qsc
 from simsopt._core.optimizable import Optimizable
 
-from neatpp import gc_solver, gc_solver_qs, gc_solver_ensemble, gc_solver_qs_ensemble, gc_solver_qs_partial
+from neatpp import (
+    gc_solver,
+    gc_solver_ensemble,
+    gc_solver_qs,
+    gc_solver_qs_ensemble,
+    gc_solver_qs_partial,
+)
 
 
 class stellna(Qic, Optimizable):
@@ -111,10 +117,8 @@ class stellna_qs(Qsc, Optimizable):
             self.G2 = 0
 
         # This variable may be changed later before calling gyronimo_parameters
-        self.B20_constant = (
-            True
-        )
-        
+        self.B20_constant = True
+
         self.B2c_array = self.B2c
         self.B2s_array = 0
 
