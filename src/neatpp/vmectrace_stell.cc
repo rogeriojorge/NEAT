@@ -162,7 +162,7 @@ int main(int argc, char* argv[]) {
   double s; command_line("s", 0.1) >> s;  // initial normalized radial position/surface (0-1)
   double th; command_line("th", 0) >> th;
   double phi; command_line("phi", 0) >> phi;
-  double lambda; command_line("lambda", 1.0) >> lambda;  // lambda is signed!
+  double lambda; command_line("lambda", 1.0) >> lambda;  // lambda is signed! lambda = mu/Energy = v_perp^2/(v_parallel^2+v_\perp^2)
   double Tfinal; command_line("tfinal", 1.0) >> Tfinal;
   double vpp_sign = std::copysign(1.0, lambda);  // lambda carries vpp sign.
   lambda = std::abs(lambda);  // once vpp sign is stored, lambda turns unsigned.
