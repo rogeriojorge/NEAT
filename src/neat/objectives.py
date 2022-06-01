@@ -49,6 +49,7 @@ class effective_velocity_residual(Optimizable):
         Tfinal=0.0003,
         nthreads=2,
         r_max=0.12,
+        B20_constant=False,
     ) -> None:
 
         self.field = field
@@ -57,12 +58,13 @@ class effective_velocity_residual(Optimizable):
         self.Tfinal = Tfinal
         self.nthreads = nthreads
         self.r_max = r_max
+        self.B20_constant = B20_constant
 
         Optimizable.__init__(self, depends_on=[field])
 
     def compute(self):
         self.orbits = particle_ensemble_orbit(
-            self.particles, self.field, self.nsamples, self.Tfinal, self.nthreads
+            self.particles, self.field, self.nsamples, self.Tfinal, self.nthreads, B20_constant=self.B20_constant
         )
         self.orbits.loss_fraction(r_max=self.r_max)
 

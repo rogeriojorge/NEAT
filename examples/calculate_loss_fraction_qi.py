@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import time
+import numpy as np
 
 import matplotlib.pyplot as plt
 
-from neat.fields import stellna_qs
+from neat.fields import stellna
 from neat.tracing import charged_particle_ensemble, particle_ensemble_orbit
 
 """                                                                           
@@ -29,8 +30,13 @@ nlambda_passing = 3  # number of pitch angles for passing particles
 nsamples = 1000  # resolution in time
 Tfinal = 1e-4  # seconds
 nthreads_array = [1, 2, 4]
+B20_constant = False  # use a constant B20 (mean value) or the real function
+stellarator_index = 'QI Jorge'
 
-g_field = stellna_qs.from_paper(2, B0=B0, etabar=0.8, nphi=151)
+g_field_temp = stellna.from_paper(stellarator_index, nphi=201)
+g_field = stellna.from_paper(
+    stellarator_index, B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
+)
 g_particle = charged_particle_ensemble(
     r0=r_initial,
     r_max=r_max,
@@ -47,7 +53,7 @@ threads_vs_time = []
 for nthreads in nthreads_array:
     start_time = time.time()
     g_orbits = particle_ensemble_orbit(
-        g_particle, g_field, nsamples=nsamples, Tfinal=Tfinal, nthreads=nthreads
+        g_particle, g_field, nsamples=nsamples, Tfinal=Tfinal, nthreads=nthreads, B20_constant=B20_constant
     )
     total_time = time.time() - start_time
     print(

@@ -3,7 +3,7 @@ from qic import Qic
 from qsc import Qsc
 from simsopt._core.optimizable import Optimizable
 
-from neatpp import gc_solver, gc_solver_qs, gc_solver_qs_ensemble, gc_solver_qs_partial
+from neatpp import gc_solver, gc_solver_qs, gc_solver_ensemble, gc_solver_qs_ensemble, gc_solver_qs_partial
 
 
 class stellna(Qic, Optimizable):
@@ -32,6 +32,9 @@ class stellna(Qic, Optimizable):
             beta_0 = [0] * (len(self.varphi) + 1)
             beta_1c = [0] * (len(self.varphi) + 1)
             beta_1s = [0] * (len(self.varphi) + 1)
+            self.B20 = B20
+            self.B2c_array = B2c
+            self.B2s_array = B2s
             self.G2 = 0
         else:
             if self.B20_constant:
@@ -67,8 +70,8 @@ class stellna(Qic, Optimizable):
     def neatpp_solver(self, *args, **kwargs):
         return gc_solver(*args, *kwargs)
 
-    # def neatpp_solver_ensemble(self, *args, **kwargs):
-    #     return gc_solver_ensemble(*args, *kwargs)
+    def neatpp_solver_ensemble(self, *args, **kwargs):
+        return gc_solver_ensemble(*args, *kwargs)
 
     def get_inv_L_grad_B(self):
         return self.inv_L_grad_B / np.sqrt(self.nphi)
@@ -98,6 +101,7 @@ class stellna_qs(Qsc, Optimizable):
         ), f"The stellna_qs field requires a quasisymmetric magnetic field with B0 a scalar constant"
 
         self.B1c = self.etabar * self.B0
+        self.B1s = 0
 
         if self.order == "r1":
             self.B20 = 0
@@ -106,9 +110,13 @@ class stellna_qs(Qsc, Optimizable):
             self.beta_1s = 0
             self.G2 = 0
 
+        # This variable may be changed later before calling gyronimo_parameters
         self.B20_constant = (
-            True  # This variable may be changed later if B20 should be constant
+            True
         )
+        
+        self.B2c_array = self.B2c
+        self.B2s_array = 0
 
     def gyronimo_parameters(self):
         if self.B20_constant:

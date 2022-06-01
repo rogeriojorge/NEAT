@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import glob
-import logging
 import os
 
 import matplotlib.patches as mpatches
@@ -24,8 +23,15 @@ B2c = B0 / 8
 nsamples = 800
 Tfinal = 0.00004
 stellarator_index = 2
-nthreads = 8
-
+nthreads = 4
+B20_constant = True
+energy = 3.52e6  # electron-volt
+charge = 2  # times charge of proton
+mass = 4  # times mass of proton
+ntheta = 14  # resolution in theta
+nphi = 8  # resolution in phi
+nlambda_trapped = 20  # number of pitch angles for trapped particles
+nlambda_passing = 3  # number of pitch angles for passing particles
 
 class optimize_loss_fraction:
     def __init__(
@@ -37,9 +43,8 @@ class optimize_loss_fraction:
         Tfinal=Tfinal,
         nthreads=nthreads,
         parallel=False,
+        B20_constant=B20_constant,
     ) -> None:
-
-        # log(level=logging.DEBUG)
 
         self.field = field
         self.particles = particles
@@ -60,6 +65,7 @@ class optimize_loss_fraction:
             self.Tfinal,
             self.nthreads,
             self.r_max,
+            B20_constant=B20_constant,
         )
 
         self.field.fix_all()
@@ -101,9 +107,19 @@ class optimize_loss_fraction:
 
 
 g_field = stellna_qs.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
-g_particle = charged_particle_ensemble(r0=r_initial, r_max=r_max)
+g_particle = charged_particle_ensemble(
+    r0=r_initial,
+    r_max=r_max,
+    energy=energy,
+    charge=charge,
+    mass=mass,
+    ntheta=ntheta,
+    nphi=nphi,
+    nlambda_trapped=nlambda_trapped,
+    nlambda_passing=nlambda_passing,
+)
 optimizer = optimize_loss_fraction(
-    g_field, g_particle, r_max=r_max, Tfinal=Tfinal, nsamples=nsamples
+    g_field, g_particle, r_max=r_max, Tfinal=Tfinal, nsamples=nsamples, B20_constant=B20_constant
 )
 test_particle = charged_particle(r0=r_initial, theta0=np.pi, Lambda=1.0)
 ##################

@@ -1,5 +1,5 @@
 import logging
-
+from typing import Union
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import CubicSpline as spline
 
 from .constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
-from .fields import stellna_qs
+from .fields import stellna_qs, stellna
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ class particle_orbit:
     """
 
     def __init__(
-        self, particle, field, nsamples=1000, Tfinal=0.0001, B20_constant=True
+        self, particle, field, nsamples=1000, Tfinal=0.0001, B20_constant=False
     ) -> None:
 
         self.particle = particle
@@ -395,10 +395,11 @@ class particle_ensemble_orbit:
     def __init__(
         self,
         particles: charged_particle_ensemble,
-        field: stellna_qs,
+        field: Union[stellna_qs, stellna],
         nsamples=800,
         Tfinal=0.0001,
         nthreads=2,
+        B20_constant=False,
     ) -> None:
 
         self.particles = particles
@@ -406,6 +407,8 @@ class particle_ensemble_orbit:
         self.nsamples = nsamples
         self.nthreads = nthreads
         self.Tfinal = Tfinal
+
+        self.field.B20_constant = B20_constant
 
         solution = np.array(
             self.field.neatpp_solver_ensemble(
@@ -424,24 +427,24 @@ class particle_ensemble_orbit:
         # Save the values of theta, phi and lambda used
         r_max = self.particles.r_max
         self.B_max = (
-            abs(field.B0)
-            + abs(r_max * field.B1c)
-            + r_max * r_max * (abs(field.B20_mean) + abs(field.B2c))
+            abs(np.max(field.B0))
+            + r_max * (abs(np.max(field.B1c)) + abs(np.max(field.B1s)))
+            + r_max * r_max * (abs(np.max(field.B20)) + abs(np.max(field.B2c_array)) + abs(np.max(field.B2s_array)))
         )
         self.B_min = max(
             0.01,
-            abs(field.B0)
-            - abs(r_max * field.B1c)
-            - r_max * r_max * (abs(field.B20_mean) + abs(field.B2c)),
+            abs(np.max(field.B0))
+            - r_max * (abs(np.max(field.B1c)) + abs(np.max(field.B1s)))
+            - r_max * r_max * (abs(np.max(field.B20)) + abs(np.max(field.B2c_array)) + abs(np.max(field.B2s_array)))
         )
         self.theta = np.linspace(0.0, 2 * np.pi, particles.ntheta)
         self.phi = np.linspace(0.0, 2 * np.pi / field.nfp, particles.nphi)
         self.lambda_trapped = np.linspace(
-            field.B0 / self.B_max, field.B0 / self.B_min, particles.nlambda_trapped
+            field.Bbar / self.B_max, field.Bbar / self.B_min, particles.nlambda_trapped
         )
         self.lambda_passing = np.linspace(
             0.0,
-            field.B0 / self.B_max * (1.0 - 1.0 / particles.nlambda_passing),
+            field.Bbar / self.B_max * (1.0 - 1.0 / particles.nlambda_passing),
             particles.nlambda_passing,
         )
         self.lambda_all = np.concatenate([self.lambda_trapped, self.lambda_passing])
@@ -466,16 +469,12 @@ class particle_ensemble_orbit:
             theta = initial_lambda_theta_phi_vppsign[1]
             phi = initial_lambda_theta_phi_vppsign[2]
             r = particles.r0
-            magB = (
-                field.B0
-                + r * (field.B1c * np.cos(theta))
-                + r * r * (field.B20_mean + field.B2c * np.cos(2 * theta))
-            )
+            magB = field.B_mag(r, theta, phi, Boozer_toroidal=True)
             self.initial_jacobian.append(
                 (field.G0 + r * r * field.G2 + field.iota * field.I2)
                 * r
-                * field.B0
-                / magB
+                * field.Bbar
+                / magB / magB
             )
 
     def loss_fraction(self, r_max=0.15, jacobian_weight=True):

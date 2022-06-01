@@ -244,8 +244,8 @@ private:
 // # Jacobian in Boozer coordinates = (G/B^2)(r_0,theta_0,phi_0), ((G-N*I)/B^2)(r_0,theta_0,phi_0) if theta is theta-N phi (check!)        
   std::valarray<double> theta = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ntheta);
   std::valarray<double> phi = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi/nfp, nphi);
-  std::valarray<double> lambda_trapped = linspace<std::valarray<double>>(B0/B_max, B0/B_min, nlambda_trapped);
-  std::valarray<double> lambda_passing = linspace<std::valarray<double>>(0.0, B0/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
+  std::valarray<double> lambda_trapped = linspace<std::valarray<double>>(Bref/B_max, Bref/B_min, nlambda_trapped);
+  std::valarray<double> lambda_passing = linspace<std::valarray<double>>(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
   // lambda minimo = 0?
   
   std::vector<guiding_centre> guiding_centre_vector;
@@ -373,11 +373,134 @@ std::vector< std::vector<double>> gc_solver(
   return x_vec;
 }
 
+std::vector< std::vector<double>> gc_solver_ensemble(
+int nfp, double G0, double G2, double I2, double iota,
+double iotaN, double Bref, const std::vector<double>& phi_grid,
+const std::vector<double>& B0,
+const std::vector<double>& B1c,
+const std::vector<double>& B1s,
+const std::vector<double>& B20,
+const std::vector<double>& B2c,
+const std::vector<double>& B2s,
+const std::vector<double>& beta0,
+const std::vector<double>& beta1c,
+const std::vector<double>& beta1s,
+double charge, double mass, double energy,
+size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
+size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
+)
+{
+
+// gets the number of threads from the openmp environment:
+  omp_set_dynamic(0);  // explicitly disable dynamic teams
+  omp_set_num_threads(nthreads);
+
+     // defines the ensemble and dynamical system:
+    typedef ensemble<guiding_centre> ensemble_type;
+
+std::vector<std::vector< double >> x_vec;
+// ODEInt observer object to print diagnostics at each time step.
+class orbit_observer {
+public:
+  std::vector< std::vector< double > >& m_states;
+  orbit_observer( std::vector< std::vector< double > > &states, const ensemble_type& particle_ensemble)
+  : m_states( states ), particle_ensemble_(particle_ensemble) { };
+  void operator()(const ensemble_type::state& z, double t) {
+    std::vector<double> temp;
+    temp.push_back(t);
+    for(std::size_t k = 0;k < particle_ensemble_.size();k++){
+      IR3 x = particle_ensemble_.gyron()[k/particle_ensemble_.n_particles_per_lambda()].get_position(z[k]);
+      temp.push_back(x[0]);
+    }
+    m_states.push_back(temp);
+  };
+private:
+ const ensemble_type& particle_ensemble_;
+};
+
+  // Prepare metric, equilibrium and particles
+  cubic_periodic_gsl_factory ifactory;
+//   cubic_gsl_factory ifactory;
+//   steffen_gsl_factory ifactory;
+  metric_stellna g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN,
+                   dblock_adapter(B0), dblock_adapter(B1c), dblock_adapter(B1s),
+                   dblock_adapter(B20), dblock_adapter(B2c), dblock_adapter(B2s),
+                   dblock_adapter(beta0), dblock_adapter(beta1c), dblock_adapter(beta1s),
+                   &ifactory);
+
+  equilibrium_stellna qsc(&g);
+
+  // Compute normalisation constants:
+  double Lref = 1.0;
+  double Vref = 1.0;
+  double Uref = 0.5*codata::m_proton*mass*Vref*Vref;
+  double energySI = energy*codata::e;
+  double B0_max = abs(*max_element(B0.begin(), B0.end()));
+  double B1c_max = abs(*max_element(B1c.begin(), B1c.end()));
+  double B1s_max = abs(*max_element(B1s.begin(), B1s.end()));
+  double B20_max = abs(*max_element(B20.begin(), B20.end()));
+  double B2c_max = abs(*max_element(B2c.begin(), B2c.end()));
+  double B2s_max = abs(*max_element(B2s.begin(), B2s.end()));
+  double B_max = B0_max + r_max * (B1c_max + B1s_max) + r_max * r_max * (B20_max + B2c_max + B2s_max);
+  double B_min = std::max( 0.01, B0_max - r_max * (B1c_max + B1s_max) - r_max * r_max * (B20_max + B2c_max + B2s_max));
+
+// # As we work in Boozer coordinates, not in spacial coordinates, we don't initialize particles
+// # uniformly in cartesian coordinates, in real space. To alleviate that, each particle initialization
+// # or the objective function for each particle can be weighted by the volume jacobian
+// # Jacobian in Boozer coordinates = (G/B^2)(r_0,theta_0,phi_0), ((G-N*I)/B^2)(r_0,theta_0,phi_0) if theta is theta-N phi (check!)        
+  std::valarray<double> theta = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi, ntheta);
+  std::valarray<double> phi = linspace<std::valarray<double>>(0.0, 2*std::numbers::pi/nfp, nphi);
+  std::valarray<double> lambda_trapped = linspace<std::valarray<double>>(Bref/B_max, Bref/B_min, nlambda_trapped);
+  std::valarray<double> lambda_passing = linspace<std::valarray<double>>(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
+  
+  std::vector<guiding_centre> guiding_centre_vector;
+  // de modo a poder paralelizar estes ciclos, dimensionar o array initial com o tamanho (nlambda_trapped+nlambda_passing)*ntheta*nphi
+//   #pragma omp parallel for
+  for(std::size_t k = 0;k < nlambda_trapped;k++){
+    guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI/Uref/Bref, &qsc));
+  }
+  for(std::size_t k = 0;k < nlambda_passing;k++){
+    guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_passing[k]*energySI/Uref/Bref, &qsc));
+  }
+
+  // defines the ensemble initial state:
+  ensemble_type::state initial;
+  // de modo a poder paralelizar estes ciclos, dimensionar o array initial com o tamanho (nlambda_trapped+nlambda_passing)
+//   #pragma omp parallel for
+    for(std::size_t k = 0;k < nlambda_trapped + nlambda_passing;k++){
+        for(std::size_t j = 0;j < ntheta;j++){
+            for(std::size_t l = 0;l < nphi;l++){
+                initial.push_back(guiding_centre_vector[k].generate_state(
+                    {r0, theta[j], phi[l]}, energySI/Uref,
+                    guiding_centre::vpp_sign::plus));
+                initial.push_back(guiding_centre_vector[k].generate_state(
+                    {r0, theta[j], phi[l]}, energySI/Uref,
+                    guiding_centre::vpp_sign::minus));
+            }
+        }
+    }
+
+// create ensemble object
+ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
+
+// integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
+//   boost::numeric::odeint::bulirsch_stoer<ensemble_type::state> ode_stepper;
+  boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
+  boost::numeric::odeint::integrate_const(
+      ode_stepper, ensemble_object,
+      initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
+      );
+
+     return x_vec;
+ }
+
+
 // Python wrapper functions
 PYBIND11_MODULE(neatpp, m) {
     m.doc() = "Gyronimo Wrapper for the Stellarator Near-Axis Expansion (STELLNA)";
-    m.def("gc_solver",&gc_solver);
-    m.def("gc_solver_qs",&gc_solver_qs);
-    m.def("gc_solver_qs_partial",&gc_solver_qs_partial);
-    m.def("gc_solver_qs_ensemble",&gc_solver_qs_ensemble);
+    m.def("gc_solver",             &gc_solver);
+    m.def("gc_solver_ensemble",    &gc_solver_ensemble);
+    m.def("gc_solver_qs",          &gc_solver_qs);
+    m.def("gc_solver_qs_ensemble", &gc_solver_qs_ensemble);
+    m.def("gc_solver_qs_partial",  &gc_solver_qs_partial);
 }

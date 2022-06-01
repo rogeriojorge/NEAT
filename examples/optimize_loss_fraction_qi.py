@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import glob
-import logging
 import os
 
 import matplotlib.patches as mpatches
@@ -15,16 +14,23 @@ from neat.fields import stellna
 from neat.objectives import effective_velocity_residual, loss_fraction_residual
 from neat.tracing import charged_particle, charged_particle_ensemble, particle_orbit
 
-r_initial = 0.05
+r_initial = 0.04
 r_max = 0.1
 nIterations = 10
 ftol = 1e-5
 B0 = 5
-nsamples = 800
-Tfinal = 0.00004
-stellarator_index = "QI Jorge"
-nthreads = 8
-
+nsamples = 700
+Tfinal = 0.0001
+stellarator_index = "QI NFP1 r2"
+nthreads = 4
+B20_constant = False
+energy = 3.52e6  # electron-volt
+charge = 2  # times charge of proton
+mass = 4  # times mass of proton
+ntheta = 12  # resolution in theta
+nphi = 6  # resolution in phi
+nlambda_trapped = 18  # number of pitch angles for trapped particles
+nlambda_passing = 3  # number of pitch angles for passing particles
 
 class optimize_loss_fraction:
     def __init__(
@@ -36,9 +42,8 @@ class optimize_loss_fraction:
         Tfinal=Tfinal,
         nthreads=nthreads,
         parallel=False,
+        B20_constant=B20_constant,
     ) -> None:
-
-        # log(level=logging.DEBUG)
 
         self.field = field
         self.particles = particles
@@ -59,6 +64,7 @@ class optimize_loss_fraction:
             self.Tfinal,
             self.nthreads,
             self.r_max,
+            B20_constant=B20_constant
         )
 
         self.field.fix_all()
@@ -103,11 +109,21 @@ g_field_temp = stellna.from_paper(stellarator_index, nphi=201)
 g_field = stellna.from_paper(
     stellarator_index, B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
 )
-g_particle = charged_particle_ensemble(r0=r_initial, r_max=r_max)
+g_particle = charged_particle_ensemble(
+    r0=r_initial,
+    r_max=r_max,
+    energy=energy,
+    charge=charge,
+    mass=mass,
+    ntheta=ntheta,
+    nphi=nphi,
+    nlambda_trapped=nlambda_trapped,
+    nlambda_passing=nlambda_passing,
+    )
 optimizer = optimize_loss_fraction(
-    g_field, g_particle, r_max=r_max, Tfinal=Tfinal, nsamples=nsamples
+    g_field, g_particle, r_max=r_max, Tfinal=Tfinal, nsamples=nsamples, B20_constant=B20_constant
 )
-test_particle = charged_particle(r0=r_initial, theta0=np.pi, Lambda=1.0)
+test_particle = charged_particle(r0=r_initial, theta0=np.pi/2, phi0=np.pi, Lambda=0.97)
 ##################
 if optimizer.mpi.proc0_world:
     print("Before run:")
