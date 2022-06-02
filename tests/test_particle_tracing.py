@@ -25,9 +25,27 @@ class NEATtests(unittest.TestCase):
         n_samples = 600
         Tfinal = 0.0001
         precision = 7
+        r_initial = 0.05  # meters
+        theta0 = np.pi / 2  # initial poloidal angle
+        phi0 = np.pi  # initial poloidal angle
+        B0 = 5  # Tesla, magnetic field on-axis
+        energy = 3.52e6  # electron-volt
+        charge = 2  # times charge of proton
+        mass = 4  # times mass of proton
+        Lambda = 0.98  # = mu * B0 / energy
+        vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 
         g_field = stellna_qs.from_paper(1, B0=2)
-        g_particle = charged_particle()
+        g_particle = charged_particle(
+            r0=r_initial,
+            theta0=theta0,
+            phi0=phi0,
+            energy=energy,
+            Lambda=Lambda,
+            charge=charge,
+            mass=mass,
+            vpp_sign=vpp_sign,
+        )
         g_orbit = particle_orbit(g_particle, g_field, nsamples=n_samples, Tfinal=Tfinal)
         np.testing.assert_allclose(
             g_orbit.total_energy,
@@ -43,8 +61,8 @@ class NEATtests(unittest.TestCase):
         Test serialization with OpenMP
         """
         nthreads_array = [1, 2]
-        nthreads = 8
-        r_max = 0.12
+        nthreads = 2
+        r_max = 0.1
 
         g_field = stellna_qs.from_paper(4)
         g_particle = charged_particle_ensemble()
