@@ -22,8 +22,7 @@ B0 = 5
 B2c = B0 / 8
 nsamples = 800
 Tfinal = 0.00004
-stellarator_index = 2
-nthreads = 4
+stellarator_index = 1
 B20_constant = True
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
@@ -32,6 +31,7 @@ ntheta = 14  # resolution in theta
 nphi = 8  # resolution in phi
 nlambda_trapped = 20  # number of pitch angles for trapped particles
 nlambda_passing = 3  # number of pitch angles for passing particles
+nthreads = 4
 
 
 class optimize_loss_fraction:

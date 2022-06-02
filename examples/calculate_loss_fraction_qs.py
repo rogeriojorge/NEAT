@@ -16,22 +16,22 @@ in a quasisymmetric stellarator
 # Calculate loss fraction at a radius = r_max
 # Test OpenMP parallelization with an array of threads = nthreads_array
 # The total number of particles is ntheta * nphi * (nlambda_passing+nlambda_trapped) * 2 (particles with v_parallel = +1, -1)
-r_initial = 0.07  # meters
-r_max = 0.1  # meters
-B0 = 4  # Tesla, magnetic field on-axis
+r_initial = 0.03  # meters
+r_max = 0.08  # meters
+B0 = 5  # Tesla, magnetic field on-axis
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-ntheta = 14  # resolution in theta
+ntheta = 16  # resolution in theta
 nphi = 8  # resolution in phi
 nlambda_trapped = 20  # number of pitch angles for trapped particles
 nlambda_passing = 3  # number of pitch angles for passing particles
-nsamples = 1000  # resolution in time
-Tfinal = 1e-4  # seconds
+nsamples = 3000  # resolution in time
+Tfinal = 1e-1  # seconds
 nthreads_array = [1, 2, 4]
-B20_constant = True  # use a constant B20 (mean value) or the real function
+stellarator_index = 1
 
-g_field = stellna_qs.from_paper(2, B0=B0, etabar=0.8, nphi=151)
+g_field = stellna_qs.from_paper(stellarator_index, B0=B0, nphi=151)
 g_particle = charged_particle_ensemble(
     r0=r_initial,
     r_max=r_max,
@@ -43,7 +43,8 @@ g_particle = charged_particle_ensemble(
     nlambda_trapped=nlambda_trapped,
     nlambda_passing=nlambda_passing,
 )
-print("Starting particle tracer")
+print("Starting particle tracer with B20 constant")
+B20_constant = True
 threads_vs_time = []
 for nthreads in nthreads_array:
     start_time = time.time()
@@ -61,18 +62,52 @@ for nthreads in nthreads_array:
     )
     threads_vs_time.append([nthreads, total_time])
 g_orbits.loss_fraction(r_max=r_max, jacobian_weight=True)
-plt.semilogx(g_orbits.time, g_orbits.loss_fraction_array, label="With jacobian weights")
+plt.semilogx(g_orbits.time, g_orbits.loss_fraction_array, label="With jacobian weights and B20 constant")
 print(
-    f"Final loss fraction with jacobian weights = {g_orbits.loss_fraction_array[-1]*100}%"
+    f"Final loss fraction with jacobian weights and B20 constant = {g_orbits.loss_fraction_array[-1]*100}%"
 )
 # g_orbits.plot_loss_fraction()
 
 g_orbits.loss_fraction(r_max=r_max, jacobian_weight=False)
 plt.semilogx(
-    g_orbits.time, g_orbits.loss_fraction_array, label="Without jacobian weights"
+    g_orbits.time, g_orbits.loss_fraction_array, label="Without jacobian weights and B20 constant"
 )
 print(
-    f"Final loss fraction without jacobian weights = {g_orbits.loss_fraction_array[-1]*100}%"
+    f"Final loss fraction without jacobian weights and B20 constant = {g_orbits.loss_fraction_array[-1]*100}%"
+)
+# g_orbits.plot_loss_fraction()
+
+print("Starting particle tracer with B20 not constant")
+B20_constant = False
+threads_vs_time = []
+for nthreads in nthreads_array:
+    start_time = time.time()
+    g_orbits = particle_ensemble_orbit(
+        g_particle,
+        g_field,
+        nsamples=nsamples,
+        Tfinal=Tfinal,
+        nthreads=nthreads,
+        B20_constant=B20_constant,
+    )
+    total_time = time.time() - start_time
+    print(
+        f"  Running with {nthreads} threads and {g_orbits.nparticles} particles took {total_time}s"
+    )
+    threads_vs_time.append([nthreads, total_time])
+g_orbits.loss_fraction(r_max=r_max, jacobian_weight=True)
+plt.semilogx(g_orbits.time, g_orbits.loss_fraction_array, label="With jacobian weights and B20 not constant")
+print(
+    f"Final loss fraction with jacobian weights and B20 not constant = {g_orbits.loss_fraction_array[-1]*100}%"
+)
+# g_orbits.plot_loss_fraction()
+
+g_orbits.loss_fraction(r_max=r_max, jacobian_weight=False)
+plt.semilogx(
+    g_orbits.time, g_orbits.loss_fraction_array, label="Without jacobian weights and B20 not constant"
+)
+print(
+    f"Final loss fraction without jacobian weights and B20 not constant = {g_orbits.loss_fraction_array[-1]*100}%"
 )
 # g_orbits.plot_loss_fraction()
 

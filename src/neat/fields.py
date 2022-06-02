@@ -9,6 +9,7 @@ from neatpp import (
     gc_solver_qs,
     gc_solver_qs_ensemble,
     gc_solver_qs_partial,
+    gc_solver_qs_partial_ensemble,
 )
 
 
@@ -149,7 +150,10 @@ class stellna_qs(Qsc, Optimizable):
             return gc_solver_qs_partial(*args, *kwargs)
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
-        return gc_solver_qs_ensemble(*args, *kwargs)
+        if self.B20_constant:
+            return gc_solver_qs_ensemble(*args, *kwargs)
+        else:
+            return gc_solver_qs_partial_ensemble(*args, *kwargs)
 
     def get_inv_L_grad_B(self):
         return self.inv_L_grad_B / np.sqrt(self.nphi)
