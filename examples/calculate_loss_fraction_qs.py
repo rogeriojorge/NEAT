@@ -18,7 +18,7 @@ in a quasisymmetric stellarator
 # The total number of particles is ntheta * nphi * (nlambda_passing+nlambda_trapped) * 2 (particles with v_parallel = +1, -1)
 r_initial = 0.03  # meters
 r_max = 0.08  # meters
-B0 = 5  # Tesla, magnetic field on-axis
+B0 = 4  # Tesla, magnetic field on-axis
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
@@ -62,7 +62,11 @@ for nthreads in nthreads_array:
     )
     threads_vs_time.append([nthreads, total_time])
 g_orbits.loss_fraction(r_max=r_max, jacobian_weight=True)
-plt.semilogx(g_orbits.time, g_orbits.loss_fraction_array, label="With jacobian weights and B20 constant")
+plt.semilogx(
+    g_orbits.time,
+    g_orbits.loss_fraction_array,
+    label="With jacobian weights and B20 constant",
+)
 print(
     f"Final loss fraction with jacobian weights and B20 constant = {g_orbits.loss_fraction_array[-1]*100}%"
 )
@@ -70,7 +74,9 @@ print(
 
 g_orbits.loss_fraction(r_max=r_max, jacobian_weight=False)
 plt.semilogx(
-    g_orbits.time, g_orbits.loss_fraction_array, label="Without jacobian weights and B20 constant"
+    g_orbits.time,
+    g_orbits.loss_fraction_array,
+    label="Without jacobian weights and B20 constant",
 )
 print(
     f"Final loss fraction without jacobian weights and B20 constant = {g_orbits.loss_fraction_array[-1]*100}%"
@@ -96,7 +102,11 @@ for nthreads in nthreads_array:
     )
     threads_vs_time.append([nthreads, total_time])
 g_orbits.loss_fraction(r_max=r_max, jacobian_weight=True)
-plt.semilogx(g_orbits.time, g_orbits.loss_fraction_array, label="With jacobian weights and B20 not constant")
+plt.semilogx(
+    g_orbits.time,
+    g_orbits.loss_fraction_array,
+    label="With jacobian weights and B20 not constant",
+)
 print(
     f"Final loss fraction with jacobian weights and B20 not constant = {g_orbits.loss_fraction_array[-1]*100}%"
 )
@@ -104,7 +114,9 @@ print(
 
 g_orbits.loss_fraction(r_max=r_max, jacobian_weight=False)
 plt.semilogx(
-    g_orbits.time, g_orbits.loss_fraction_array, label="Without jacobian weights and B20 not constant"
+    g_orbits.time,
+    g_orbits.loss_fraction_array,
+    label="Without jacobian weights and B20 not constant",
 )
 print(
     f"Final loss fraction without jacobian weights and B20 not constant = {g_orbits.loss_fraction_array[-1]*100}%"

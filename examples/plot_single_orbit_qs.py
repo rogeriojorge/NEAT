@@ -35,6 +35,7 @@ g_particle = charged_particle(
     Lambda=Lambda,
     charge=charge,
     mass=mass,
+    vpp_sign=vpp_sign,
 )
 print("Starting particle tracer")
 start_time = time.time()

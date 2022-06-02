@@ -3,7 +3,7 @@ import unittest
 
 from numpy.testing import assert_almost_equal
 
-from neat.fields import stellna_qs
+from neat.fields import stellna, stellna_qs
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,5 +43,28 @@ class NEATtests(unittest.TestCase):
                 sigma0=-0.6,
             ).iota,
             0.3111813731231253,
+            decimal=10,
+        )
+
+    def test_stellna(self):
+        """
+        Test that we can obtain qi fields from pyQIC
+        using several methods
+        """
+        assert_almost_equal(
+            stellna.from_paper("QI").iota, 0.7166463779543341, decimal=10
+        )
+
+        assert_almost_equal(
+            stellna(
+                rc=[1, 0.155, 0.0102],
+                zs=[0, 0.154, 0.0111],
+                nfp=2,
+                etabar=0.1,
+                order="r3",
+                B2c=-0.01,
+                nphi=251,
+            ).iota,
+            -0.018692578813516082,
             decimal=10,
         )
