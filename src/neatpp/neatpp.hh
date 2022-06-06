@@ -2,21 +2,14 @@
 #define NEATPP
 
 #include <omp.h>
-#include <cstddef>
-#include <vector>
 #include <numbers>
-#include <iterator>
-#include <boost/math/tools/roots.hpp>
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
-#include <boost/numeric/odeint/stepper/bulirsch_stoer.hpp>
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
 #include <gyronimo/core/codata.hh>
 #include <gyronimo/core/dblock.hh>
-#include <gyronimo/core/linspace.hh>
 #include <gyronimo/interpolators/cubic_gsl.hh>
 #include <gyronimo/dynamics/guiding_centre.hh>
 #include <gyronimo/dynamics/odeint_adapter.hh>
-#include <gyronimo/interpolators/steffen_gsl.hh>
 #include <gyronimo/interpolators/cubic_periodic_gsl.hh>
 #include "metric_stellna_qs.hh"
 #include "equilibrium_stellna_qs.hh"
@@ -104,6 +97,53 @@ private:
     const size_t n_particles_per_lambda_;
 };
 
+// Observer class to store the particle position and velocity
+// at each time step in single particle tracing functions
+class push_back_state_and_time {
+public:
+    vector< vector< double > >& m_states;
+    push_back_state_and_time( vector< vector< double > > &states,
+                                const IR3field_c1* e, const guiding_centre* g)
+        : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
+    void operator()(const guiding_centre::state& s, double t) {
+        IR3 x = gc_pointer_->get_position(s);
+        double B = eq_pointer_->magnitude(x, t);
+        guiding_centre::state dots = (*gc_pointer_)(s, t);
+        IR3 y = gc_pointer_->get_position(dots);
+        m_states.push_back({
+            t,x[0],x[1],x[2],
+            gc_pointer_->energy_parallel(s),
+            gc_pointer_->energy_perpendicular(s, t),
+            B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
+            gc_pointer_->get_vpp(dots)
+        });
+    }
+private:
+    const IR3field_c1* eq_pointer_;
+    const guiding_centre* gc_pointer_;
+};
+
+// Observer class to store the particle position and velocity
+// at each time step in ensemble particle tracing functions
+typedef ensemble<guiding_centre> ensemble_type;
+class orbit_observer {
+public:
+    vector< vector< double > >& m_states;
+    orbit_observer( vector< vector< double > > &states, const ensemble_type& particle_ensemble)
+        : m_states( states ), particle_ensemble_(particle_ensemble) { };
+    void operator()(const ensemble_type::state& z, double t) {
+        vector<double> temp;
+        temp.push_back(t);
+        for(size_t k = 0; k < particle_ensemble_.size(); k++) {
+            IR3 x = particle_ensemble_.gyron()[k/particle_ensemble_.n_particles_per_lambda()].get_position(z[k]);
+            temp.push_back(x[0]);
+        }
+        m_states.push_back(temp);
+    };
+private:
+    const ensemble_type& particle_ensemble_;
+};
+
 // // Single particle tracing functions
 
 // Fully quasisymmetric
@@ -129,30 +169,6 @@ vector< vector<double>> gc_solver_qs(
     {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
     vector<vector< double >> x_vec;
-    class push_back_state_and_time {
-    public:
-        vector< vector< double > >& m_states;
-        push_back_state_and_time( vector< vector< double > > &states,
-                                  const IR3field_c1* e, const guiding_centre* g)
-            : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
-        void operator()(const guiding_centre::state& s, double t) {
-            IR3 x = gc_pointer_->get_position(s);
-            double B = eq_pointer_->magnitude(x, t);
-            guiding_centre::state dots = (*gc_pointer_)(s, t);
-            IR3 y = gc_pointer_->get_position(dots);
-            m_states.push_back({
-                t,x[0],x[1],x[2],
-                gc_pointer_->energy_parallel(s),
-                gc_pointer_->energy_perpendicular(s, t),
-                B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
-                gc_pointer_->get_vpp(dots)
-            });
-        }
-    private:
-        const IR3field_c1* eq_pointer_;
-        const guiding_centre* gc_pointer_;
-    };
-
     boost::numeric::odeint::runge_kutta4<guiding_centre::state> integration_algorithm;
     boost::numeric::odeint::integrate_const(
         integration_algorithm, odeint_adapter(&gc),
@@ -178,7 +194,6 @@ vector< vector<double>> gc_solver_qs_partial(
     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
     cubic_periodic_gsl_factory ifactory;
 //   cubic_gsl_factory ifactory;
-//   steffen_gsl_factory ifactory;
     metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
                                 dblock_adapter(B20), B2c, beta1s, &ifactory);
     equilibrium_stellna_qs_partial qsc(&g);
@@ -187,30 +202,6 @@ vector< vector<double>> gc_solver_qs_partial(
     {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
     vector<vector< double >> x_vec;
-    class push_back_state_and_time {
-    public:
-        vector< vector< double > >& m_states;
-        push_back_state_and_time( vector< vector< double > > &states,
-                                  const IR3field_c1* e, const guiding_centre* g)
-            : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
-        void operator()(const guiding_centre::state& s, double t) {
-            IR3 x = gc_pointer_->get_position(s);
-            double B = eq_pointer_->magnitude(x, t);
-            guiding_centre::state dots = (*gc_pointer_)(s, t);
-            IR3 y = gc_pointer_->get_position(dots);
-            m_states.push_back({
-                t,x[0],x[1],x[2],
-                gc_pointer_->energy_parallel(s),
-                gc_pointer_->energy_perpendicular(s, t),
-                B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
-                gc_pointer_->get_vpp(dots)
-            });
-        }
-    private:
-        const IR3field_c1* eq_pointer_;
-        const guiding_centre* gc_pointer_;
-    };
-
     boost::numeric::odeint::runge_kutta4<guiding_centre::state> integration_algorithm;
     boost::numeric::odeint::integrate_const(
         integration_algorithm, odeint_adapter(&gc),
@@ -242,7 +233,6 @@ vector< vector<double>> gc_solver(
 
     cubic_periodic_gsl_factory ifactory;
 //   cubic_gsl_factory ifactory;
-//   steffen_gsl_factory ifactory;
     metric_stellna g(field_periods, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN,
                      dblock_adapter(B0), dblock_adapter(B1c), dblock_adapter(B1s),
                      dblock_adapter(B20), dblock_adapter(B2c), dblock_adapter(B2s),
@@ -256,30 +246,6 @@ vector< vector<double>> gc_solver(
     {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
     vector<vector< double >> x_vec;
-    class push_back_state_and_time {
-    public:
-        vector< vector< double > >& m_states;
-        push_back_state_and_time( vector< vector< double > > &states,
-                                  const IR3field_c1* e, const guiding_centre* g)
-            : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
-        void operator()(const guiding_centre::state& s, double t) {
-            IR3 x = gc_pointer_->get_position(s);
-            double B = eq_pointer_->magnitude(x, t);
-            guiding_centre::state dots = (*gc_pointer_)(s, t);
-            IR3 y = gc_pointer_->get_position(dots);
-            m_states.push_back({
-                t,x[0],x[1],x[2],
-                gc_pointer_->energy_parallel(s),
-                gc_pointer_->energy_perpendicular(s, t),
-                B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
-                gc_pointer_->get_vpp(dots)
-            });
-        }
-    private:
-        const IR3field_c1* eq_pointer_;
-        const guiding_centre* gc_pointer_;
-    };
-
     boost::numeric::odeint::runge_kutta4<guiding_centre::state> integration_algorithm;
     boost::numeric::odeint::integrate_const(
         integration_algorithm, odeint_adapter(&gc),
@@ -301,29 +267,8 @@ vector< vector<double>> gc_solver_qs_ensemble(
                                )
 {
 
-    omp_set_dynamic(0);  // explicitly disable dynamic teams
+    omp_set_dynamic(0);
     omp_set_num_threads(nthreads);
-
-    typedef ensemble<guiding_centre> ensemble_type;
-
-    vector<vector< double >> x_vec;
-    class orbit_observer {
-    public:
-        vector< vector< double > >& m_states;
-        orbit_observer( vector< vector< double > > &states, const ensemble_type& particle_ensemble)
-            : m_states( states ), particle_ensemble_(particle_ensemble) { };
-        void operator()(const ensemble_type::state& z, double t) {
-            vector<double> temp;
-            temp.push_back(t);
-            for(size_t k = 0; k < particle_ensemble_.size(); k++) {
-                IR3 x = particle_ensemble_.gyron()[k/particle_ensemble_.n_particles_per_lambda()].get_position(z[k]);
-                temp.push_back(x[0]);
-            }
-            m_states.push_back(temp);
-        };
-    private:
-        const ensemble_type& particle_ensemble_;
-    };
 
     double Bref = B0;
     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
@@ -364,8 +309,8 @@ vector< vector<double>> gc_solver_qs_ensemble(
         }
     }
 
+    vector<vector< double >> x_vec;
     ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
-
     boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
     boost::numeric::odeint::integrate_const(
         ode_stepper, ensemble_object,
@@ -386,35 +331,13 @@ vector< vector<double>> gc_solver_qs_partial_ensemble(
                                )
 {
 
-    omp_set_dynamic(0);  // explicitly disable dynamic teams
+    omp_set_dynamic(0);
     omp_set_num_threads(nthreads);
-
-    typedef ensemble<guiding_centre> ensemble_type;
-
-    vector<vector< double >> x_vec;
-    class orbit_observer {
-    public:
-        vector< vector< double > >& m_states;
-        orbit_observer( vector< vector< double > > &states, const ensemble_type& particle_ensemble)
-            : m_states( states ), particle_ensemble_(particle_ensemble) { };
-        void operator()(const ensemble_type::state& z, double t) {
-            vector<double> temp;
-            temp.push_back(t);
-            for(size_t k = 0; k < particle_ensemble_.size(); k++) {
-                IR3 x = particle_ensemble_.gyron()[k/particle_ensemble_.n_particles_per_lambda()].get_position(z[k]);
-                temp.push_back(x[0]);
-            }
-            m_states.push_back(temp);
-        };
-    private:
-        const ensemble_type& particle_ensemble_;
-    };
 
     double Bref = B0;
     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
     cubic_periodic_gsl_factory ifactory;
 //   cubic_gsl_factory ifactory;
-//   steffen_gsl_factory ifactory;
     metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
                                 dblock_adapter(B20), B2c, beta1s, &ifactory);
     equilibrium_stellna_qs_partial qsc(&g);
@@ -452,8 +375,8 @@ vector< vector<double>> gc_solver_qs_partial_ensemble(
         }
     }
 
+    vector<vector< double >> x_vec;
     ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
-
     boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
     boost::numeric::odeint::integrate_const(
         ode_stepper, ensemble_object,
@@ -482,37 +405,11 @@ vector< vector<double>> gc_solver_ensemble(
                                )
 {
 
-// gets the number of threads from the openmp environment:
-    omp_set_dynamic(0);  // explicitly disable dynamic teams
+    omp_set_dynamic(0); 
     omp_set_num_threads(nthreads);
 
-    // defines the ensemble and dynamical system:
-    typedef ensemble<guiding_centre> ensemble_type;
-
-    vector<vector< double >> x_vec;
-// ODEInt observer object to print diagnostics at each time step.
-    class orbit_observer {
-    public:
-        vector< vector< double > >& m_states;
-        orbit_observer( vector< vector< double > > &states, const ensemble_type& particle_ensemble)
-            : m_states( states ), particle_ensemble_(particle_ensemble) { };
-        void operator()(const ensemble_type::state& z, double t) {
-            vector<double> temp;
-            temp.push_back(t);
-            for(size_t k = 0; k < particle_ensemble_.size(); k++) {
-                IR3 x = particle_ensemble_.gyron()[k/particle_ensemble_.n_particles_per_lambda()].get_position(z[k]);
-                temp.push_back(x[0]);
-            }
-            m_states.push_back(temp);
-        };
-    private:
-        const ensemble_type& particle_ensemble_;
-    };
-
-    // Prepare metric, equilibrium and particles
     cubic_periodic_gsl_factory ifactory;
 //   cubic_gsl_factory ifactory;
-//   steffen_gsl_factory ifactory;
     metric_stellna g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN,
                      dblock_adapter(B0), dblock_adapter(B1c), dblock_adapter(B1s),
                      dblock_adapter(B20), dblock_adapter(B2c), dblock_adapter(B2s),
@@ -521,7 +418,6 @@ vector< vector<double>> gc_solver_ensemble(
 
     equilibrium_stellna qsc(&g);
 
-    // Compute normalisation constants:
     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
     double B0_max = abs(*max_element(B0.begin(), B0.end()));
     double B1c_max = abs(*max_element(B1c.begin(), B1c.end()));
@@ -561,8 +457,8 @@ vector< vector<double>> gc_solver_ensemble(
         }
     }
 
+    vector<vector< double >> x_vec;
     ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
-
     boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
     boost::numeric::odeint::integrate_const(
         ode_stepper, ensemble_object,

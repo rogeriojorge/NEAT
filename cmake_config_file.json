@@ -4,6 +4,6 @@
             "-DINSTALL_SIMPLE=OFF",
             "-DBUILD_VMEC_SUPPORT=ON",
             "-DCMAKE_CXX_COMPILER=g++",
-            "-DPROFILING=ON"
+            "-DPROFILING=OFF"
         ]
 }

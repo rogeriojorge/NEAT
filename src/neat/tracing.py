@@ -1,10 +1,10 @@
 import logging
 from typing import Union
 
-from matplotlib import animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
+from matplotlib import animation
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import CubicSpline as spline
 
@@ -152,7 +152,7 @@ class particle_orbit:
             *self.field.gyronimo_parameters(),
             *self.particle.gyronimo_parameters(),
             self.nsamples,
-            self.Tfinal
+            self.Tfinal,
         ]
 
         solution = np.array(
@@ -423,7 +423,7 @@ class particle_ensemble_orbit:
             *self.particles.gyronimo_parameters(),
             self.nsamples,
             self.Tfinal,
-            self.nthreads
+            self.nthreads,
         ]
 
         solution = np.array(

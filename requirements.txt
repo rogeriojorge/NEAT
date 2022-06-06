@@ -1,10 +1,7 @@
-inputs==0.5
-matplotlib==3.5.1
-mpi4py==3.0.3
-netCDF4==1.5.8
-numpy==1.21.5
-qsc==0.1.0
-scipy==1.7.0
-setuptools==59.6.0
+matplotlib
+numpy
+scipy
+qsc
+qic
+setuptools
 pybind11
-simsopt

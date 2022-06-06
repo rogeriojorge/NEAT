@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Install requirements
 RUN apt update
-RUN apt-get install -y git gfortran openmpi-bin libopenmpi-dev gfortran g++ libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev doxygen
+RUN apt-get install -y git gfortran openmpi-bin libopenmpi-dev gfortran g++ libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev doxygen google-perftools libgoogle-perftools-dev
 RUN apt-get install -y libblas-dev liblapack-dev python3 python3-numpy python3-h5py pgplot5 libncarg-dev libscalapack-openmpi-dev python3-pip libnetcdf-c++4-dev cmake vim wget
 RUN pip3 install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml
 
@@ -24,13 +24,13 @@ WORKDIR /home
 # Get NEAT
 COPY . .
 
-# Install VMEC
-WORKDIR /home/external
-RUN git clone https://github.com/hiddensymmetries/VMEC2000.git vmec
-WORKDIR /home/external/vmec
-RUN cp cmake/machines/ubuntu.json cmake_config_file.json
-RUN sed -i -e '9i   "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch",\' cmake_config_file.json
-RUN pip3 install .
+# # Install VMEC
+# WORKDIR /home/external
+# RUN git clone https://github.com/hiddensymmetries/VMEC2000.git vmec
+# WORKDIR /home/external/vmec
+# RUN cp cmake/machines/ubuntu.json cmake_config_file.json
+# RUN sed -i -e '9i   "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch",\' cmake_config_file.json
+# RUN pip3 install .
 
 # Install pyQSC
 WORKDIR /home/external
@@ -44,9 +44,9 @@ RUN git clone https://github.com/rogeriojorge/pyQIC.git
 WORKDIR /home/external/pyQIC
 RUN pip3 install .
 
-# Install SIMSOPT
-WORKDIR /home/external
-RUN pip3 install simsopt
+# # Install SIMSOPT
+# WORKDIR /home/external
+# RUN pip3 install simsopt
 
 # Install NEAT
 WORKDIR /home

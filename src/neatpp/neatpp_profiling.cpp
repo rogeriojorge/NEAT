@@ -35,11 +35,13 @@ int main(int argc, char *argv[]) {
     size_t nsamples = 800;
     double Tfinal = 0.00001;
     
+    // Read number of threads from argv if it exists
     if(argc==2)
         nthreads = stoi(argv[1]);
     else if(argc>2)
         throw "There is only one optional parameter that is the number of threads.";
 
+    // Run function and time it
     chrono::steady_clock::time_point begin = chrono::steady_clock::now();
     gc_solver_qs_partial_ensemble(
         G0, G2, I2, nfp, iota, iotaN,
@@ -50,7 +52,6 @@ int main(int argc, char *argv[]) {
         Tfinal, nthreads);
     chrono::steady_clock::time_point end = chrono::steady_clock::now();
     cout << "nthreads = " << nthreads << " -> " <<  (chrono::duration_cast<chrono::microseconds>(end - begin).count()) /1000000.0 << "s" << endl;
-
 
   return 0;
 }
