@@ -148,6 +148,13 @@ class particle_orbit:
 
         self.field.B20_constant = B20_constant
 
+        self.gyronimo_parameters = [
+            *self.field.gyronimo_parameters(),
+            *self.particle.gyronimo_parameters(),
+            self.nsamples,
+            self.Tfinal
+        ]
+
         solution = np.array(
             self.field.neatpp_solver(
                 *self.field.gyronimo_parameters(),
@@ -157,7 +164,7 @@ class particle_orbit:
             )
         )
 
-        self.gyronimo_parameters = solution
+        self.solution = solution
 
         nu = field.varphi - field.phi
         nu_spline_of_varphi = spline(
@@ -411,6 +418,14 @@ class particle_ensemble_orbit:
 
         self.field.B20_constant = B20_constant
 
+        self.gyronimo_parameters = [
+            *self.field.gyronimo_parameters(),
+            *self.particles.gyronimo_parameters(),
+            self.nsamples,
+            self.Tfinal,
+            self.nthreads
+        ]
+
         solution = np.array(
             self.field.neatpp_solver_ensemble(
                 *self.field.gyronimo_parameters(),
@@ -420,7 +435,9 @@ class particle_ensemble_orbit:
                 self.nthreads
             )
         )
-        self.gyronimo_parameters = solution
+
+        self.solution = solution
+
         self.time = solution[:, 0]
         self.nparticles = solution.shape[1] - 1
         self.r_pos = solution[:, 1:].transpose()

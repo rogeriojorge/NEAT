@@ -36,12 +36,10 @@ metric_stellna_qs_partial::~metric_stellna_qs_partial() {
   if(B20_) delete B20_;
 }
 
-/*phi0_ added to handle phi_grid that do not start on 0
-(such as the quasi-isodynamic stellarator case)*/
 double metric_stellna_qs_partial::reduce_phi(double phi) const {
-  phi = std::fmod(phi-this->phi0_, phi_modulus_factor_);
-  return (phi < 0 ? phi + phi_modulus_factor_ : phi)+this->phi0_;
-  // return phi;
+  phi = std::fmod(phi, phi_modulus_factor_);
+  return (phi < 0 ? phi + phi_modulus_factor_ : phi);
+//   return phi;
 }
 
 SM3 metric_stellna_qs_partial::operator()(const IR3& position) const {

@@ -24,14 +24,14 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 ntheta = 16  # resolution in theta
 nphi = 8  # resolution in phi
-nlambda_trapped = 20  # number of pitch angles for trapped particles
+nlambda_trapped = 14  # number of pitch angles for trapped particles
 nlambda_passing = 3  # number of pitch angles for passing particles
-nsamples = 3000  # resolution in time
-Tfinal = 1e-1  # seconds
+nsamples = 600  # resolution in time
+Tfinal = 1e-3  # seconds
 nthreads_array = [1, 2, 4]
 stellarator_index = 1
 
-g_field = stellna_qs.from_paper(stellarator_index, B0=B0, nphi=151)
+g_field = stellna_qs.from_paper(stellarator_index, B0=B0, nphi=31)
 g_particle = charged_particle_ensemble(
     r0=r_initial,
     r_max=r_max,

@@ -28,13 +28,14 @@ NEAT could be run either directly by installing the requirements pyQSC, gyronimo
 
 # Installation
 
+## CMake
+
+
 Make sure that you have installed all of the python packages listed in the file [requirements.txt](requirements.txt). A simple way of doing so is by running
 
 ```
 pip install -r requirements.txt
 ```
-
-## CMake
 
 On NEAT's root directory run
 
@@ -43,11 +44,7 @@ python setup.py build
 python setup.py install --user
 ```
 
-To clean the build folders and all folders not being tracked by GIT, run
-
-```
-git clean -d -f -x
-```
+Done! Now try running an example.
 
 ## Docker
 
@@ -108,119 +105,6 @@ To run NEAT, you'll need the following libraries
 
 and the python packages specified in [requirements.txt](requirements.txt) .
 
-### Install gyronimo
-In NEAT's root folder, run
-
-```bash
-cd external/gyronimo
-mkdir build
-cd build
-CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build -DSUPPORT_OPENMP=ON -DSUPPORT_VMEC=ON ../
-cmake --build . --target install
-```
-
-If you want to build documentation with doxygen, run
-
-```bash
-cmake --build . --target doc
-```
-
-
-### Compile NEAT
-
-Compilation is done in the src/ folder of the repo. The fields and metrics need to be compiled before compiling the main file NEAT.cc in the src/neatpp folder
-
-#### Example on MacOS
-
-```bash
-cd src/neatpp
-
-cd fields_NEAT
-g++-mp-11 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-
-cd ../metrics_NEAT
-g++-mp-11 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-
-cd ../neatpp
-```
-
-Compile the serial version (no parallelization)
-```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc ../neatpp/fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/neatpp/metric_stellna_qs.o -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib -Wl,-rpath $(pwd)/..
-```
-
-Compile the OpenMP version
-```bash
-g++ -O2 -Wall -std=c++20 -fopenmp NEAT_openmp.cc ../neatpp/fields_NEAT/equilibrium_stellna_qs.o ../neatpp/metrics_NEAT/metric_stellna_qs.o -o NEAT_openmp -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib
-```
-
-The number of threads can be changed using the command
-
-```bash
-export OMP_NUM_THREADS=[number of threads]
-```
-
-#### Example on Linux
-
-```bash
-cd src/neatpp
-
-cd fields_NEAT
-g++-10 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-
-cd ../metrics_NEAT
-g++-10 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-
-cd ../neatpp
-g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include  -Wl,-rpath $(pwd)/../../build/lib
-```
-
-### Install SIMPLE
-In NEAT's root folder, run
-
-```bash
-cd external/simple
-mkdir build
-cd build
-CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
-cmake --build . --target install
-cp simple.x ../../../build/bin
-```
-
-The last command copies the executable of SIMPLE to the folder build/bin
-
-### Install VMEC
-First, in the external/vmec folder, change the file cmake_config_file.json to your machine using an example from the cmake/machines templates. Here is a template for MacOS running gcc11
-
-```
-{
-    "comment": "This configuration file works on a macbook on which gcc and netcdf have been installed using macports.",
-    "cmake_args": [
-           "-DCMAKE_C_COMPILER=mpicc",
-           "-DCMAKE_CXX_COMPILER=mpicxx",
-           "-DCMAKE_Fortran_COMPILER=mpif90",
-           "-DNETCDF_INC_PATH=/opt/local/include",
-           "-DNETCDF_LIB_PATH=/opt/local/lib",
-           "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch"]
-}
-```
-
-Then, in NEAT's root folder, run
-
-```bash
-cd external/vmec
-pip install numpy
-pip install cmake scikit-build ninja f90wrap
-python setup.py build_ext
-python setup.py install
-```
-
-To test VMEC's installation, you can run
-
-```
-python -c "import vmec; print('success')"
-```
-
 # Normalizations
 
 All units are in SI, except:
@@ -230,6 +114,49 @@ All units are in SI, except:
 
 Lambda = mu (SI) / Energy (SI) * B (reference SI)
 
+# Profiling
+
+## Profiling Python code
+
+Use the line_profiler python extension.
+
+```pip install line_profiler```
+
+Example [here](https://stackoverflow.com/questions/22328183/python-line-profiler-code-example/43376466#43376466)
+
+## Profiling the C++ extension
+
+There is a C++ script in the `src/neatpp` directory called `neatpp_profiling.cpp` that has the
+sole purpose of helping find bottlenecks in the C++ implementation. We show here an example of
+how to profile the code using the tool `gperftools`.
+
+    ```https://github.com/gperftools/gperftools```
+
+On MacOs, it can be installed via Macports or Homebrew.
+On Ubuntu, it can be install via ```sudo apt-get install google-perftools```.
+
+For it to profile the code, the flag `PROFILING` should be `ON` in the `cmake_config_file.json` file.
+After compiling NEAT, it will create an executable called `profiling` in the temporary build directory.
+To profile the code using the `gperftools`, you can run
+
+    ```CPUPROFILE=profile.out build/path_to_profiling```
+
+where the output file for the profiling was named `profile.out`.
+
+The results can be ploted using the following command
+
+    ```pprof --gv build/path_to_profiling profile.out```
+
+On MacOs, to show the plot, one needs to install `gprof2dot`, `graphivz` and `gv`. On macports, for example, this can be done using
+
+    ```sudo port install py310-gprof2dot graphivz gv```
+
+where the python version 3.10 was specified.
+
+If, instead of plotting, you would like text results, you can run
+
+    ```prof build/path_to_profiling profile.out```
+
 # FAQ
 
 ## pybind11 not found by cmake
@@ -238,4 +165,12 @@ Please use the following command to install ```pybind11[global]``` instead of ``
 
 ```
 pip install "pybind11[global]"
+```
+
+## How to clean all folders created during installation/execution
+
+To clean the build folders and all folders not being tracked by GIT, run
+
+```
+git clean -d -f -x
 ```
