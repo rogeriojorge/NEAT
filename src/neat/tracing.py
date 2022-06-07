@@ -357,15 +357,19 @@ class ParticleEnsembleOrbit:
             Lambda = initial_lambda_theta_phi_vppsign[0]
             theta = initial_lambda_theta_phi_vppsign[1]
             phi = initial_lambda_theta_phi_vppsign[2]
-            r = particles.r_initial
-            magB = field.B_mag(r, theta, phi, Boozer_toroidal=True)
+            radius = particles.r_initial
+            field_magnitude = field.B_mag(radius, theta, phi, Boozer_toroidal=True)
             self.initial_jacobian.append(
-                (field.G0 + r * r * field.G2 + field.iota * field.I2)
-                * r
+                (field.G0 + radius * radius * field.G2 + field.iota * field.I2)
+                * radius
                 * field.Bbar
-                / magB
-                / magB
+                / field_magnitude
+                / field_magnitude
             )
+
+        self.lost_times_of_particles = []
+        self.loss_fraction_array = []
+        self.total_particles_lost = 0
 
     def loss_fraction(self, r_max=0.15, jacobian_weight=True):
         """
@@ -407,6 +411,7 @@ class ParticleEnsembleOrbit:
         return self.loss_fraction_array
 
     def plot_loss_fraction(self, show=True):
+        """Make a plot of the fraction of total particles lost over time"""
         plt.semilogx(self.time, self.loss_fraction_array)
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
@@ -422,7 +427,7 @@ def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
     quasi-symmetric stellarators.
     """
     m_proton = PROTON_MASS
-    e = ELEMENTARY_CHARGE
+    elementary_charge = ELEMENTARY_CHARGE
 
     p_phi1 = (
         particle.mass
@@ -433,7 +438,7 @@ def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
         / field.Bbar
     )
 
-    p_phi2 = particle.charge * e * r_pos**2 * field.Bbar / 2 * field.iotaN
+    p_phi2 = particle.charge * elementary_charge * r_pos**2 * field.Bbar / 2 * field.iotaN
     p_phi = p_phi1 - p_phi2
 
     return p_phi
