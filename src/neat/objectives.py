@@ -69,11 +69,10 @@ class EffectiveVelocityResidual(Optimizable):
     This residual is smoother than the loss fraction
     residual and is defined as delta s / delta t.
 
-    delta s = maximum radial distance travelled by each particle before
-           coliding with the wall or reaching the end of the simulation
-    delta t = time until particle collided or until the end of simulation,
-            depends on the particle
-    J = delta s/ delta t or delta s^2/delta t
+    - delta s = maximum radial distance travelled by each particle before coliding with the wall or reaching the end of the simulation
+    - delta t = time until particle collided or until the end of simulation, depends on the particle
+    - J = delta s/ delta t or delta s^2/delta t
+
     """
 
     def __init__(

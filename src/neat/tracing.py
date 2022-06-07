@@ -131,9 +131,9 @@ class ParticleOrbit:  # pylint: disable=R0902
     and outputs the characteristics of the orbit.
     Args:
         stel: Qsc instance of pyQSC
-        params (dict): a Python dict() containing the following parameters:
-            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,tfinal
+        params (dict): a Python dict() containing the following parameters: r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
+        
     """
 
     def __init__(
@@ -266,9 +266,9 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
     and outputs the characteristics of the orbit.
     Args:
         stel: Qsc instance of pyQSC
-        params (dict): a Python dict() containing the following parameters:
-            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,tfinal
+        params (dict): a Python dict() containing the following parameters: r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
+
     """
 
     def __init__(

@@ -1,23 +1,51 @@
 NEAT package
 ===============
 
-Subpackages
------------
+neat.constants module
+^^^^^^^^^^^^^^^^^^^^^
 
-.. toctree::
-   :maxdepth: 4
-
-   neat.constants
-   neat.fields
-   neat.objectives
-   neat.plotting
-   neat.tracing
-   neatpp
-
-Module contents
----------------
-
-.. automodule:: neat
+.. automodule:: neat.constants
    :members:
    :undoc-members:
    :show-inheritance:
+
+neat.fields module
+^^^^^^^^^^^^^^^^^^
+
+.. automodule:: neat.fields
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+neat.objectives module
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: neat.objectives
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+neat.plotting module
+^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: neat.plotting
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+neat.tracing module
+^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: neat.tracing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+neatpp module
+^^^^^^^^^^^^^
+
+.. automodule:: neatpp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
