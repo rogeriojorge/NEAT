@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from neat.fields import stellna
-from neat.tracing import charged_particle_ensemble, particle_ensemble_orbit
+from neat.tracing import ChargedParticleEnsemble, particle_ensemble_orbit
 
 """                                                                           
 Calculate the loss fraction of a distribution of particles
@@ -37,7 +37,7 @@ g_field_temp = stellna.from_paper(stellarator_index, nphi=201)
 g_field = stellna.from_paper(
     stellarator_index, B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
 )
-g_particle = charged_particle_ensemble(
+g_particle = ChargedParticleEnsemble(
     r0=r_initial,
     r_max=r_max,
     energy=energy,

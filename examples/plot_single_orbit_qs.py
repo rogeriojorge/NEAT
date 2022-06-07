@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 from neat.fields import stellna_qs
-from neat.tracing import charged_particle, particle_orbit
+from neat.tracing import ChargedParticle, particle_orbit
 
 """                                                                           
 Trace the orbit of a single particle in a
@@ -27,7 +27,7 @@ Tfinal = 6e-5  # seconds
 B20_constant = False  # use a constant B20 (mean value) or the real function
 
 g_field = stellna_qs.from_paper(1, B0=B0)
-g_particle = charged_particle(
+g_particle = ChargedParticle(
     r0=r_initial,
     theta0=theta0,
     phi0=phi0,

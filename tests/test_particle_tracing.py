@@ -6,8 +6,8 @@ import numpy as np
 
 from neat.fields import stellna_qs
 from neat.tracing import (
-    charged_particle,
-    charged_particle_ensemble,
+    ChargedParticle,
+    ChargedParticleEnsemble,
     particle_ensemble_orbit,
     particle_orbit,
 )
@@ -39,7 +39,7 @@ class NEATtests(unittest.TestCase):
         )
 
         g_field = stellna_qs.from_paper(1, B0=B0)
-        g_particle = charged_particle(
+        g_particle = ChargedParticle(
             r0=r_initial,
             theta0=theta0,
             phi0=phi0,
@@ -74,7 +74,7 @@ class NEATtests(unittest.TestCase):
         r_max = 0.1
 
         g_field = stellna_qs.from_paper(4)
-        g_particle = charged_particle_ensemble()
+        g_particle = ChargedParticleEnsemble()
         total_times = [
             self.orbit_time_nthreads(nthread, g_particle, g_field)
             for nthread in nthreads_array
@@ -117,7 +117,7 @@ class NEATtests(unittest.TestCase):
         Lambda = 0.98  # = mu * B0 / energy
         vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
         g_field = stellna_qs.from_paper(4, B0=B0)
-        g_particle = charged_particle(
+        g_particle = ChargedParticle(
             r0=r_initial,
             theta0=theta0,
             phi0=phi0,

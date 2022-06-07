@@ -4,7 +4,7 @@ import unittest
 
 from neat.fields import stellna_qs
 from neat.objectives import optimize_loss_fraction_skeleton
-from neat.tracing import charged_particle_ensemble
+from neat.tracing import ChargedParticleEnsemble
 
 
 class NEATtests(unittest.TestCase):
@@ -14,7 +14,7 @@ class NEATtests(unittest.TestCase):
         energy = 1e4
 
         g_field = stellna_qs.from_paper(4, B0=4, nphi=131)
-        g_particle = charged_particle_ensemble(r0=r_initial, energy=energy)
+        g_particle = ChargedParticleEnsemble(r0=r_initial, energy=energy)
         optimizer = optimize_loss_fraction_skeleton(g_field, g_particle, r_max)
         initial_loss_fraction = optimizer.residual.J()
         optimizer.run(nIterations=4)

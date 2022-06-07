@@ -10,18 +10,19 @@ ensemble orbits.
 
 import logging
 from typing import Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import CubicSpline as spline
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
 from .fields import stellna, stellna_qs
-from .plotting import plot_animation3D, plot_orbit2D, plot_orbit3D, plot_parameters, plot_animation3D
+from .plotting import plot_animation3D, plot_orbit2D, plot_orbit3D, plot_parameters
 
 logger = logging.getLogger(__name__)
 
 
-class charged_particle:
+class ChargedParticle:
     r"""
     Class that contains the physics information of a
     given charged particle, as well as its position
@@ -61,12 +62,13 @@ class charged_particle:
         )
 
 
-class charged_particle_ensemble:
+class ChargedParticleEnsemble:
     r"""
     Class that contains the physics information of a
     collection of charged particles, as well as their position
     and velocities
     """
+
     def __init__(
         self,
         charge=2,
@@ -114,6 +116,7 @@ class particle_orbit:
             r0,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
+
     def __init__(
         self, particle, field, nsamples=1000, Tfinal=0.0001, B20_constant=False
     ) -> None:
@@ -207,15 +210,12 @@ class particle_orbit:
             boundary=boundary,
             rpos_cartesian=self.rpos_cartesian,
             distance=distance,
-            show=show
+            show=show,
         )
-        
+
     def plot(self, show=True):
         """Plot relevant physics parameters of the particle orbit"""
-        plot_parameters(
-            self=self,
-            show=show
-        )
+        plot_parameters(self=self, show=show)
 
     def plot_animation(self, r_surface=0.1, distance=7, show=True, SaveMovie=False):
         """Plot three-dimensional animation of the particle orbit"""
@@ -235,7 +235,7 @@ class particle_orbit:
             nsamples=self.nsamples,
             distance=distance,
             show=show,
-            SaveMovie=SaveMovie
+            SaveMovie=SaveMovie,
         )
 
 
@@ -252,7 +252,7 @@ class particle_ensemble_orbit:
 
     def __init__(
         self,
-        particles: charged_particle_ensemble,
+        particles: ChargedParticleEnsemble,
         field: Union[stellna_qs, stellna],
         nsamples=800,
         Tfinal=0.0001,

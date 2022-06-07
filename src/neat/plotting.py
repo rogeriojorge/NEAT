@@ -6,11 +6,14 @@ attributes for NEAT.
 
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 # import mpl_toolkits.mplot3d.axes3d as p3
 from matplotlib import animation
+
 # from mpl_toolkits.mplot3d import Axes3D
+
 
 def set_axes_equal(axes):
     """
@@ -40,6 +43,7 @@ def set_axes_equal(axes):
     axes.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
     axes.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
+
 def plot_orbit2D(x, y, show=True):
     """
     Make a plot of a single particle orbit in
@@ -56,6 +60,7 @@ def plot_orbit2D(x, y, show=True):
     if show:
         plt.show()
 
+
 def plot_orbit3D(boundary, rpos_cartesian, distance=6, show=True):
     """
     Make a three-dimensional plot of a single particle orbit
@@ -65,9 +70,7 @@ def plot_orbit3D(boundary, rpos_cartesian, distance=6, show=True):
     fig = plt.figure(figsize=(10, 3))
     ax = fig.add_subplot(131, projection="3d")
 
-    ax.plot3D(
-        rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2]
-    )
+    ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
 
     ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
     set_axes_equal(ax)
@@ -75,9 +78,7 @@ def plot_orbit3D(boundary, rpos_cartesian, distance=6, show=True):
     ax.dist = distance
 
     ax = fig.add_subplot(132, projection="3d")
-    ax.plot3D(
-        rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2]
-    )
+    ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
     ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
     set_axes_equal(ax)
     ax.set_axis_off()
@@ -85,9 +86,7 @@ def plot_orbit3D(boundary, rpos_cartesian, distance=6, show=True):
     ax.dist = distance
 
     ax = fig.add_subplot(133, projection="3d")
-    ax.plot3D(
-        rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2]
-    )
+    ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
     ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
     set_axes_equal(ax)
     ax.set_axis_off()
@@ -97,6 +96,7 @@ def plot_orbit3D(boundary, rpos_cartesian, distance=6, show=True):
     plt.tight_layout()
     if show:
         plt.show()
+
 
 def plot_parameters(self, show=True):
     """
@@ -138,9 +138,7 @@ def plot_parameters(self, show=True):
     plt.xlabel(r"$t (s)$")
     plt.legend()
     plt.subplot(3, 3, 8)
-    plt.plot(
-        self.r_pos * np.cos(self.theta_pos), self.r_pos * np.sin(self.theta_pos)
-    )
+    plt.plot(self.r_pos * np.cos(self.theta_pos), self.r_pos * np.sin(self.theta_pos))
     plt.gca().set_aspect("equal", adjustable="box")
     plt.xlabel(r"r cos($\theta$)")
     plt.ylabel(r"r sin($\theta$)")
@@ -152,13 +150,9 @@ def plot_parameters(self, show=True):
     if show:
         plt.show()
 
+
 def plot_animation3D(
-    boundary,
-    rpos_cartesian,
-    nsamples,
-    distance=7,
-    show=True,
-    SaveMovie=False
+    boundary, rpos_cartesian, nsamples, distance=7, show=True, SaveMovie=False
 ):
     """
     Show a three-dimensional animation of a particle

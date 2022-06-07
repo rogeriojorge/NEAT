@@ -12,7 +12,7 @@ from simsopt.util.mpi import MpiPartition, log
 
 from neat.fields import stellna_qs
 from neat.objectives import effective_velocity_residual, loss_fraction_residual
-from neat.tracing import charged_particle, charged_particle_ensemble, particle_orbit
+from neat.tracing import ChargedParticle, ChargedParticleEnsemble, particle_orbit
 
 r_initial = 0.05
 r_max = 0.1
@@ -108,7 +108,7 @@ class optimize_loss_fraction:
 
 
 g_field = stellna_qs.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
-g_particle = charged_particle_ensemble(
+g_particle = ChargedParticleEnsemble(
     r0=r_initial,
     r_max=r_max,
     energy=energy,
@@ -127,7 +127,7 @@ optimizer = optimize_loss_fraction(
     nsamples=nsamples,
     B20_constant=B20_constant,
 )
-test_particle = charged_particle(r0=r_initial, theta0=np.pi, Lambda=1.0)
+test_particle = ChargedParticle(r0=r_initial, theta0=np.pi, Lambda=1.0)
 ##################
 if optimizer.mpi.proc0_world:
     print("Before run:")

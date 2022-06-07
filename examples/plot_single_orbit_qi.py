@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 from neat.fields import stellna
-from neat.tracing import charged_particle, particle_orbit
+from neat.tracing import ChargedParticle, particle_orbit
 
 """                                                                           
 Trace the orbit of a single particle in a
@@ -35,7 +35,7 @@ g_field = stellna.from_paper(
 # g_field = stellna.from_paper(2, B0=B0, nphi=201)
 # Quasi-helically symmetric
 # g_field = stellna.from_paper(4, B0=B0, nphi=201)
-g_particle = charged_particle(
+g_particle = ChargedParticle(
     r0=r_initial,
     theta0=theta0,
     phi0=phi0,
