@@ -1,18 +1,48 @@
-Usage
-===============
+Testing
+^^^^^^^
 
+``NEAT`` includes unit and regression tests, and continuous integration.
 
-Known configurations
-^^^^^^^^^^^^^^^^^^^^
+Python test suite
+*****************
 
-We can use a known configuration from ``pyQSC`` to start tracing particles.
-For example, if we wanted to use the second order configuration from
-section 5.2 of [LandremanSengupta]_, we can simply run the script
+The main test suite is based on the standard ``unittest`` python module.
+Source code for the python tests is located in the ``tests`` directory.
+These tests will use the installed version of the ``NEAT`` python package,
+which may differ from the code in your local repository if you did not
+make an editable install (see :doc:`installation`).
+
+To run all of the tests in the test suite on one processor, you can type
 
 .. code-block::
 
-   ./main.py
+    ./run_tests
 
-in the ``src/neat`` folder.
+from the command line in the repository's home directory. Equivalently,
+you can run
 
-.. [LandremanSengupta] Landreman and Sengupta, *Journal of Plasma Physics* **85**, 815850601 (2019).
+.. code-block::
+
+    python -m unittest
+
+from the ``tests`` directory.
+
+
+Longer examples
+***************
+
+For convenience, the main test suite is designed to run in no more than a few minutes.
+This means that some more complicated integrated and regression tests that require substantial time
+are not included. You may wish to run some of these more complicated tests by hand during development.
+A number of such examples can be found in the ``examples`` subdirectory.
+
+
+Continuous integration
+**********************
+
+The tests are automatically run after every commit to
+the repository.  This automation is handled by GitHub Actions, and
+controlled by the script ``.github/workflows/ci.yml``.
+To view the results of the continuous integration runs, you can click on the "Actions"
+link from the `GitHub repository page <https://github.com/rogeriojorge/neat>`_,
+or you can directly visit `<https://github.com/rogeriojorge/neat/actions>`_.

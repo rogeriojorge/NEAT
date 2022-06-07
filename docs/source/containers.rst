@@ -15,7 +15,7 @@ includes VMEC, pyQSC, pyQIC, SIMSOPT and SIMPLE.
 .. warning::
 
    Docker is not generally allowed to run on computers at HPC centers due to security issues.
-   For those wishing to run ``NEAT`` on MARCONI or NERSC machines, please refer to :ref:`shifter_doc`.
+   For those wishing to run ``NEAT`` on MARCONI, NERSC, or other machines, please refer to udocker.
 
 Requirements
 ^^^^^^^^^^^^

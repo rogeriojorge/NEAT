@@ -1,9 +1,10 @@
 Installation
 ============
 
-This page provides general information on installation.  Detailed
-installation instructions for some specific systems will be made available
-on `the wiki <https://github.com/rogeriojorge/neat/wiki>`_.
+This page provides general information on installation.
+..
+    Detailed installation instructions for some specific systems will be made available
+    on `the wiki <https://github.com/rogeriojorge/neat/wiki>`_.
 
 Requirements
 ^^^^^^^^^^^^
