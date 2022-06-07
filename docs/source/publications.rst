@@ -5,10 +5,8 @@ If you use ``NEAT`` in your research, kindly cite ``NEAT`` from the
 Zenodo repository for its corresponding version. Each release has a
 Zenodo archive with a unique DOI. The DOI for the latest release is
 
-    :ref:`zenodo`
-
-   .. image:: https://zenodo.org/badge/2081.svg
-        :target: https://zenodo.org/badge/latestdoi/24771
+   .. image:: https://zenodo.org/badge/448360325.svg
+        :target: https://zenodo.org/badge/448360325.svg
 
 Clicking this badge will take you to Zenodo, and on the right of the
 page you will find a list of DOIs for previous releases.

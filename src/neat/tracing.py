@@ -127,14 +127,8 @@ class ChargedParticleEnsemble:
 
 class ParticleOrbit:  # pylint: disable=R0902
     r"""
-    Interface function with the C++ executable NEAT. Receives a pyQSC instance
-    and outputs the characteristics of the orbit.
-    Args:
-        stel: Qsc instance of pyQSC
-        params (dict): a Python dict() containing the following parameters:
-            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,tfinal
-        B20real (bool): True if a constant B20real should be used, False otherwise
-
+    Interface function with the C++ executable NEAT. Receives a
+    particle and a field instance from NEAT.
     """
 
     def __init__(
@@ -263,14 +257,8 @@ class ParticleOrbit:  # pylint: disable=R0902
 
 class ParticleEnsembleOrbit:  # pylint: disable=R0902
     r"""
-    Interface function with the C++ executable NEAT. Receives a pyQSC instance
-    and outputs the characteristics of the orbit.
-    Args:
-        stel: Qsc instance of pyQSC
-        params (dict): a Python dict() containing the following parameters:
-            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,tfinal
-        B20real (bool): True if a constant B20real should be used, False otherwise
-
+    Interface function with the C++ executable NEAT. Receives a
+    particle and field instance from neat.
     """
 
     def __init__(
