@@ -1,46 +1,24 @@
+""" Tracing module of NEAT
+
+This script performs the tracing of particles by
+connecting the user input to the gyronimo-based
+functions defined in the neatpp.cpp file. It is
+able to simulate both single particle and particle
+ensemble orbits.
+
+"""
+
 import logging
 from typing import Union
-
 import matplotlib.pyplot as plt
-import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
-from matplotlib import animation
-from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import CubicSpline as spline
 
-from .constants import ELEMENTARY_CHARGE, MU_0, PROTON_MASS
+from .constants import ELEMENTARY_CHARGE, PROTON_MASS
 from .fields import stellna, stellna_qs
+from .plotting import plot_animation3D, plot_orbit2D, plot_orbit3D, plot_parameters, plot_animation3D
 
 logger = logging.getLogger(__name__)
-
-
-def set_axes_equal(ax):
-    """
-    Make axes of 3D plot have equal scale so that spheres appear as spheres,
-    cubes as cubes, etc..  This is one possible solution to Matplotlib's
-    ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
-
-    Args:
-      ax: a matplotlib axis, e.g., as output from plt.gca().
-    """
-    x_limits = ax.get_xlim3d()
-    y_limits = ax.get_ylim3d()
-    z_limits = ax.get_zlim3d()
-
-    x_range = abs(x_limits[1] - x_limits[0])
-    x_middle = np.mean(x_limits)
-    y_range = abs(y_limits[1] - y_limits[0])
-    y_middle = np.mean(y_limits)
-    z_range = abs(z_limits[1] - z_limits[0])
-    z_middle = np.mean(z_limits)
-
-    # The plot bounding box is a sphere in the sense of the infinity
-    # norm, hence call half the max range the plot radius.
-    plot_radius = 0.5 * max([x_range, y_range, z_range])
-
-    ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
-    ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
-    ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
 class charged_particle:
@@ -89,7 +67,6 @@ class charged_particle_ensemble:
     collection of charged particles, as well as their position
     and velocities
     """
-
     def __init__(
         self,
         charge=2,
@@ -102,6 +79,7 @@ class charged_particle_ensemble:
         ntheta=10,
         nphi=10,
     ) -> None:
+
         self.charge = charge
         self.mass = mass
         self.energy = energy
@@ -136,7 +114,6 @@ class particle_orbit:
             r0,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
-
     def __init__(
         self, particle, field, nsamples=1000, Tfinal=0.0001, B20_constant=False
     ) -> None:
@@ -208,18 +185,13 @@ class particle_orbit:
         )
 
     def plot_orbit(self, show=True):
+        """Plot particle orbit in 2D flux coordinates"""
         x = self.r_pos * np.cos(self.theta_pos)
         y = self.r_pos * np.sin(self.theta_pos)
-        plt.figure()
-        plt.plot(x, y)
-        plt.gca().set_aspect("equal", adjustable="box")
-        plt.xlabel(r"r cos($\theta$)")
-        plt.ylabel(r"r sin($\theta$)")
-        plt.tight_layout()
-        if show:
-            plt.show()
+        plot_orbit2D(x=x, y=y, show=show)
 
     def plot_orbit_3D(self, r_surface=0.1, distance=6, show=True):
+        """Plot particle orbit in 3D cartesian coordinates"""
         boundary = np.array(
             self.field.get_boundary(
                 r=r_surface,
@@ -230,96 +202,23 @@ class particle_orbit:
                 ntor=15,
             )
         )
-        # fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-        fig = plt.figure(figsize=(10, 3))
 
-        ax = fig.add_subplot(131, projection="3d")
-        ax.plot3D(
-            self.rpos_cartesian[0], self.rpos_cartesian[1], self.rpos_cartesian[2]
+        plot_orbit3D(
+            boundary=boundary,
+            rpos_cartesian=self.rpos_cartesian,
+            distance=distance,
+            show=show
         )
-        ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
-        set_axes_equal(ax)
-        ax.set_axis_off()
-        ax.dist = distance
-
-        ax = fig.add_subplot(132, projection="3d")
-        ax.plot3D(
-            self.rpos_cartesian[0], self.rpos_cartesian[1], self.rpos_cartesian[2]
-        )
-        ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
-        set_axes_equal(ax)
-        ax.set_axis_off()
-        ax.view_init(azim=90, elev=90)
-        ax.dist = distance
-
-        ax = fig.add_subplot(133, projection="3d")
-        ax.plot3D(
-            self.rpos_cartesian[0], self.rpos_cartesian[1], self.rpos_cartesian[2]
-        )
-        ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
-        set_axes_equal(ax)
-        ax.set_axis_off()
-        ax.view_init(azim=0, elev=0)
-        ax.dist = distance - 1
-
-        plt.tight_layout()
-        if show:
-            plt.show()
-
+        
     def plot(self, show=True):
-        fig = plt.figure(figsize=(10, 6))
-        plt.subplot(3, 3, 1)
-        plt.plot(self.time, self.r_pos)
-        plt.xlabel(r"$t (s)$")
-        plt.ylabel(r"$r$")
-        plt.subplot(3, 3, 2)
-        plt.plot(self.time, self.theta_pos)
-        plt.xlabel(r"$t (s)$")
-        plt.ylabel(r"$\theta$")
-        plt.subplot(3, 3, 3)
-        plt.plot(self.time, self.varphi_pos)
-        plt.xlabel(r"$t (s)$")
-        plt.ylabel(r"$\varphi$")
-        plt.subplot(3, 3, 4)
-        plt.plot(self.time, self.v_parallel)
-        plt.xlabel(r"$t (s)$")
-        plt.ylabel(r"$v_\parallel$")
-        plt.subplot(3, 3, 5)
-        plt.plot(
-            self.time, (self.total_energy - self.total_energy[0]) / self.total_energy[0]
+        """Plot relevant physics parameters of the particle orbit"""
+        plot_parameters(
+            self=self,
+            show=show
         )
-        plt.xlabel(r"$t (s)$")
-        plt.ylabel(r"$(E-E_0)/E_0$")
-        plt.subplot(3, 3, 6)
-        plt.plot(self.time, (self.p_phi - self.p_phi[0]) / self.p_phi[0])
-        plt.xlabel(r"$t (s)$")
-        plt.ylabel(r"$(p_\phi-p_{\phi0})/p_{\phi0}$")
-        plt.subplot(3, 3, 7)
-        plt.plot(self.time, self.rdot, label=r"$\dot r$")
-        plt.plot(self.time, self.thetadot, label=r"$\dot \theta$")
-        plt.plot(self.time, self.varphidot, label=r"$\dot \varphi$")
-        plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
-        plt.xlabel(r"$t (s)$")
-        plt.legend()
-        plt.subplot(3, 3, 8)
-        plt.plot(
-            self.r_pos * np.cos(self.theta_pos), self.r_pos * np.sin(self.theta_pos)
-        )
-        plt.gca().set_aspect("equal", adjustable="box")
-        plt.xlabel(r"r cos($\theta$)")
-        plt.ylabel(r"r sin($\theta$)")
-        plt.subplot(3, 3, 9)
-        plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
-        plt.xlabel(r"$R$")
-        plt.ylabel(r"$Z$")
-        plt.tight_layout()
-        if show:
-            plt.show()
 
     def plot_animation(self, r_surface=0.1, distance=7, show=True, SaveMovie=False):
-        fig = plt.figure(figsize=(6, 4))
-        ax = fig.add_subplot(111, projection="3d")
-
+        """Plot three-dimensional animation of the particle orbit"""
         boundary = np.array(
             self.field.get_boundary(
                 r=r_surface,
@@ -330,63 +229,14 @@ class particle_orbit:
                 ntor=15,
             )
         )
-
-        ax.plot_surface(
-            boundary[0],
-            boundary[1],
-            boundary[2],
-            rstride=1,
-            cstride=1,
-            antialiased=False,
-            linewidth=0,
-            alpha=0.15,
+        plot_animation3D(
+            boundary=boundary,
+            rpos_cartesian=self.rpos_cartesian,
+            nsamples=self.nsamples,
+            distance=distance,
+            show=show,
+            SaveMovie=SaveMovie
         )
-        ax.auto_scale_xyz(
-            [boundary[0].min(), boundary[0].max()],
-            [boundary[0].min(), boundary[0].max()],
-            [boundary[0].min(), boundary[0].max()],
-        )
-        ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
-        ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
-        ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
-        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-        ax.set_axis_off()
-        ax.dist = distance
-
-        ani = []
-
-        def update(num, data, line):
-            line.set_data(data[:2, 0:num])
-            line.set_3d_properties(data[2, 0:num])
-
-        (line,) = ax.plot(
-            self.rpos_cartesian[0][0:1],
-            self.rpos_cartesian[1][0:1],
-            self.rpos_cartesian[2][0:1],
-            lw=2,
-        )
-        ani = animation.FuncAnimation(
-            fig,
-            update,
-            self.nsamples,
-            fargs=(self.rpos_cartesian, line),
-            interval=self.nsamples / 200,
-        )
-
-        if show:
-            plt.show()
-
-        if SaveMovie:
-            ani.save(
-                "particle_Orbit.mp4",
-                fps=30,
-                dpi=300,
-                codec="libx264",
-                bitrate=-1,
-                extra_args=["-pix_fmt", "yuv420p"],
-            )
 
 
 class particle_ensemble_orbit:
@@ -557,7 +407,11 @@ class particle_ensemble_orbit:
 
 
 def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
-
+    """
+    Calculate the canonical angular momentum conjugated with
+    the Boozer coordinate phi. This should be constant for
+    quasi-symmetric stellarators.
+    """
     m_proton = PROTON_MASS
     e = ELEMENTARY_CHARGE
 

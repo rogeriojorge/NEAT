@@ -34,7 +34,9 @@ class NEATtests(unittest.TestCase):
         mass = 4  # times mass of proton
         Lambda = 0.99  # = mu * B0 / energy
         vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-        B20_constant = True # truly quasi-symmetric field for angular momentum conservation
+        B20_constant = (
+            True  # truly quasi-symmetric field for angular momentum conservation
+        )
 
         g_field = stellna_qs.from_paper(1, B0=B0)
         g_particle = charged_particle(
@@ -47,7 +49,13 @@ class NEATtests(unittest.TestCase):
             mass=mass,
             vpp_sign=vpp_sign,
         )
-        g_orbit = particle_orbit(g_particle, g_field, nsamples=n_samples, Tfinal=Tfinal, B20_constant=B20_constant)
+        g_orbit = particle_orbit(
+            g_particle,
+            g_field,
+            nsamples=n_samples,
+            Tfinal=Tfinal,
+            B20_constant=B20_constant,
+        )
         np.testing.assert_allclose(
             g_orbit.total_energy,
             [g_orbit.total_energy[0]] * (n_samples + 1),
