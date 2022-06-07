@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'NEAT'
-copyright = '2022, EUROfusion Enabling Research IST'
+copyright = '2022, EUROfusion Enabling Research IST (PI: Rogerio Jorge)'
 author = 'EUROfusion Enabling Research IST (PI: Rogerio Jorge)'
 
 

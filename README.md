@@ -31,15 +31,37 @@ The simplest installation of NEAT is by running the command
 
 However, it doesn't work on every system and the code hosted in PyPI might be outdated.
 
-## CMake
+## From source
 
-Make sure that you have installed all of the python packages listed in the file [requirements.txt](requirements.txt). A simple way of doing so is by running
+To download, clone NEAT using the following command:
+
+```bash
+git clone https://github.com/rogeriojorge/NEAT.git
+```
+
+The python packages necessary to run NEAT are listed in the file [requirements.txt](requirements.txt).
+A simple way of installing them is by running
 
 ```
 pip install -r requirements.txt
 ```
 
-On NEAT's root directory run
+Then, to install NEAT, on its root directory run
+
+```
+pip install -e .
+```
+
+If you do not have permission to install python packages to the
+default location, add the ``--user`` flag to ``pip`` so the package
+can be installed for your user only::
+
+```
+pip install --user -e .
+```
+
+To debug any possible problems that might arise, you may also try to install
+using the provided ``setup.py`` file
 
 ```
 python setup.py install --user
@@ -58,7 +80,7 @@ This section explains how to build the docker container for NEAT. It can be used
 The easiest way to get simsopt docker image which comes with NEAT and all of its dependencies such as gyronimo and VMEC pre-installed is to use Docker Hub. After installing docker, you can run the simsopt container directly from the simsopt docker image uploaded to Docker Hub.
 
 ```
-docker run -it --rm rjorge123/neat # Linux users, prefix the command with sudo
+docker run -it --rm rjorge123/neat
 ```
 
 The above command should load the terminal that comes with the NEAT docker container. When you run it first time, the image is downloaded automatically, so be patient. You should now be able to import the module from python:

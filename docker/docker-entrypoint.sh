@@ -1,4 +1,4 @@
 #!/bin/bash
 
-## Run NEAT
-python3 src/neat/main.py
+# Run the CMD
+exec "$@"
