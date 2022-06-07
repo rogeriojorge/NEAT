@@ -9,10 +9,12 @@ attributes for NEAT.
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
+
 ## Uncomment the two lines below if the 3D
 ## plotting/animation is not working for some reason
 # import mpl_toolkits.mplot3d.axes3d as p3
 # from mpl_toolkits.mplot3d import Axes3D
+
 
 def set_axes_equal(ax):
     """
@@ -174,9 +176,9 @@ def plot_animation3d(
         [boundary[0].min(), boundary[0].max()],
         [boundary[0].min(), boundary[0].max()],
     )
-    ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0) # pylint: disable=W0212
-    ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0) # pylint: disable=W0212
-    ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0) # pylint: disable=W0212
+    ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)  # pylint: disable=W0212
+    ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)  # pylint: disable=W0212
+    ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)  # pylint: disable=W0212
     ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))

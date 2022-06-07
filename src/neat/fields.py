@@ -161,7 +161,9 @@ class StellnaQS(Qsc, Optimizable):
         if self.constant_b20:
             self.B20_gyronimo = self.B20_mean
         else:
-            self.B20_gyronimo = np.append(self.B20, self.B20[0])
+            self.B20_gyronimo = np.append(
+                self.B20, self.B20[0]  # pylint: disable=unsubscriptable-object
+            )
 
         self.B2c_array = self.B2c
         self.B2s_array = 0
@@ -171,7 +173,9 @@ class StellnaQS(Qsc, Optimizable):
         if self.constant_b20:
             self.B20_gyronimo = self.B20_mean
         else:
-            self.B20_gyronimo = np.append(self.B20, self.B20[0])
+            self.B20_gyronimo = np.append(
+                self.B20, self.B20[0]  # pylint: disable=unsubscriptable-object
+            )
         return (
             self.G0,
             self.G2,

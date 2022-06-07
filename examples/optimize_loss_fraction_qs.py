@@ -11,12 +11,12 @@ from simsopt.solve.mpi import least_squares_mpi_solve
 from simsopt.util.mpi import MpiPartition, log
 
 from neat.fields import StellnaQS
-from neat.objectives import effective_velocity_residual, loss_fraction_residual
+from neat.objectives import EffectiveVelocityResidual, LossFractionResidual
 from neat.tracing import ChargedParticle, ChargedParticleEnsemble, ParticleOrbit
 
 r_initial = 0.05
 r_max = 0.1
-nIterations = 10
+n_iterations = 10
 ftol = 1e-5
 B0 = 5
 B2c = B0 / 8
@@ -57,9 +57,9 @@ class optimize_loss_fraction:
 
         self.mpi = MpiPartition()
 
-        # self.residual = loss_fraction_residual(
-        self.residual = effective_velocity_residual(
-            # loss_fraction_residual(
+        # self.residual = LossFractionResidual(
+        self.residual = EffectiveVelocityResidual(
+            # LossFractionResidual(
             self.field,
             self.particles,
             self.nsamples,
@@ -90,7 +90,7 @@ class optimize_loss_fraction:
             ]
         )
 
-    def run(self, ftol=1e-6, nIterations=100, rel_step=1e-3, abs_step=1e-5):
+    def run(self, ftol=1e-6, n_iterations=100, rel_step=1e-3, abs_step=1e-5):
         # Algorithms that do not use derivatives
         # Relative/Absolute step size ~ 1/n_particles
         # with MPI, to see more info do mpi.write()
@@ -101,10 +101,10 @@ class optimize_loss_fraction:
                 grad=True,
                 rel_step=rel_step,
                 abs_step=abs_step,
-                max_nfev=nIterations,
+                max_nfev=n_iterations,
             )
         else:
-            least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=nIterations)
+            least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
 
 
 g_field = StellnaQS.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
@@ -154,7 +154,7 @@ if optimizer.mpi.proc0_world:
 initial_orbit = ParticleOrbit(test_particle, g_field, nsamples=nsamples, tfinal=tfinal)
 initial_field = StellnaQS.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
 ##################
-optimizer.run(ftol=ftol, nIterations=nIterations)
+optimizer.run(ftol=ftol, n_iterations=n_iterations)
 ##################
 if optimizer.mpi.proc0_world:
     print("After run:")

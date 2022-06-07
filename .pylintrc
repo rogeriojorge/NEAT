@@ -2,9 +2,6 @@
 max-attributes=12
 max-args=10
 
-[MESSAGES CONTROL]
-disable = locally-disabled
-
 [TYPECHECK]
 generated-members=S*
 ignored-modules=neatpp

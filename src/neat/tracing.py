@@ -125,7 +125,7 @@ class ChargedParticleEnsemble:
         )
 
 
-class ParticleOrbit:
+class ParticleOrbit:  # pylint: disable=R0902
     r"""
     Interface function with the C++ executable NEAT. Receives a pyQSC instance
     and outputs the characteristics of the orbit.
@@ -260,7 +260,7 @@ class ParticleOrbit:
         )
 
 
-class ParticleEnsembleOrbit:
+class ParticleEnsembleOrbit:  # pylint: disable=R0902
     r"""
     Interface function with the C++ executable NEAT. Receives a pyQSC instance
     and outputs the characteristics of the orbit.
