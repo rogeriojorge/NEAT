@@ -16,7 +16,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline as spline
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
-from .fields import stellna, stellna_qs
+from .fields import Stellna, Stellna_qs
 from .plotting import plot_animation3D, plot_orbit2D, plot_orbit3D, plot_parameters
 
 logger = logging.getLogger(__name__)
@@ -262,7 +262,7 @@ class ParticleEnsembleOrbit:
     def __init__(
         self,
         particles: ChargedParticleEnsemble,
-        field: Union[stellna_qs, stellna],
+        field: Union[Stellna_qs, Stellna],
         nsamples=800,
         tfinal=0.0001,
         nthreads=2,

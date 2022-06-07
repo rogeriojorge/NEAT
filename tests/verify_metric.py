@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import multiprocessing
 
-import helna
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
@@ -328,7 +327,7 @@ def particleOrbit(ax, nphi, r0, theta_initial, phi_initial):
 
 
 def verifyMetric(count):
-    ## Obtain stellna's positions, metric and derivatives
+    ## Obtain Stellna's positions, metric and derivatives
     [positions, gHelna, dgHelna] = helna.metric_info(
         stel.rc[0],
         int(len(stel.rc) - 1),

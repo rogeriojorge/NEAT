@@ -4,3 +4,6 @@ max-args=10
 
 [MESSAGES CONTROL]
 disable = locally-disabled
+
+[TYPECHECK]
+ignored-modules=neatpp

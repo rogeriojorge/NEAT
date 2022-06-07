@@ -1,3 +1,14 @@
+""" Fields module of NEAT
+
+This script defines the fields being
+used by neat (near-axis or VMEC) and
+defines what are the gyronimo-based
+functions from C++ that are called
+for each field. Each classo also contains
+the necessary SIMSOPT wrappers for optimization.
+
+"""
+
 import numpy as np
 from qic import Qic
 from qsc import Qsc
@@ -13,7 +24,14 @@ from neatpp import (
 )
 
 
-class stellna(Qic, Optimizable):
+class Stellna(Qic, Optimizable):
+    """Stellna class
+
+    This class initializes a pyQIC field in the same
+    way as a Qic function is used. It also contains
+    the necessary SIMSOPT wrappers for optimization.
+
+    """
     def __init__(self, *args, **kwargs) -> None:
         Qic.__init__(self, *args, **kwargs)
         Optimizable.__init__(
@@ -25,13 +43,15 @@ class stellna(Qic, Optimizable):
 
         assert hasattr(
             self.B0, "__len__"
-        ), f"The stellna field requires a non-quasisymmetric magnetic field with B0 a function of phi"
+        ),\
+        "The Stellna field requires a non-quasisymmetric magnetic field with B0 a function of phi"
 
         self.constant_b20 = (
             False  # This variable may be changed later if B20 should be constant
         )
 
     def gyronimo_parameters(self):
+        """Return list of parameters to feed gyronimo-based functions"""
         if self.order == "r1":
             B20 = [0] * (len(self.varphi) + 1)
             B2c = [0] * (len(self.varphi) + 1)
@@ -93,7 +113,14 @@ class stellna(Qic, Optimizable):
         return self.grad_grad_B_inverse_scale_length_vs_varphi / np.sqrt(self.nphi)
 
 
-class stellna_qs(Qsc, Optimizable):
+class Stellna_qs(Qsc, Optimizable):
+    """Stellna_QS class
+
+    This class initializes a pyQSC field in the same
+    way as a Qsc function is used. It also contains
+    the necessary SIMSOPT wrappers for optimization.
+
+    """
     def __init__(self, *args, **kwargs) -> None:
         Qsc.__init__(self, *args, **kwargs)
         Optimizable.__init__(
@@ -105,7 +132,8 @@ class stellna_qs(Qsc, Optimizable):
 
         assert not hasattr(
             self.B0, "__len__"
-        ), f"The stellna_qs field requires a quasisymmetric magnetic field with B0 a scalar constant"
+        ),\
+        "The Stellna_qs field requires a quasisymmetric magnetic field with B0 a scalar constant"
 
         self.B1c = self.etabar * self.B0
         self.B1s = 0
@@ -124,6 +152,7 @@ class stellna_qs(Qsc, Optimizable):
         self.B2s_array = 0
 
     def gyronimo_parameters(self):
+        """Return list of parameters to feed gyronimo-based functions"""
         if self.constant_b20:
             self.B20_gyronimo = self.B20_mean
         else:

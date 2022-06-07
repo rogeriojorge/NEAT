@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-from neat.fields import stellna_qs
+from neat.fields import Stellna_qs
 from neat.tracing import (
     ChargedParticle,
     ChargedParticleEnsemble,
@@ -38,7 +38,7 @@ class NEATtests(unittest.TestCase):
             True  # truly quasi-symmetric field for angular momentum conservation
         )
 
-        g_field = stellna_qs.from_paper(1, B0=B0)
+        g_field = Stellna_qs.from_paper(1, B0=B0)
         g_particle = ChargedParticle(
             r_initial=r_initial,
             theta_initial=theta_initial,
@@ -73,7 +73,7 @@ class NEATtests(unittest.TestCase):
         nthreads = 2
         r_max = 0.1
 
-        g_field = stellna_qs.from_paper(4)
+        g_field = Stellna_qs.from_paper(4)
         g_particle = ChargedParticleEnsemble()
         total_times = [
             self.orbit_time_nthreads(nthread, g_particle, g_field)
@@ -116,7 +116,7 @@ class NEATtests(unittest.TestCase):
         mass = 4  # times mass of proton
         Lambda = 0.98  # = mu * B0 / energy
         vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-        g_field = stellna_qs.from_paper(4, B0=B0)
+        g_field = Stellna_qs.from_paper(4, B0=B0)
         g_particle = ChargedParticle(
             r_initial=r_initial,
             theta_initial=theta_initial,

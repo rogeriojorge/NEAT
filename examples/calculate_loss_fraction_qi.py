@@ -5,7 +5,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-from neat.fields import stellna
+from neat.fields import Stellna
 from neat.tracing import ChargedParticleEnsemble, ParticleEnsembleOrbit
 
 """                                                                           
@@ -33,8 +33,8 @@ nthreads_array = [1, 2, 4]
 constant_b20 = False  # use a constant B20 (mean value) or the real function
 stellarator_index = "QI Jorge"
 
-g_field_temp = stellna.from_paper(stellarator_index, nphi=201)
-g_field = stellna.from_paper(
+g_field_temp = Stellna.from_paper(stellarator_index, nphi=201)
+g_field = Stellna.from_paper(
     stellarator_index, B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
 )
 g_particle = ChargedParticleEnsemble(

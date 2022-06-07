@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 
-from neat.fields import stellna
+from neat.fields import Stellna
 from neat.tracing import ChargedParticle, ParticleOrbit
 
 """                                                                           
@@ -27,14 +27,14 @@ tfinal = 6e-5  # seconds
 constant_b20 = False  # use a constant B20 (mean value) or the real function
 
 # Quasi-isodynamic
-g_field_temp = stellna.from_paper("QI NFP1 r2", nphi=201)
-g_field = stellna.from_paper(
+g_field_temp = Stellna.from_paper("QI NFP1 r2", nphi=201)
+g_field = Stellna.from_paper(
     "QI NFP1 r2", B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
 )
 # Quasi-axisymmetric
-# g_field = stellna.from_paper(2, B0=B0, nphi=201)
+# g_field = Stellna.from_paper(2, B0=B0, nphi=201)
 # Quasi-helically symmetric
-# g_field = stellna.from_paper(4, B0=B0, nphi=201)
+# g_field = Stellna.from_paper(4, B0=B0, nphi=201)
 g_particle = ChargedParticle(
     r_initial=r_initial,
     theta_initial=theta_initial,
