@@ -49,7 +49,11 @@ class ChargedParticle:
         self.theta_initial = theta_initial
         self.phi_initial = phi_initial
 
-
+    def alpha_particle(self) -> bool:
+        if self.mass==4 and self.charge==2 and np.isclose(self.energy, 3.52e6, rtol=5e-2):
+            return True
+        else:
+            return False
 
     def gyronimo_parameters(self):
         return (
@@ -93,6 +97,12 @@ class ChargedParticleEnsemble:
         self.r_max = r_max
         self.ntheta = ntheta
         self.nphi = nphi
+
+    def alpha_particles(self) -> bool:
+        if self.mass==4 and self.charge==2 and np.isclose(self.energy, 3.52e6, rtol=5e-2):
+            return True
+        else:
+            return False
 
     def gyronimo_parameters(self):
         return (
