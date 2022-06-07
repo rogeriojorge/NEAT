@@ -8,27 +8,13 @@
 [![codecov](https://codecov.io/gh/rogeriojorge/NEAT/branch/main/graph/badge.svg?token=8515A2RQL3)](https://codecov.io/gh/rogeriojorge/NEAT)
 
 NEAT is a python framework that is intended to find optimized stellarator configurations for fast particle confinement using the near-axis expansion formalism.
-The magnetic field is calculated using the codes [pyQSC](https://github.com/landreman/pyQSC/) and [pyQIC](https://github.com/rogeriojorge/pyQIC/), the particle orbits are traced using the code [gyronimo](https://github.com/prodrigs/gyronimo) (included as a submodule) and the optimization is done using the code [simsopt](https://github.com/hiddenSymmetries/).
+The magnetic field is calculated using the codes [pyQSC](https://github.com/landreman/pyQSC/) and [pyQIC](https://github.com/rogeriojorge/pyQIC/), the particle orbits are traced using the code [gyronimo](https://github.com/prodrigs/gyronimo) (included as a submodule) and the optimization is done using the code [simsopt](https://github.com/hiddenSymmetries/). The benchmarks are made with the [SIMPLE](https://github.com/itpplasma/SIMPLE) and [BEAMS3D](https://github.com/PrincetonUniversity/STELLOPT/tree/develop/BEAMS3D) codes (under construction).
 
-To download clone NEAT including its submodules, use the following command:
-
-```bash
-git clone --recurse-submodules https://github.com/rogeriojorge/NEAT.git
-```
-or, alternatively, after downloading this repository, in the root folder, run:
-
-```bash
-git submodule init
-git submodule update
-```
-
-# Usage
-
-NEAT could be run either directly by installing the requirements pyQSC, gyronimo and SIMSOPT, and then compiling the [NEAT.cc](src/NEAT.cc) file in the *[src](src/)* folder, or using the provided Docker image. The usage of the Docker image is recommended.
+We show here the standard way to download and install NEAT. For more information, please visit the [documentation](http://neat-docs.readthedocs.io/) present in http://neat-docs.readthedocs.io/.
 
 # Installation
 
-To run NEAT, you'll need the following libraries
+To install NEAT, you'll need the following libraries
 
 * gsl
 * boost
@@ -37,6 +23,13 @@ To run NEAT, you'll need the following libraries
 and the python packages specified in [requirements.txt](requirements.txt).
 Note that [pyQSC](https://github.com/landreman/pyQSC/) and [pyQIC](https://github.com/rogeriojorge/pyQIC/) should be downloaded and installed locally.
 
+## PyPI
+
+The simplest installation of NEAT is by running the command
+
+    pip install neatstel
+
+However, it doesn't work on every system and the code hosted in PyPI might be outdated.
 
 ## CMake
 
@@ -92,6 +85,14 @@ This process yields an image with roughly 2 GB and may take minute to build.
     ```
 
 3. Done! You are now in an environment with NEAT installed. You can open python and run the examples.
+
+# Usage
+
+For common uses of NEAT, please check the `examples` folder.
+It has the three main current uses of NEAT:
+- Trace a single particle orbit (`examples/plot_single_orbit_qs.py`)
+- Trace an ensemble of particles (`examples/calculate_loss_fraction_qs.py`)
+- Optimize a stellarator magnetic field (`examples/optimize_loss_fraction_qs.py`)
 
 # Normalizations
 

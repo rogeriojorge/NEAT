@@ -160,7 +160,6 @@ class OptimizeLossFractionSkeleton:
     ) -> None:
 
         # log(level=logging.DEBUG)
-        self.mpi = MpiPartition()
 
         self.field = field
         self.particles = particles
@@ -206,6 +205,7 @@ class OptimizeLossFractionSkeleton:
 
     def run_parallel(self, n_iterations=100, rel_step=1e-3, abs_step=1e-5):
         """Run the optimization problem defined in this class in parallel"""
+        self.mpi = MpiPartition()
         if self.mpi.proc0_world:
             print("Starting optimization in parallel")
         least_squares_mpi_solve(
