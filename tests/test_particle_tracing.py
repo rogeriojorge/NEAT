@@ -22,20 +22,21 @@ class NEATtests(unittest.TestCase):
         Test that an orbit traced in a quasisymmetric stellarator
         conserves energy and angular momentum
         """
-        n_samples = 600
-        Tfinal = 0.0001
+        n_samples = 2000
+        Tfinal = 0.001
         precision = 7
-        r_initial = 0.05  # meters
+        r_initial = 0.06  # meters
         theta0 = np.pi / 2  # initial poloidal angle
         phi0 = np.pi  # initial poloidal angle
-        B0 = 5  # Tesla, magnetic field on-axis
+        B0 = 2  # Tesla, magnetic field on-axis
         energy = 3.52e6  # electron-volt
         charge = 2  # times charge of proton
         mass = 4  # times mass of proton
-        Lambda = 0.98  # = mu * B0 / energy
+        Lambda = 0.99  # = mu * B0 / energy
         vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
+        B20_constant = True # truly quasi-symmetric field for angular momentum conservation
 
-        g_field = stellna_qs.from_paper(1, B0=2)
+        g_field = stellna_qs.from_paper(1, B0=B0)
         g_particle = charged_particle(
             r0=r_initial,
             theta0=theta0,
@@ -46,7 +47,7 @@ class NEATtests(unittest.TestCase):
             mass=mass,
             vpp_sign=vpp_sign,
         )
-        g_orbit = particle_orbit(g_particle, g_field, nsamples=n_samples, Tfinal=Tfinal)
+        g_orbit = particle_orbit(g_particle, g_field, nsamples=n_samples, Tfinal=Tfinal, B20_constant=B20_constant)
         np.testing.assert_allclose(
             g_orbit.total_energy,
             [g_orbit.total_energy[0]] * (n_samples + 1),
