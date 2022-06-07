@@ -8,25 +8,24 @@ attributes for NEAT.
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-# import mpl_toolkits.mplot3d.axes3d as p3
 from matplotlib import animation
-
+## Uncomment the two lines below if the 3D
+## plotting/animation is not working for some reason
+# import mpl_toolkits.mplot3d.axes3d as p3
 # from mpl_toolkits.mplot3d import Axes3D
 
-
-def set_axes_equal(axes):
+def set_axes_equal(ax):
     """
     Make axes of 3D plot have equal scale so that spheres appear as spheres,
     cubes as cubes, etc..  This is one possible solution to Matplotlib's
     ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
 
     Args:
-      axes: a matplotlib axis, e.g., as output from plt.gca().
+      ax: a matplotlib axis, e.g., as output from plt.gca().
     """
-    x_limits = axes.get_xlim3d()
-    y_limits = axes.get_ylim3d()
-    z_limits = axes.get_zlim3d()
+    x_limits = ax.get_xlim3d()
+    y_limits = ax.get_ylim3d()
+    z_limits = ax.get_zlim3d()
 
     x_range = abs(x_limits[1] - x_limits[0])
     x_middle = np.mean(x_limits)
@@ -39,12 +38,12 @@ def set_axes_equal(axes):
     # norm, hence call half the max range the plot radius.
     plot_radius = 0.5 * max([x_range, y_range, z_range])
 
-    axes.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
-    axes.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
-    axes.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+    ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+    ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+    ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
-def plot_orbit2D(x, y, show=True):
+def plot_orbit2d(x_position, y_position, show=True):
     """
     Make a plot of a single particle orbit in
     (r,theta) coordinates where r is the square
@@ -52,7 +51,7 @@ def plot_orbit2D(x, y, show=True):
     the poloidal Boozer angle.
     """
     plt.figure()
-    plt.plot(x, y)
+    plt.plot(x_position, y_position)
     plt.gca().set_aspect("equal", adjustable="box")
     plt.xlabel(r"r cos($\theta$)")
     plt.ylabel(r"r sin($\theta$)")
@@ -61,7 +60,7 @@ def plot_orbit2D(x, y, show=True):
         plt.show()
 
 
-def plot_orbit3D(boundary, rpos_cartesian, distance=6, show=True):
+def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
     """
     Make a three-dimensional plot of a single particle orbit
     together with the corresponding stellarator toroidal flux
@@ -103,7 +102,7 @@ def plot_parameters(self, show=True):
     Make a single plot with relevant physics parameters
     of a single particle orbit on a magnetic field.
     """
-    fig = plt.figure(figsize=(10, 6))
+    _ = plt.figure(figsize=(10, 6))
     plt.subplot(3, 3, 1)
     plt.plot(self.time, self.r_pos)
     plt.xlabel(r"$t (s)$")
@@ -151,7 +150,7 @@ def plot_parameters(self, show=True):
         plt.show()
 
 
-def plot_animation3D(
+def plot_animation3d(
     boundary, rpos_cartesian, nsamples, distance=7, show=True, save_movie=False
 ):
     """
@@ -175,9 +174,9 @@ def plot_animation3D(
         [boundary[0].min(), boundary[0].max()],
         [boundary[0].min(), boundary[0].max()],
     )
-    ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
-    ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
-    ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
+    ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0) # pylint: disable=W0212
+    ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0) # pylint: disable=W0212
+    ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0) # pylint: disable=W0212
     ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))

@@ -25,11 +25,12 @@ vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
 tfinal = 6e-5  # seconds
 constant_b20 = False  # use a constant B20 (mean value) or the real function
+stellarator_index = "QI NFP1 r2"
 
 # Quasi-isodynamic
-g_field_temp = Stellna.from_paper("QI NFP1 r2", nphi=201)
+g_field_temp = Stellna.from_paper(stellarator_index, nphi=201)
 g_field = Stellna.from_paper(
-    "QI NFP1 r2", B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
+    stellarator_index, B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
 )
 # Quasi-axisymmetric
 # g_field = Stellna.from_paper(2, B0=B0, nphi=201)

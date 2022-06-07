@@ -50,29 +50,30 @@ class Stellna(Qic, Optimizable):
             False  # This variable may be changed later if B20 should be constant
         )
 
+        if self.order == "r1":
+            self.B20 = [0] * (len(self.varphi))
+            self.B2c_array = [0] * (len(self.varphi))
+            self.B2s_array = [0] * (len(self.varphi))
+            self.beta_0 = [0] * (len(self.varphi))
+            self.beta_1c = [0] * (len(self.varphi))
+            self.beta_1s = [0] * (len(self.varphi))
+            self.G2 = 0
+
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
         if self.order == "r1":
-            B20 = [0] * (len(self.varphi) + 1)
-            B2c = [0] * (len(self.varphi) + 1)
-            B2s = [0] * (len(self.varphi) + 1)
-            beta_0 = [0] * (len(self.varphi) + 1)
-            beta_1c = [0] * (len(self.varphi) + 1)
-            beta_1s = [0] * (len(self.varphi) + 1)
-            self.B20 = B20
-            self.B2c_array = B2c
-            self.B2s_array = B2s
-            self.G2 = 0
+            B20 = np.append(self.B20, self.B20[0])
         else:
             if self.constant_b20:
                 B20 = [self.B20_mean] * (len(self.varphi) + 1)
             else:
                 B20 = np.append(self.B20, self.B20[0])
-            B2c = np.append(self.B2c_array, self.B2c_array[0])
-            B2s = np.append(self.B2s_array, self.B2s_array[0])
-            beta_0 = np.append(self.beta_0, self.beta_0[0])
-            beta_1c = np.append(self.beta_1c, self.beta_1c[0])
-            beta_1s = np.append(self.beta_1s, self.beta_1s[0])
+
+        B2c = np.append(self.B2c_array, self.B2c_array[0])
+        B2s = np.append(self.B2s_array, self.B2s_array[0])
+        beta_0 = np.append(self.beta_0, self.beta_0[0])
+        beta_1c = np.append(self.beta_1c, self.beta_1c[0])
+        beta_1s = np.append(self.beta_1s, self.beta_1s[0])
 
         return (
             int(self.nfp),
@@ -139,7 +140,7 @@ class StellnaQS(Qsc, Optimizable):
 
         assert not hasattr(
             self.B0, "__len__"
-        ), "The StellnaQS field requires a quasisymmetric magnetic field with B0 a scalar constant"
+        ), "The StellnaQS field requires a magnetic field with B0 a scalar constant"
 
         self.B1c = self.etabar * self.B0
         self.B1s = 0
@@ -153,6 +154,14 @@ class StellnaQS(Qsc, Optimizable):
 
         # This variable may be changed later before calling gyronimo_parameters
         self.constant_b20 = True
+
+        # The B20 that is outputted to gyronimo is defined here
+        # but is overriden when the gyronimo_parameters function
+        # is called
+        if self.constant_b20:
+            self.B20_gyronimo = self.B20_mean
+        else:
+            self.B20_gyronimo = np.append(self.B20, self.B20[0])
 
         self.B2c_array = self.B2c
         self.B2s_array = 0
@@ -182,15 +191,13 @@ class StellnaQS(Qsc, Optimizable):
         """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
         if self.constant_b20:
             return gc_solver_qs(*args, *kwargs)
-        else:
-            return gc_solver_qs_partial(*args, *kwargs)
+        return gc_solver_qs_partial(*args, *kwargs)
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
         if self.constant_b20:
             return gc_solver_qs_ensemble(*args, *kwargs)
-        else:
-            return gc_solver_qs_partial_ensemble(*args, *kwargs)
+        return gc_solver_qs_partial_ensemble(*args, *kwargs)
 
     def get_inv_L_grad_B(self):
         """Wrapper for 1/L_gradB to feed into SIMSOPT"""

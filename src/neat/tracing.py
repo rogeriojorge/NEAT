@@ -17,7 +17,7 @@ from scipy.interpolate import CubicSpline as spline
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
 from .fields import Stellna, StellnaQS
-from .plotting import plot_animation3D, plot_orbit2D, plot_orbit3D, plot_parameters
+from .plotting import plot_animation3d, plot_orbit2d, plot_orbit3d, plot_parameters
 
 logger = logging.getLogger(__name__)
 
@@ -208,9 +208,9 @@ class ParticleOrbit:
 
     def plot_orbit(self, show=True):
         """Plot particle orbit in 2D flux coordinates"""
-        plot_orbit2D(
-            x=self.r_pos * np.cos(self.theta_pos),
-            y=self.r_pos * np.sin(self.theta_pos),
+        plot_orbit2d(
+            x_position=self.r_pos * np.cos(self.theta_pos),
+            y_position=self.r_pos * np.sin(self.theta_pos),
             show=show,
         )
 
@@ -227,7 +227,7 @@ class ParticleOrbit:
             )
         )
 
-        plot_orbit3D(
+        plot_orbit3d(
             boundary=boundary,
             rpos_cartesian=self.rpos_cartesian,
             distance=distance,
@@ -250,7 +250,7 @@ class ParticleOrbit:
                 ntor=15,
             )
         )
-        plot_animation3D(
+        plot_animation3d(
             boundary=boundary,
             rpos_cartesian=self.rpos_cartesian,
             nsamples=self.nsamples,
