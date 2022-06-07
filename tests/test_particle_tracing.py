@@ -8,8 +8,8 @@ from neat.fields import stellna_qs
 from neat.tracing import (
     ChargedParticle,
     ChargedParticleEnsemble,
-    particle_ensemble_orbit,
-    particle_orbit,
+    ParticleEnsembleOrbit,
+    ParticleOrbit,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -23,7 +23,7 @@ class NEATtests(unittest.TestCase):
         conserves energy and angular momentum
         """
         n_samples = 2000
-        Tfinal = 0.001
+        tfinal = 0.001
         precision = 7
         r_initial = 0.06  # meters
         theta_initial = np.pi / 2  # initial poloidal angle
@@ -34,7 +34,7 @@ class NEATtests(unittest.TestCase):
         mass = 4  # times mass of proton
         Lambda = 0.99  # = mu * B0 / energy
         vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-        B20_constant = (
+        constant_b20 = (
             True  # truly quasi-symmetric field for angular momentum conservation
         )
 
@@ -49,12 +49,12 @@ class NEATtests(unittest.TestCase):
             mass=mass,
             vpp_sign=vpp_sign,
         )
-        g_orbit = particle_orbit(
+        g_orbit = ParticleOrbit(
             g_particle,
             g_field,
             nsamples=n_samples,
-            Tfinal=Tfinal,
-            B20_constant=B20_constant,
+            tfinal=tfinal,
+            constant_b20=constant_b20,
         )
         np.testing.assert_allclose(
             g_orbit.total_energy,
@@ -83,7 +83,7 @@ class NEATtests(unittest.TestCase):
         #     total_times == sorted(total_times, reverse=True),
         #     "The OpenMP parallelization is not working",
         # )
-        g_orbits = particle_ensemble_orbit(g_particle, g_field, nthreads=nthreads)
+        g_orbits = ParticleEnsembleOrbit(g_particle, g_field, nthreads=nthreads)
         loss_fraction = g_orbits.loss_fraction(r_max=r_max)
         self.assertTrue(
             all(
@@ -99,14 +99,14 @@ class NEATtests(unittest.TestCase):
 
     def orbit_time_nthreads(self, nthreads, g_particle, g_field):
         start_time = time.time()
-        particle_ensemble_orbit(g_particle, g_field, nthreads=nthreads)
+        ParticleEnsembleOrbit(g_particle, g_field, nthreads=nthreads)
         total_time = time.time() - start_time
         logger.info(f"  With {nthreads} threads took {total_time}s")
         return total_time
 
     def test_plotting(self):
         n_samples = 800
-        Tfinal = 0.00002
+        tfinal = 0.00002
         r_initial = 0.05  # meters
         theta_initial = np.pi / 2  # initial poloidal angle
         phi_initial = np.pi  # initial poloidal angle
@@ -127,11 +127,11 @@ class NEATtests(unittest.TestCase):
             mass=mass,
             vpp_sign=vpp_sign,
         )
-        g_orbit = particle_orbit(g_particle, g_field, nsamples=n_samples, Tfinal=Tfinal)
+        g_orbit = ParticleOrbit(g_particle, g_field, nsamples=n_samples, tfinal=tfinal)
         g_orbit.plot(show=True)
         g_orbit.plot_orbit(show=True)
-        g_orbit.plot_orbit_3D(show=True)
-        g_orbit.plot_animation(show=True, SaveMovie=False)
+        g_orbit.plot_orbit_3d(show=True)
+        g_orbit.plot_animation(show=True, save_movie=False)
 
 
 if __name__ == "__main__":

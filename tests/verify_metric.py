@@ -47,7 +47,7 @@ mass = 1
 Lambda = 0.6
 energy = 10000
 nsamples = 50000
-Tfinal = 500
+tfinal = 500
 
 ## Obtain Stellarator
 stel = Qsc(rc=eR, zs=eZ, etabar=eta, nfp=NFP, nphi=nphiOrbit, I2=0.6)
@@ -247,7 +247,7 @@ def particleOrbit(ax, nphi, r0, theta_initial, phi_initial):
             theta_initial,
             phi_initial,
             nsamples,
-            Tfinal,
+            tfinal,
         ),
         dtype=np.float64,
     )

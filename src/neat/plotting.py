@@ -152,7 +152,7 @@ def plot_parameters(self, show=True):
 
 
 def plot_animation3D(
-    boundary, rpos_cartesian, nsamples, distance=7, show=True, SaveMovie=False
+    boundary, rpos_cartesian, nsamples, distance=7, show=True, save_movie=False
 ):
     """
     Show a three-dimensional animation of a particle
@@ -207,9 +207,9 @@ def plot_animation3D(
     if show:
         plt.show()
 
-    if SaveMovie:
+    if save_movie:
         ani.save(
-            "particle_Orbit.mp4",
+            "ParticleOrbit.mp4",
             fps=30,
             dpi=300,
             codec="libx264",

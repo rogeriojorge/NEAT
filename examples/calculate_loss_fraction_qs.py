@@ -5,7 +5,7 @@ import time
 import matplotlib.pyplot as plt
 
 from neat.fields import stellna_qs
-from neat.tracing import ChargedParticleEnsemble, particle_ensemble_orbit
+from neat.tracing import ChargedParticleEnsemble, ParticleEnsembleOrbit
 
 """                                                                           
 Calculate the loss fraction of a distribution of particles
@@ -27,7 +27,7 @@ nphi = 8  # resolution in phi
 nlambda_trapped = 16  # number of pitch angles for trapped particles
 nlambda_passing = 4  # number of pitch angles for passing particles
 nsamples = 1000  # resolution in time
-Tfinal = 1e-4  # seconds
+tfinal = 1e-4  # seconds
 nthreads_array = [1, 2, 4]
 stellarator_index = 1
 
@@ -44,17 +44,17 @@ g_particle = ChargedParticleEnsemble(
     nlambda_passing=nlambda_passing,
 )
 print("Starting particle tracer with B20 constant")
-B20_constant = True
+constant_b20 = True
 threads_vs_time = []
 for nthreads in nthreads_array:
     start_time = time.time()
-    g_orbits = particle_ensemble_orbit(
+    g_orbits = ParticleEnsembleOrbit(
         g_particle,
         g_field,
         nsamples=nsamples,
-        Tfinal=Tfinal,
+        tfinal=tfinal,
         nthreads=nthreads,
-        B20_constant=B20_constant,
+        constant_b20=constant_b20,
     )
     total_time = time.time() - start_time
     print(
@@ -84,17 +84,17 @@ print(
 # g_orbits.plot_loss_fraction()
 
 print("Starting particle tracer with B20 not constant")
-B20_constant = False
+constant_b20 = False
 threads_vs_time = []
 for nthreads in nthreads_array:
     start_time = time.time()
-    g_orbits = particle_ensemble_orbit(
+    g_orbits = ParticleEnsembleOrbit(
         g_particle,
         g_field,
         nsamples=nsamples,
-        Tfinal=Tfinal,
+        tfinal=tfinal,
         nthreads=nthreads,
-        B20_constant=B20_constant,
+        constant_b20=constant_b20,
     )
     total_time = time.time() - start_time
     print(

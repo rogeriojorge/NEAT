@@ -12,7 +12,7 @@ from simsopt.util.mpi import MpiPartition, log
 
 from neat.fields import stellna
 from neat.objectives import effective_velocity_residual, loss_fraction_residual
-from neat.tracing import ChargedParticle, ChargedParticleEnsemble, particle_orbit
+from neat.tracing import ChargedParticle, ChargedParticleEnsemble, ParticleOrbit
 
 r_initial = 0.04
 r_max = 0.1
@@ -20,10 +20,10 @@ nIterations = 10
 ftol = 1e-5
 B0 = 5
 nsamples = 700
-Tfinal = 1e-4
+tfinal = 1e-4
 stellarator_index = "QI NFP1 r2"
 nthreads = 4
-B20_constant = False
+constant_b20 = False
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
@@ -40,16 +40,16 @@ class optimize_loss_fraction:
         particles,
         r_max=r_max,
         nsamples=nsamples,
-        Tfinal=Tfinal,
+        tfinal=tfinal,
         nthreads=nthreads,
         parallel=False,
-        B20_constant=B20_constant,
+        constant_b20=constant_b20,
     ) -> None:
 
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
-        self.Tfinal = Tfinal
+        self.tfinal = tfinal
         self.nthreads = nthreads
         self.r_max = r_max
         self.parallel = parallel
@@ -62,10 +62,10 @@ class optimize_loss_fraction:
             self.field,
             self.particles,
             self.nsamples,
-            self.Tfinal,
+            self.tfinal,
             self.nthreads,
             self.r_max,
-            B20_constant=B20_constant,
+            constant_b20=constant_b20,
         )
 
         self.field.fix_all()
@@ -125,9 +125,9 @@ optimizer = optimize_loss_fraction(
     g_field,
     g_particle,
     r_max=r_max,
-    Tfinal=Tfinal,
+    tfinal=tfinal,
     nsamples=nsamples,
-    B20_constant=B20_constant,
+    constant_b20=constant_b20,
 )
 test_particle = ChargedParticle(
     r_initial=r_initial, theta_initial=np.pi / 2, phi_initial=np.pi, Lambda=0.97
@@ -155,7 +155,7 @@ if optimizer.mpi.proc0_world:
     # print("        B2c = ", optimizer.field.B2c)
     # print("        B20 = ", optimizer.field.B20_mean)
     optimizer.residual.orbits.plot_loss_fraction(show=False)
-initial_orbit = particle_orbit(test_particle, g_field, nsamples=nsamples, Tfinal=Tfinal)
+initial_orbit = ParticleOrbit(test_particle, g_field, nsamples=nsamples, tfinal=tfinal)
 initial_field = stellna.from_paper(
     stellarator_index, B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
 )
@@ -187,7 +187,7 @@ if optimizer.mpi.proc0_world:
     initial_patch = mpatches.Patch(color="#1f77b4", label="Initial")
     final_patch = mpatches.Patch(color="#ff7f0e", label="Final")
     plt.legend(handles=[initial_patch, final_patch])
-final_orbit = particle_orbit(test_particle, g_field, nsamples=nsamples, Tfinal=Tfinal)
+final_orbit = ParticleOrbit(test_particle, g_field, nsamples=nsamples, tfinal=tfinal)
 final_field = g_field
 ##################
 plt.figure()
@@ -206,8 +206,8 @@ plt.legend()
 plt.xlabel(r"r cos($\theta$)")
 plt.ylabel(r"r sin($\theta$)")
 plt.tight_layout()
-initial_orbit.plot_orbit_3D(show=False, r_surface=r_max)
-final_orbit.plot_orbit_3D(show=False, r_surface=r_max)
+initial_orbit.plot_orbit_3d(show=False, r_surface=r_max)
+final_orbit.plot_orbit_3d(show=False, r_surface=r_max)
 # initial_orbit.plot_animation(show=False)
 # final_orbit.plot_animation(show=True)
 plt.show()

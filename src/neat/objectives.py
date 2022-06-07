@@ -6,16 +6,16 @@ from qsc import Qsc
 from simsopt import LeastSquaresProblem, least_squares_serial_solve
 from simsopt._core.optimizable import Optimizable
 
-from neat.tracing import particle_ensemble_orbit
+from neat.tracing import ParticleEnsembleOrbit
 
 
 class loss_fraction_residual(Optimizable):
     def __init__(
         self,
         field: Union[Qsc, Qic],
-        particles: particle_ensemble_orbit,
+        particles: ParticleEnsembleOrbit,
         nsamples=500,
-        Tfinal=0.0003,
+        tfinal=0.0003,
         nthreads=2,
         r_max=0.12,
     ) -> None:
@@ -23,15 +23,15 @@ class loss_fraction_residual(Optimizable):
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
-        self.Tfinal = Tfinal
+        self.tfinal = tfinal
         self.nthreads = nthreads
         self.r_max = r_max
 
         Optimizable.__init__(self, depends_on=[field])
 
     def compute(self):
-        self.orbits = particle_ensemble_orbit(
-            self.particles, self.field, self.nsamples, self.Tfinal, self.nthreads
+        self.orbits = ParticleEnsembleOrbit(
+            self.particles, self.field, self.nsamples, self.tfinal, self.nthreads
         )
         self.orbits.loss_fraction(r_max=self.r_max)
 
@@ -44,32 +44,32 @@ class effective_velocity_residual(Optimizable):
     def __init__(
         self,
         field: Union[Qsc, Qic],
-        particles: particle_ensemble_orbit,
+        particles: ParticleEnsembleOrbit,
         nsamples=500,
-        Tfinal=0.0003,
+        tfinal=0.0003,
         nthreads=2,
         r_max=0.12,
-        B20_constant=False,
+        constant_b20=False,
     ) -> None:
 
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
-        self.Tfinal = Tfinal
+        self.tfinal = tfinal
         self.nthreads = nthreads
         self.r_max = r_max
-        self.B20_constant = B20_constant
+        self.constant_b20 = constant_b20
 
         Optimizable.__init__(self, depends_on=[field])
 
     def compute(self):
-        self.orbits = particle_ensemble_orbit(
+        self.orbits = ParticleEnsembleOrbit(
             self.particles,
             self.field,
             self.nsamples,
-            self.Tfinal,
+            self.tfinal,
             self.nthreads,
-            B20_constant=self.B20_constant,
+            constant_b20=self.constant_b20,
         )
         self.orbits.loss_fraction(r_max=self.r_max)
 
@@ -117,7 +117,7 @@ class optimize_loss_fraction_skeleton:
         particles,
         r_max=0.12,
         nsamples=800,
-        Tfinal=0.0001,
+        tfinal=0.0001,
         nthreads=2,
         parallel=False,
     ) -> None:
@@ -127,7 +127,7 @@ class optimize_loss_fraction_skeleton:
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
-        self.Tfinal = Tfinal
+        self.tfinal = tfinal
         self.nthreads = nthreads
         self.r_max = r_max
 
@@ -135,7 +135,7 @@ class optimize_loss_fraction_skeleton:
             self.field,
             self.particles,
             self.nsamples,
-            self.Tfinal,
+            self.tfinal,
             self.nthreads,
             self.r_max,
         )

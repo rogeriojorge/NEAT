@@ -9,7 +9,7 @@
 #     theta_initial,
 #     phi_initial,
 #     charge,
-#     Tfinal,
+#     tfinal,
 #     rParticleVec,
 #     nsamples,
 #     zParticleVec,
@@ -31,7 +31,7 @@
 #     print("  CHARGE_IN =", e)
 #     print("  MASS_IN =", mass * m_proton)
 #     print("  ZATOM_IN =", charge)
-#     print("  T_END_IN =", Tfinal * stel.rc[0] / Valfven)
+#     print("  T_END_IN =", tfinal * stel.rc[0] / Valfven)
 #     print("  NPOINC =", nsamples)
 #     print("  VLL_START_IN =", Valfven * result[0][14][0])
 #     print("  MU_START_IN =", energySI / Bfield0)

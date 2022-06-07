@@ -40,6 +40,7 @@ class ChargedParticle:
         theta_initial=np.pi,
         phi_initial=0,
     ) -> None:
+
         self.charge = charge
         self.mass = mass
         self.energy = energy
@@ -49,13 +50,12 @@ class ChargedParticle:
         self.theta_initial = theta_initial
         self.phi_initial = phi_initial
 
-    def alpha_particle(self) -> bool:
-        if self.mass==4 and self.charge==2 and np.isclose(self.energy, 3.52e6, rtol=5e-2):
-            return True
-        else:
-            return False
+    def is_alpha_particle(self) -> bool:
+        """Return true if particle is an alpha particle"""
+        return bool(self.mass==4 and self.charge==2 and np.isclose(self.energy, 3.52e6, rtol=5e-2))
 
     def gyronimo_parameters(self):
+        """Return list of parameters to feed gyronimo-based functions"""
         return (
             self.charge,
             self.mass,
@@ -98,13 +98,12 @@ class ChargedParticleEnsemble:
         self.ntheta = ntheta
         self.nphi = nphi
 
-    def alpha_particles(self) -> bool:
-        if self.mass==4 and self.charge==2 and np.isclose(self.energy, 3.52e6, rtol=5e-2):
-            return True
-        else:
-            return False
+    def is_alpha_particle(self) -> bool:
+        """Return true if particles are a collection of alpha particles"""
+        return bool(self.mass==4 and self.charge==2 and np.isclose(self.energy, 3.52e6, rtol=5e-2))
 
     def gyronimo_parameters(self):
+        """Return list of parameters to feed gyronimo-based functions"""
         return (
             self.charge,
             self.mass,
@@ -118,33 +117,33 @@ class ChargedParticleEnsemble:
         )
 
 
-class particle_orbit:
+class ParticleOrbit:
     r"""
     Interface function with the C++ executable NEAT. Receives a pyQSC instance
     and outputs the characteristics of the orbit.
     Args:
         stel: Qsc instance of pyQSC
         params (dict): a Python dict() containing the following parameters:
-            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,Tfinal
+            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
     def __init__(
-        self, particle, field, nsamples=1000, Tfinal=0.0001, B20_constant=False
+        self, particle, field, nsamples=1000, tfinal=0.0001, constant_b20=False
     ) -> None:
 
         self.particle = particle
         self.field = field
         self.nsamples = nsamples
-        self.Tfinal = Tfinal
+        self.tfinal = tfinal
 
-        self.field.B20_constant = B20_constant
+        self.field.constant_b20 = constant_b20
 
         self.gyronimo_parameters = [
             *self.field.gyronimo_parameters(),
             *self.particle.gyronimo_parameters(),
             self.nsamples,
-            self.Tfinal,
+            self.tfinal,
         ]
 
         solution = np.array(
@@ -152,16 +151,16 @@ class particle_orbit:
                 *self.field.gyronimo_parameters(),
                 *self.particle.gyronimo_parameters(),
                 self.nsamples,
-                self.Tfinal
+                self.tfinal
             )
         )
 
         self.solution = solution
 
-        nu = field.varphi - field.phi
+        nu_array = field.varphi - field.phi
         nu_spline_of_varphi = spline(
             np.append(field.varphi, 2 * np.pi / field.nfp),
-            np.append(nu, nu[0]),
+            np.append(nu_array, nu_array[0]),
             bc_type="periodic",
         )
 
@@ -201,11 +200,9 @@ class particle_orbit:
 
     def plot_orbit(self, show=True):
         """Plot particle orbit in 2D flux coordinates"""
-        x = self.r_pos * np.cos(self.theta_pos)
-        y = self.r_pos * np.sin(self.theta_pos)
-        plot_orbit2D(x=x, y=y, show=show)
+        plot_orbit2D(x=self.r_pos * np.cos(self.theta_pos), y=self.r_pos * np.sin(self.theta_pos), show=show)
 
-    def plot_orbit_3D(self, r_surface=0.1, distance=6, show=True):
+    def plot_orbit_3d(self, r_surface=0.1, distance=6, show=True):
         """Plot particle orbit in 3D cartesian coordinates"""
         boundary = np.array(
             self.field.get_boundary(
@@ -229,7 +226,7 @@ class particle_orbit:
         """Plot relevant physics parameters of the particle orbit"""
         plot_parameters(self=self, show=show)
 
-    def plot_animation(self, r_surface=0.1, distance=7, show=True, SaveMovie=False):
+    def plot_animation(self, r_surface=0.1, distance=7, show=True, save_movie=False):
         """Plot three-dimensional animation of the particle orbit"""
         boundary = np.array(
             self.field.get_boundary(
@@ -247,18 +244,18 @@ class particle_orbit:
             nsamples=self.nsamples,
             distance=distance,
             show=show,
-            SaveMovie=SaveMovie,
+            save_movie=save_movie,
         )
 
 
-class particle_ensemble_orbit:
+class ParticleEnsembleOrbit:
     r"""
     Interface function with the C++ executable NEAT. Receives a pyQSC instance
     and outputs the characteristics of the orbit.
     Args:
         stel: Qsc instance of pyQSC
         params (dict): a Python dict() containing the following parameters:
-            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,Tfinal
+            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
@@ -267,24 +264,24 @@ class particle_ensemble_orbit:
         particles: ChargedParticleEnsemble,
         field: Union[stellna_qs, stellna],
         nsamples=800,
-        Tfinal=0.0001,
+        tfinal=0.0001,
         nthreads=2,
-        B20_constant=False,
+        constant_b20=False,
     ) -> None:
 
         self.particles = particles
         self.field = field
         self.nsamples = nsamples
         self.nthreads = nthreads
-        self.Tfinal = Tfinal
+        self.tfinal = tfinal
 
-        self.field.B20_constant = B20_constant
+        self.field.constant_b20 = constant_b20
 
         self.gyronimo_parameters = [
             *self.field.gyronimo_parameters(),
             *self.particles.gyronimo_parameters(),
             self.nsamples,
-            self.Tfinal,
+            self.tfinal,
             self.nthreads,
         ]
 
@@ -293,7 +290,7 @@ class particle_ensemble_orbit:
                 *self.field.gyronimo_parameters(),
                 *self.particles.gyronimo_parameters(),
                 self.nsamples,
-                self.Tfinal,
+                self.tfinal,
                 self.nthreads
             )
         )

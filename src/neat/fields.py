@@ -27,7 +27,7 @@ class stellna(Qic, Optimizable):
             self.B0, "__len__"
         ), f"The stellna field requires a non-quasisymmetric magnetic field with B0 a function of phi"
 
-        self.B20_constant = (
+        self.constant_b20 = (
             False  # This variable may be changed later if B20 should be constant
         )
 
@@ -44,7 +44,7 @@ class stellna(Qic, Optimizable):
             self.B2s_array = B2s
             self.G2 = 0
         else:
-            if self.B20_constant:
+            if self.constant_b20:
                 B20 = [self.B20_mean] * (len(self.varphi) + 1)
             else:
                 B20 = np.append(self.B20, self.B20[0])
@@ -118,13 +118,13 @@ class stellna_qs(Qsc, Optimizable):
             self.G2 = 0
 
         # This variable may be changed later before calling gyronimo_parameters
-        self.B20_constant = True
+        self.constant_b20 = True
 
         self.B2c_array = self.B2c
         self.B2s_array = 0
 
     def gyronimo_parameters(self):
-        if self.B20_constant:
+        if self.constant_b20:
             self.B20_gyronimo = self.B20_mean
         else:
             self.B20_gyronimo = np.append(self.B20, self.B20[0])
@@ -144,13 +144,13 @@ class stellna_qs(Qsc, Optimizable):
         )
 
     def neatpp_solver(self, *args, **kwargs):
-        if self.B20_constant:
+        if self.constant_b20:
             return gc_solver_qs(*args, *kwargs)
         else:
             return gc_solver_qs_partial(*args, *kwargs)
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
-        if self.B20_constant:
+        if self.constant_b20:
             return gc_solver_qs_ensemble(*args, *kwargs)
         else:
             return gc_solver_qs_partial_ensemble(*args, *kwargs)
