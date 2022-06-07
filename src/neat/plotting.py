@@ -129,7 +129,7 @@ def plot_parameters(self, show=True):
     plt.subplot(3, 3, 6)
     plt.plot(self.time, (self.p_phi - self.p_phi[0]) / self.p_phi[0])
     plt.xlabel(r"$t (s)$")
-    plt.ylabel(r"$(p_\phi-p_{\phi0})/p_{\phi0}$")
+    plt.ylabel(r"$(p_\phi-p_{\phi_initial})/p_{\phi_initial}$")
     plt.subplot(3, 3, 7)
     plt.plot(self.time, self.rdot, label=r"$\dot r$")
     plt.plot(self.time, self.thetadot, label=r"$\dot \theta$")

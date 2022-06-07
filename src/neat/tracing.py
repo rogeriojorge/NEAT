@@ -37,8 +37,8 @@ class ChargedParticle:
         vpp_sign=1,
         energy=3.52e6,
         r_initial=0.05,
-        theta0=np.pi,
-        phi0=0,
+        theta_initial=np.pi,
+        phi_initial=0,
     ) -> None:
         self.charge = charge
         self.mass = mass
@@ -46,8 +46,10 @@ class ChargedParticle:
         self.Lambda = Lambda
         self.vpp_sign = vpp_sign
         self.r_initial = r_initial
-        self.theta0 = theta0
-        self.phi0 = phi0
+        self.theta_initial = theta_initial
+        self.phi_initial = phi_initial
+
+
 
     def gyronimo_parameters(self):
         return (
@@ -57,8 +59,8 @@ class ChargedParticle:
             self.vpp_sign,
             self.energy,
             self.r_initial,
-            self.theta0,
-            self.phi0,
+            self.theta_initial,
+            self.phi_initial,
         )
 
 
@@ -113,7 +115,7 @@ class particle_orbit:
     Args:
         stel: Qsc instance of pyQSC
         params (dict): a Python dict() containing the following parameters:
-            r_initial,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
+            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
@@ -246,7 +248,7 @@ class particle_ensemble_orbit:
     Args:
         stel: Qsc instance of pyQSC
         params (dict): a Python dict() containing the following parameters:
-            r_initial,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
+            r_initial,theta_initial,phi_initial,charge,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 

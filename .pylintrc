@@ -1,0 +1,6 @@
+[DESIGN]
+max-attributes=12
+max-args=10
+
+[MESSAGES CONTROL]
+disable = locally-disabled

@@ -6,8 +6,8 @@
 #     rhom,
 #     mass,
 #     r_initial,
-#     theta0,
-#     phi0,
+#     theta_initial,
+#     phi_initial,
 #     charge,
 #     Tfinal,
 #     rParticleVec,
@@ -24,7 +24,7 @@
 #     Ualfven = 0.5 * m_proton * mass * Valfven * Valfven
 #     energySI = result[0][4][0] * Ualfven
 #     Bfield0 = result[0][15][0]
-#     rStart, zStart, phiStart = stel.to_RZ(r_initial, theta0, phi0)
+#     rStart, zStart, phiStart = stel.to_RZ(r_initial, theta_initial, phi_initial)
 #     print("  R_START_IN =", rStart)
 #     print("  Z_START_IN =", zStart)
 #     print("  PHI_START_IN =", phiStart)
@@ -278,16 +278,16 @@
 #             # print('j={}: '.format(j), end='')
 #             while True:
 #                 print(".", end="")
-#                 theta0 = rng.random() * 2 * np.pi
-#                 phi0 = rng.random() * 2 * np.pi / self.nfp
+#                 theta_initial = rng.random() * 2 * np.pi
+#                 phi_initial = rng.random() * 2 * np.pi / self.nfp
 #                 # f = rng.random() * max_norm_normal
-#                 # if f <= norm_normal_spl(theta0, phi0):
+#                 # if f <= norm_normal_spl(theta_initial, phi_initial):
 #                 #    break
 #                 f = rng.random() * max_sqrtg
-#                 if f <= sqrtg_spl(theta0, phi0):
+#                 if f <= sqrtg_spl(theta_initial, phi_initial):
 #                     break
-#             thetas[j] = theta0
-#             phis[j] = phi0
+#             thetas[j] = theta_initial
+#             phis[j] = phi_initial
 #             # print()
 
 #         self.rs = r_spl.ev(thetas, phis)

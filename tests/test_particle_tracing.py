@@ -26,8 +26,8 @@ class NEATtests(unittest.TestCase):
         Tfinal = 0.001
         precision = 7
         r_initial = 0.06  # meters
-        theta0 = np.pi / 2  # initial poloidal angle
-        phi0 = np.pi  # initial poloidal angle
+        theta_initial = np.pi / 2  # initial poloidal angle
+        phi_initial = np.pi  # initial poloidal angle
         B0 = 2  # Tesla, magnetic field on-axis
         energy = 3.52e6  # electron-volt
         charge = 2  # times charge of proton
@@ -41,8 +41,8 @@ class NEATtests(unittest.TestCase):
         g_field = stellna_qs.from_paper(1, B0=B0)
         g_particle = ChargedParticle(
             r_initial=r_initial,
-            theta0=theta0,
-            phi0=phi0,
+            theta_initial=theta_initial,
+            phi_initial=phi_initial,
             energy=energy,
             Lambda=Lambda,
             charge=charge,
@@ -108,8 +108,8 @@ class NEATtests(unittest.TestCase):
         n_samples = 800
         Tfinal = 0.00002
         r_initial = 0.05  # meters
-        theta0 = np.pi / 2  # initial poloidal angle
-        phi0 = np.pi  # initial poloidal angle
+        theta_initial = np.pi / 2  # initial poloidal angle
+        phi_initial = np.pi  # initial poloidal angle
         B0 = 5  # Tesla, magnetic field on-axis
         energy = 3.52e6  # electron-volt
         charge = 2  # times charge of proton
@@ -119,8 +119,8 @@ class NEATtests(unittest.TestCase):
         g_field = stellna_qs.from_paper(4, B0=B0)
         g_particle = ChargedParticle(
             r_initial=r_initial,
-            theta0=theta0,
-            phi0=phi0,
+            theta_initial=theta_initial,
+            phi_initial=phi_initial,
             energy=energy,
             Lambda=Lambda,
             charge=charge,

@@ -38,8 +38,8 @@ points = np.asarray(npoints * [[0.31241, 0.62312, 0.341231]])
 points += pointVar * (np.random.rand(*points.shape) - 0.5)
 ## Particle Orbit parameters
 nphiOrbit = 400
-theta0 = [3.0]  # [5.0,5.2,5.4,5.6,5.8,6.0]
-phi0 = [3.0]  # [5.0,5.2,5.4,5.6,5.8,6.0]
+theta_initial = [3.0]  # [5.0,5.2,5.4,5.6,5.8,6.0]
+phi_initial = [3.0]  # [5.0,5.2,5.4,5.6,5.8,6.0]
 B0 = 1.0
 charge = 1
 rhom = 1
@@ -217,7 +217,7 @@ def plot_stellarator(ax, rR, ntheta=50, nphi=200):
     # mlab.points3d(data[:,0], data[:,1], data[:,2], color=(0.58, 0.33, 0.01), mode='sphere', scale_factor=0.02)
 
 
-def particleOrbit(ax, nphi, r0, theta0, phi0):
+def particleOrbit(ax, nphi, r0, theta_initial, phi_initial):
     ## Obtain particle orbit
     sol = np.array(
         helna.gc_solver(
@@ -244,8 +244,8 @@ def particleOrbit(ax, nphi, r0, theta0, phi0):
             Lambda,
             energy,
             r0,
-            theta0,
-            phi0,
+            theta_initial,
+            phi_initial,
             nsamples,
             Tfinal,
         ),
@@ -943,8 +943,8 @@ if __name__ == "__main__":
     # mlab.options.offscreen = True # Show on screen or not
     # mlab.figure(bgcolor=(1,1,1),size=(2000,2000))
     # print("Plotting particles")
-    # for i in range(len(theta0)):
-    #     particleOrbit(ax,nphiOrbit,r0,theta0[i],phi0[i])
+    # for i in range(len(theta_initial)):
+    #     particleOrbit(ax,nphiOrbit,r0,theta_initial[i],phi_initial[i])
     # print("Plotting stellarator")
     # plot_stellarator(ax,r0)
     # plt.savefig('particle_gyronimo.png',dpi=500)

@@ -130,7 +130,7 @@ optimizer = optimize_loss_fraction(
     B20_constant=B20_constant,
 )
 test_particle = ChargedParticle(
-    r_initial=r_initial, theta0=np.pi / 2, phi0=np.pi, Lambda=0.97
+    r_initial=r_initial, theta_initial=np.pi / 2, phi_initial=np.pi, Lambda=0.97
 )
 ##################
 if optimizer.mpi.proc0_world:
