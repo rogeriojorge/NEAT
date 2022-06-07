@@ -40,7 +40,7 @@ class NEATtests(unittest.TestCase):
 
         g_field = stellna_qs.from_paper(1, B0=B0)
         g_particle = ChargedParticle(
-            r0=r_initial,
+            r_initial=r_initial,
             theta0=theta0,
             phi0=phi0,
             energy=energy,
@@ -118,7 +118,7 @@ class NEATtests(unittest.TestCase):
         vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
         g_field = stellna_qs.from_paper(4, B0=B0)
         g_particle = ChargedParticle(
-            r0=r_initial,
+            r_initial=r_initial,
             theta0=theta0,
             phi0=phi0,
             energy=energy,

@@ -109,7 +109,7 @@ class optimize_loss_fraction:
 
 g_field = stellna_qs.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
 g_particle = ChargedParticleEnsemble(
-    r0=r_initial,
+    r_initial=r_initial,
     r_max=r_max,
     energy=energy,
     charge=charge,
@@ -127,7 +127,7 @@ optimizer = optimize_loss_fraction(
     nsamples=nsamples,
     B20_constant=B20_constant,
 )
-test_particle = ChargedParticle(r0=r_initial, theta0=np.pi, Lambda=1.0)
+test_particle = ChargedParticle(r_initial=r_initial, theta0=np.pi, Lambda=1.0)
 ##################
 if optimizer.mpi.proc0_world:
     print("Before run:")

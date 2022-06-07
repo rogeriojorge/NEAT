@@ -111,7 +111,7 @@ g_field = stellna.from_paper(
     stellarator_index, B0_vals=np.array(g_field_temp.B0_vals) * B0, nphi=201
 )
 g_particle = ChargedParticleEnsemble(
-    r0=r_initial,
+    r_initial=r_initial,
     r_max=r_max,
     energy=energy,
     charge=charge,
@@ -130,7 +130,7 @@ optimizer = optimize_loss_fraction(
     B20_constant=B20_constant,
 )
 test_particle = ChargedParticle(
-    r0=r_initial, theta0=np.pi / 2, phi0=np.pi, Lambda=0.97
+    r_initial=r_initial, theta0=np.pi / 2, phi0=np.pi, Lambda=0.97
 )
 ##################
 if optimizer.mpi.proc0_world:

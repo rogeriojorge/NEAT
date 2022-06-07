@@ -36,7 +36,7 @@ class ChargedParticle:
         Lambda=1.0,
         vpp_sign=1,
         energy=3.52e6,
-        r0=0.05,
+        r_initial=0.05,
         theta0=np.pi,
         phi0=0,
     ) -> None:
@@ -45,7 +45,7 @@ class ChargedParticle:
         self.energy = energy
         self.Lambda = Lambda
         self.vpp_sign = vpp_sign
-        self.r0 = r0
+        self.r_initial = r_initial
         self.theta0 = theta0
         self.phi0 = phi0
 
@@ -56,7 +56,7 @@ class ChargedParticle:
             self.Lambda,
             self.vpp_sign,
             self.energy,
-            self.r0,
+            self.r_initial,
             self.theta0,
             self.phi0,
         )
@@ -76,7 +76,7 @@ class ChargedParticleEnsemble:
         energy=3.52e6,
         nlambda_trapped=10,
         nlambda_passing=3,
-        r0=0.05,
+        r_initial=0.05,
         r_max=0.1,
         ntheta=10,
         nphi=10,
@@ -87,7 +87,7 @@ class ChargedParticleEnsemble:
         self.energy = energy
         self.nlambda_trapped = nlambda_trapped
         self.nlambda_passing = nlambda_passing
-        self.r0 = r0
+        self.r_initial = r_initial
         self.r_max = r_max
         self.ntheta = ntheta
         self.nphi = nphi
@@ -99,7 +99,7 @@ class ChargedParticleEnsemble:
             self.energy,
             self.nlambda_trapped,
             self.nlambda_passing,
-            self.r0,
+            self.r_initial,
             self.r_max,
             self.ntheta,
             self.nphi,
@@ -113,7 +113,7 @@ class particle_orbit:
     Args:
         stel: Qsc instance of pyQSC
         params (dict): a Python dict() containing the following parameters:
-            r0,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
+            r_initial,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
@@ -246,7 +246,7 @@ class particle_ensemble_orbit:
     Args:
         stel: Qsc instance of pyQSC
         params (dict): a Python dict() containing the following parameters:
-            r0,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
+            r_initial,theta0,phi0,charge,mass,Lambda,energy,nsamples,Tfinal
         B20real (bool): True if a constant B20real should be used, False otherwise
     """
 
@@ -348,7 +348,7 @@ class particle_ensemble_orbit:
             Lambda = initial_lambda_theta_phi_vppsign[0]
             theta = initial_lambda_theta_phi_vppsign[1]
             phi = initial_lambda_theta_phi_vppsign[2]
-            r = particles.r0
+            r = particles.r_initial
             magB = field.B_mag(r, theta, phi, Boozer_toroidal=True)
             self.initial_jacobian.append(
                 (field.G0 + r * r * field.G2 + field.iota * field.I2)

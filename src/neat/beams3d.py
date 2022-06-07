@@ -5,7 +5,7 @@
 #     stel,
 #     rhom,
 #     mass,
-#     r0,
+#     r_initial,
 #     theta0,
 #     phi0,
 #     charge,
@@ -24,7 +24,7 @@
 #     Ualfven = 0.5 * m_proton * mass * Valfven * Valfven
 #     energySI = result[0][4][0] * Ualfven
 #     Bfield0 = result[0][15][0]
-#     rStart, zStart, phiStart = stel.to_RZ(r0, theta0, phi0)
+#     rStart, zStart, phiStart = stel.to_RZ(r_initial, theta0, phi0)
 #     print("  R_START_IN =", rStart)
 #     print("  Z_START_IN =", zStart)
 #     print("  PHI_START_IN =", phiStart)

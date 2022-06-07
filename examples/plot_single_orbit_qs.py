@@ -28,7 +28,7 @@ B20_constant = False  # use a constant B20 (mean value) or the real function
 
 g_field = stellna_qs.from_paper(1, B0=B0)
 g_particle = ChargedParticle(
-    r0=r_initial,
+    r_initial=r_initial,
     theta0=theta0,
     phi0=phi0,
     energy=energy,

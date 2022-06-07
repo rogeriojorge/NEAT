@@ -33,7 +33,7 @@ stellarator_index = 1
 
 g_field = stellna_qs.from_paper(stellarator_index, B0=B0, nphi=131)
 g_particle = ChargedParticleEnsemble(
-    r0=r_initial,
+    r_initial=r_initial,
     r_max=r_max,
     energy=energy,
     charge=charge,

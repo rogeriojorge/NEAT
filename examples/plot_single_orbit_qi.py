@@ -36,7 +36,7 @@ g_field = stellna.from_paper(
 # Quasi-helically symmetric
 # g_field = stellna.from_paper(4, B0=B0, nphi=201)
 g_particle = ChargedParticle(
-    r0=r_initial,
+    r_initial=r_initial,
     theta0=theta0,
     phi0=phi0,
     energy=energy,
