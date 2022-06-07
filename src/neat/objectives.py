@@ -69,7 +69,8 @@ class EffectiveVelocityResidual(Optimizable):
     This residual is smoother than the loss fraction
     residual and is defined as delta s / delta t.
 
-    - delta s = maximum radial distance travelled by each particle before coliding with the wall or reaching the end of the simulation
+    - delta s = maximum radial distance travelled by each particle before
+        coliding with the wall or reaching the end of the simulation
     - delta t = time until particle collided or until the end of simulation, depends on the particle
     - J = delta s/ delta t or delta s^2/delta t
 
@@ -204,7 +205,7 @@ class OptimizeLossFractionSkeleton:
 
     def run_parallel(self, n_iterations=100, rel_step=1e-3, abs_step=1e-5):
         """Run the optimization problem defined in this class in parallel"""
-        self.mpi = MpiPartition()
+        self.mpi = MpiPartition()  # pylint: disable=W0201
         if self.mpi.proc0_world:
             print("Starting optimization in parallel")
         least_squares_mpi_solve(
