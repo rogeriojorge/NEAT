@@ -2,6 +2,6 @@ matplotlib
 numpy
 scipy
 qsc
-qic
+qicna
 setuptools
 pybind11
