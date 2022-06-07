@@ -32,6 +32,7 @@ class Stellna(Qic, Optimizable):
     the necessary SIMSOPT wrappers for optimization.
 
     """
+
     def __init__(self, *args, **kwargs) -> None:
         Qic.__init__(self, *args, **kwargs)
         Optimizable.__init__(
@@ -43,8 +44,7 @@ class Stellna(Qic, Optimizable):
 
         assert hasattr(
             self.B0, "__len__"
-        ),\
-        "The Stellna field requires a non-quasisymmetric magnetic field with B0 a function of phi"
+        ), "The Stellna field requires a magnetic field with B0 a function of phi"
 
         self.constant_b20 = (
             False  # This variable may be changed later if B20 should be constant
@@ -95,25 +95,31 @@ class Stellna(Qic, Optimizable):
         )
 
     def neatpp_solver(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
         return gc_solver(*args, *kwargs)
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
         return gc_solver_ensemble(*args, *kwargs)
 
     def get_inv_L_grad_B(self):
+        """Wrapper for 1/L_gradB to feed into SIMSOPT"""
         return self.inv_L_grad_B / np.sqrt(self.nphi)
 
     def get_elongation(self):
+        """Wrapper for elongation to feed into SIMSOPT"""
         return self.elongation / np.sqrt(self.nphi)
 
     def get_B20_mean(self):
+        """Wrapper for the mean of B20 to feed into SIMSOPT"""
         return self.B20_mean
 
     def get_grad_grad_B_inverse_scale_length_vs_varphi(self):
+        """Wrapper for 1/L_gradgradB(varphi) to feed into SIMSOPT"""
         return self.grad_grad_B_inverse_scale_length_vs_varphi / np.sqrt(self.nphi)
 
 
-class Stellna_qs(Qsc, Optimizable):
+class StellnaQS(Qsc, Optimizable):
     """Stellna_QS class
 
     This class initializes a pyQSC field in the same
@@ -121,6 +127,7 @@ class Stellna_qs(Qsc, Optimizable):
     the necessary SIMSOPT wrappers for optimization.
 
     """
+
     def __init__(self, *args, **kwargs) -> None:
         Qsc.__init__(self, *args, **kwargs)
         Optimizable.__init__(
@@ -132,8 +139,7 @@ class Stellna_qs(Qsc, Optimizable):
 
         assert not hasattr(
             self.B0, "__len__"
-        ),\
-        "The Stellna_qs field requires a quasisymmetric magnetic field with B0 a scalar constant"
+        ), "The StellnaQS field requires a quasisymmetric magnetic field with B0 a scalar constant"
 
         self.B1c = self.etabar * self.B0
         self.B1s = 0
@@ -173,25 +179,31 @@ class Stellna_qs(Qsc, Optimizable):
         )
 
     def neatpp_solver(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
         if self.constant_b20:
             return gc_solver_qs(*args, *kwargs)
         else:
             return gc_solver_qs_partial(*args, *kwargs)
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
         if self.constant_b20:
             return gc_solver_qs_ensemble(*args, *kwargs)
         else:
             return gc_solver_qs_partial_ensemble(*args, *kwargs)
 
     def get_inv_L_grad_B(self):
+        """Wrapper for 1/L_gradB to feed into SIMSOPT"""
         return self.inv_L_grad_B / np.sqrt(self.nphi)
 
     def get_elongation(self):
+        """Wrapper for elongation to feed into SIMSOPT"""
         return self.elongation / np.sqrt(self.nphi)
 
     def get_B20_mean(self):
+        """Wrapper for the mean of B20 to feed into SIMSOPT"""
         return self.B20_mean
 
     def get_grad_grad_B_inverse_scale_length_vs_varphi(self):
+        """Wrapper for 1/L_gradgradB(varphi) to feed into SIMSOPT"""
         return self.grad_grad_B_inverse_scale_length_vs_varphi / np.sqrt(self.nphi)

@@ -4,7 +4,7 @@ import time
 
 import matplotlib.pyplot as plt
 
-from neat.fields import Stellna_qs
+from neat.fields import StellnaQS
 from neat.tracing import ChargedParticleEnsemble, ParticleEnsembleOrbit
 
 """                                                                           
@@ -31,7 +31,7 @@ tfinal = 1e-4  # seconds
 nthreads_array = [1, 2, 4]
 stellarator_index = 1
 
-g_field = Stellna_qs.from_paper(stellarator_index, B0=B0, nphi=131)
+g_field = StellnaQS.from_paper(stellarator_index, B0=B0, nphi=131)
 g_particle = ChargedParticleEnsemble(
     r_initial=r_initial,
     r_max=r_max,

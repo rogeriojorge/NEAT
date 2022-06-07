@@ -23,7 +23,7 @@
 #     Valfven = stel.B0 / np.sqrt(mu0 * rhom * m_proton * 1.0e19)
 #     Ualfven = 0.5 * m_proton * mass * Valfven * Valfven
 #     energySI = result[0][4][0] * Ualfven
-#     Bfield0 = result[0][15][0]
+#     magnetic_field_strength0 = result[0][15][0]
 #     rStart, zStart, phiStart = stel.to_RZ(r_initial, theta_initial, phi_initial)
 #     print("  R_START_IN =", rStart)
 #     print("  Z_START_IN =", zStart)
@@ -34,7 +34,7 @@
 #     print("  T_END_IN =", tfinal * stel.rc[0] / Valfven)
 #     print("  NPOINC =", nsamples)
 #     print("  VLL_START_IN =", Valfven * result[0][14][0])
-#     print("  MU_START_IN =", energySI / Bfield0)
+#     print("  MU_START_IN =", energySI / magnetic_field_strength0)
 #     print("")
 #     os.chdir("results/" + name)
 #     np.savetxt("rParticleVec.txt", rParticleVec)

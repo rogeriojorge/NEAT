@@ -16,7 +16,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline as spline
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
-from .fields import Stellna, Stellna_qs
+from .fields import Stellna, StellnaQS
 from .plotting import plot_animation3D, plot_orbit2D, plot_orbit3D, plot_parameters
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,11 @@ class ChargedParticle:
 
     def is_alpha_particle(self) -> bool:
         """Return true if particle is an alpha particle"""
-        return bool(self.mass==4 and self.charge==2 and np.isclose(self.energy, 3.52e6, rtol=5e-2))
+        return bool(
+            self.mass == 4
+            and self.charge == 2
+            and np.isclose(self.energy, 3.52e6, rtol=5e-2)
+        )
 
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
@@ -100,7 +104,11 @@ class ChargedParticleEnsemble:
 
     def is_alpha_particle(self) -> bool:
         """Return true if particles are a collection of alpha particles"""
-        return bool(self.mass==4 and self.charge==2 and np.isclose(self.energy, 3.52e6, rtol=5e-2))
+        return bool(
+            self.mass == 4
+            and self.charge == 2
+            and np.isclose(self.energy, 3.52e6, rtol=5e-2)
+        )
 
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
@@ -173,7 +181,7 @@ class ParticleOrbit:
         self.energy_perpendicular = solution[:, 5]
         self.total_energy = self.energy_parallel + self.energy_perpendicular
 
-        self.Bfield = solution[:, 6]
+        self.magnetic_field_strength = solution[:, 6]
         self.v_parallel = solution[:, 7]
         self.rdot = solution[:, 8]
         self.thetadot = solution[:, 9]
@@ -181,7 +189,7 @@ class ParticleOrbit:
         self.vparalleldot = solution[:, 11]
 
         self.p_phi = canonical_angular_momentum(
-            particle, field, self.r_pos, self.v_parallel, self.Bfield
+            particle, field, self.r_pos, self.v_parallel, self.magnetic_field_strength
         )
 
         self.rpos_cylindrical = np.array(
@@ -200,7 +208,11 @@ class ParticleOrbit:
 
     def plot_orbit(self, show=True):
         """Plot particle orbit in 2D flux coordinates"""
-        plot_orbit2D(x=self.r_pos * np.cos(self.theta_pos), y=self.r_pos * np.sin(self.theta_pos), show=show)
+        plot_orbit2D(
+            x=self.r_pos * np.cos(self.theta_pos),
+            y=self.r_pos * np.sin(self.theta_pos),
+            show=show,
+        )
 
     def plot_orbit_3d(self, r_surface=0.1, distance=6, show=True):
         """Plot particle orbit in 3D cartesian coordinates"""
@@ -262,7 +274,7 @@ class ParticleEnsembleOrbit:
     def __init__(
         self,
         particles: ChargedParticleEnsemble,
-        field: Union[Stellna_qs, Stellna],
+        field: Union[StellnaQS, Stellna],
         nsamples=800,
         tfinal=0.0001,
         nthreads=2,
@@ -420,7 +432,9 @@ class ParticleEnsembleOrbit:
             plt.show()
 
 
-def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
+def canonical_angular_momentum(
+    particle, field, r_pos, v_parallel, magnetic_field_strength
+):
     """
     Calculate the canonical angular momentum conjugated with
     the Boozer coordinate phi. This should be constant for
@@ -434,11 +448,13 @@ def canonical_angular_momentum(particle, field, r_pos, v_parallel, Bfield):
         * m_proton
         * v_parallel
         * (field.G0 + r_pos**2 * (field.G2 + (field.iota - field.iotaN) * field.I2))
-        / Bfield
+        / magnetic_field_strength
         / field.Bbar
     )
 
-    p_phi2 = particle.charge * elementary_charge * r_pos**2 * field.Bbar / 2 * field.iotaN
+    p_phi2 = (
+        particle.charge * elementary_charge * r_pos**2 * field.Bbar / 2 * field.iotaN
+    )
     p_phi = p_phi1 - p_phi2
 
     return p_phi
