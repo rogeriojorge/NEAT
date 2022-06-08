@@ -137,8 +137,9 @@ Example [here](https://stackoverflow.com/questions/22328183/python-line-profiler
 ## Profiling the C++ extension
 
 There is a C++ script in the `src/neatpp` directory called `neatpp_profiling.cpp` that has the
-sole purpose of helping find bottlenecks in the C++ implementation. We show here an example of
-how to profile the code using the tool `gperftools`.
+sole purpose of helping find bottlenecks in the C++ implementation. To compile this script with
+profiling capabilities, the ``cmake_config_file.json`` should have the flag ``-DPROFILING=ON``.
+We show here an example of how to profile the code using the tool `gperftools`.
 
     https://github.com/gperftools/gperftools
 
