@@ -35,37 +35,36 @@ However, it doesn't work on every system and the code hosted in PyPI might be ou
 
 To download, clone NEAT using the following command:
 
-```bash
-git clone https://github.com/rogeriojorge/NEAT.git
-```
+    git clone https://github.com/rogeriojorge/NEAT.git
+
 
 The python packages necessary to run NEAT are listed in the file [requirements.txt](requirements.txt).
 A simple way of installing them is by running
 
-```
-pip install -r requirements.txt
-```
+
+    pip install -r requirements.txt
+
 
 Then, to install NEAT, on its root directory run
 
-```
-pip install -e .
-```
+
+    pip install -e .
+
 
 If you do not have permission to install python packages to the
 default location, add the ``--user`` flag to ``pip`` so the package
 can be installed for your user only::
 
-```
-pip install --user -e .
-```
+
+    pip install --user -e .
+
 
 To debug any possible problems that might arise, you may also try to install
 using the provided ``setup.py`` file
 
-```
-python setup.py install --user
-```
+
+    python setup.py install --user
+
 
 Done! Now try running an example.
 
@@ -79,16 +78,16 @@ This section explains how to build the docker container for NEAT. It can be used
 
 The easiest way to get simsopt docker image which comes with NEAT and all of its dependencies such as gyronimo and VMEC pre-installed is to use Docker Hub. After installing docker, you can run the simsopt container directly from the simsopt docker image uploaded to Docker Hub.
 
-```
-docker run -it --rm rjorge123/neat
-```
+
+    docker run -it --rm rjorge123/neat
+
 
 The above command should load the terminal that comes with the NEAT docker container. When you run it first time, the image is downloaded automatically, so be patient. You should now be able to import the module from python:
 
-```
-python3
-import neat
-```
+
+    python3
+    import neat
+
 
 ### Build locally
 
@@ -96,15 +95,15 @@ To build the image locally, instead of downloading from DockerHub, you can use t
 
 
 1. Build the docker image by running the `docker build` command in the repo root directory:
-   ```bash
+
    docker build -t neat -f docker/Dockerfile.NEAT .
-   ```
+
 This process yields an image with roughly 2 GB and may take minute to build.
 
 2. Run the docker image using the `docker run` command including your results folder:
-    ``` bash
+
     docker run -it neat
-    ```
+
 
 3. Done! You are now in an environment with NEAT installed. You can open python and run the examples.
 
@@ -174,14 +173,12 @@ If, instead of plotting, you would like text results, you can run
 
 Please use the following command to install ```pybind11[global]``` instead of ```pybind11```
 
-```
-pip install "pybind11[global]"
-```
+
+    pip install "pybind11[global]"
+
 
 ## How to clean all folders created during installation/execution
 
 To clean the build folders and all folders not being tracked by GIT, run
 
-```
-git clean -d -f -x
-```
+    git clean -d -f -x
