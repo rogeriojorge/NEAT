@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 from neat.fields import StellnaQS
-from neat.tracing import ChargedParticle, ParticleOrbit
+from neat.tracing_gyronimo import ChargedParticle, ParticleOrbit
 
 """                                                                           
 Trace the orbit of a single particle in a

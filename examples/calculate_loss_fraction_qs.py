@@ -5,7 +5,7 @@ import time
 import matplotlib.pyplot as plt
 
 from neat.fields import StellnaQS
-from neat.tracing import ChargedParticleEnsemble, ParticleEnsembleOrbit
+from neat.tracing_gyronimo import ChargedParticleEnsemble, ParticleEnsembleOrbit
 
 """                                                                           
 Calculate the loss fraction of a distribution of particles

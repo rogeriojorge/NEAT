@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 from neat.fields import StellnaQS
-from neat.tracing import (
+from neat.tracing_gyronimo import (
     ChargedParticle,
     ChargedParticleEnsemble,
     ParticleEnsembleOrbit,

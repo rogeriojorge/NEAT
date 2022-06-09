@@ -3,7 +3,9 @@
     "cmake_args": [
             "-DINSTALL_SIMPLE=OFF",
             "-DBUILD_VMEC_SUPPORT=ON",
+            "-DCMAKE_C_COMPILER=gcc",
             "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_Fortran_COMPILER=gfortran",
             "-DPROFILING=OFF"
         ]
 }
