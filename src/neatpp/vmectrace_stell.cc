@@ -29,6 +29,8 @@
 #include <cmath>
 #include <argh.h>
 #include <iostream>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <gyronimo/version.hh>
 #include <gyronimo/core/codata.hh>
 #include <gyronimo/core/linspace.hh>
@@ -154,9 +156,7 @@ int main(int argc, char* argv[]) {
   gyronimo::equilibrium_vmec veq(&g, &ifactory);
 
 // Reads parameters from the command line:
-  //double pphi; command_line("pphi", 1.0) >> pphi;  // pphi in eV.s.
   double mass; command_line("mass", 1.0) >> mass;  // m_proton units.
-  //double rhom; command_line("rhom", 1.0) >> rhom;  // density in m_proton*1e19.
   double charge; command_line("charge", 1.0) >> charge;  // q_electron units.
   double energy; command_line("energy", 1.0) >> energy;  // energy in eV.
   double s; command_line("s", 0.1) >> s;  // initial normalized radial position/surface (0-1)
@@ -168,12 +168,9 @@ int main(int argc, char* argv[]) {
   lambda = std::abs(lambda);  // once vpp sign is stored, lambda turns unsigned.
 
 // Computes normalisation constants:
-  //double Valfven = veq.B_0()/std::sqrt(
-    //gyronimo::codata::mu0*(rhom*gyronimo::codata::m_proton*1.e+19));
   double Vref = 1; // New version of Valfven
   double Uref = 0.5*gyronimo::codata::m_proton*mass*Vref*Vref; // New version of Ualfven
   double energySI = energy*gyronimo::codata::e;
-  //double Lref = veq.R_0();
   double Lref= 1.0;
 
 // Prints output header:
@@ -182,9 +179,6 @@ int main(int argc, char* argv[]) {
   std::cout << "# args: ";
   for(int i = 1; i < argc; i++) std::cout << argv[i] << " ";
   std::cout << std::endl;
-  //std::cout << "# l_ref = " << Lref << " [m];";
-  //std::cout << " v_alfven = " << Valfven << " [m/s];";
-  //std::cout << " u_alfven = " << Ualfven << " [J];";
   std::cout << " energy = " << energySI << " [J]." << "\n";
   std::cout << "# vars: t s theta zeta vpar Pphi/e Eperp/Ealfven Epar/Ealfven R phi Z\n";
 
@@ -219,3 +213,4 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+

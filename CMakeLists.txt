@@ -116,6 +116,7 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
     src/neatpp/neatpp.cpp
     src/neatpp/vmectrace_stell.cc
+    src/neatpp/vmectrace_stell_new.cc
     # src/neatpp/NEAT_Mercier.cc
     # src/neatpp/ensemble.cc
 )
