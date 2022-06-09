@@ -1,0 +1,178 @@
+Fortran:
+  statements*=Statement
+;
+
+Statement: 
+  InternalSubprogram
+  | Declaration
+  | DerivedTypeDefinition
+  | Comment
+  | Module
+;
+
+// R1104
+// TODO: distinguish module subprograms
+Module:
+  'MODULE' name=ID
+  SpecificationPart
+  declarations*=Declaration
+  ( 'CONTAINS'
+    subprograms*=InternalSubprogram ) ?
+  ModuleEnding
+;
+
+// R211
+// TODO: allow other stuff in subprograms to parse declarations of actual code
+InternalSubprogram:
+  heading=SubProgramHeading
+  SpecificationPart
+  statements*=Body
+  SubProgramEnding
+;
+Body: Declaration|Stmt;
+// R1224, R1225
+SubProgramHeading:
+    ( (Prefix)? DeclarationType 'FUNCTION' 
+      name=ID '(' arguments*=ID[','] ')' (Suffix)? )
+  | ( (Prefix)? 'SUBROUTINE' 
+      name=ID ( '(' arguments*=ID[','] ')' )? (BindingSpec)? )
+;
+
+// R1228
+Prefix:
+    'RECURSIVE'
+  | 'PURE'
+  | 'ELEMENTAL'
+;
+
+// R1229
+Suffix:
+    'RESULT' '(' name=ID ')' (BindingSpec)?
+  | BindingSpec ( 'RESULT' '(' name=ID ')' )?
+;
+
+// R1230, R1234
+SubProgramEnding:
+    end = 'END SUBROUTINE 'ID
+    | 'END FUNCTION 'ID
+    | 'END SUBROUTINE'
+    | 'END FUNCTION'
+    | 'END'
+;
+
+// R1104
+ModuleEnding:
+    end = 'END MODULE 'ID
+    | 'END MODULE'
+    | 'END'
+;
+
+// R207, R501
+Declaration:
+   dtype=DeclarationType ((',' attributes*=DeclarationAttribute[','])? DEF)? 
+       entities*=DeclarationEntity[',']
+;
+
+// R502
+DeclarationType:
+      type=IntrinsicType 
+    | type=DerivedType
+//  | type='CLASS' //(DerivedType | STAR)? // TODO
+;
+
+// R503
+DeclarationAttribute:
+      key='ALLOCATABLE'
+    | key='ASYNCHRONOUS'
+// TODO    | key='BIND' '(' 'C' ( ',' 'NAME=' name=ID )? ')'
+    | key='DIMENSION' '(' value=ArraySpec ')'
+    | key='EXTERNAL'
+    | key='INTENT' '(' ( 'INOUT' | 'IN' | 'OUT' ) ')'
+    | key='INTRINSIC'
+    | key='OPTIONAL'
+    | key='PARAMETER'
+    | key='POINTER'
+    | key='PRIVATE'
+    | key='PROTECTED'
+    | key='PUBLIC'
+    | key='SAVE'
+    | key='TARGET'
+    | key='VALUE'
+    | key='VOLATILE'
+;
+
+// R504
+DeclarationEntity: DeclarationEntityObject | DeclarationEntityFunction;
+
+// R504
+DeclarationEntityObject:
+    name=ID ('(' arrayspec=ArraySpec ')')? ('=' /.*$/)? // TODO add the remaining attributes
+;
+
+// R504
+DeclarationEntityFunction:
+    name=ID (STAR charlen=INT)? ('=' /.*$/)?
+;
+
+// R509
+BindingSpec:
+    'BIND' '(' 'C' ( ',' 'NAME=' name=ID )? ')'
+;
+
+// R510
+// TODO treat remaining cases
+ArraySpec:
+      value*=ArrayExplicitShapeSpec[','] 
+//    | value*=ArrayAssumedShapeSpec[','] 
+//    | value*=ArrayDeferredShapeSpec[','] 
+//    | value=ArrayAssumedSizeSpec
+;
+
+// R514
+ArrayExplicitShapeSpec:
+    ((lower_bound=ArrayBound)? ':')? (upper_bound=ArrayBound)? 
+;
+
+// TODO this must be an int expr
+ArrayBound:
+      INT
+    | ID
+;
+
+// R404 for kind
+IntrinsicType:
+      name='INTEGER' ('('('kind=')?kind=INT')')?
+    | name='REAL'    ('('('kind=')?kind=INT')')?
+    | name='COMPLEX' ('('('kind=')?kind=INT')')?
+    | name='LOGICAL' ('('('kind=')?kind=INT')')?
+    | name='DOUBLE PRECISION'
+    | name='DOUBLE COMPLEX'
+    | name='CHARACTER' ('('('len=')?'*'')')?
+;
+
+DerivedType:
+  'TYPE' '(' name=ID ')'
+;
+
+// R429
+DerivedTypeDefinition:
+    'TYPE' (DEF)? name=ID
+      declarations*=Declaration
+    'END TYPE'
+;
+
+// R204, R1109, R206
+SpecificationPart:
+    ('USE '/.*$/)*
+    ('IMPLICIT '/.*$/)*
+    ('SAVE'/.*$/)*
+;
+
+
+Comment:
+    '!'/.*$/
+;
+Stmt:  !(SubProgramEnding) name=/.*$/;
+DEF:         "::";
+COMMA:       ",";
+STAR:       "*";
