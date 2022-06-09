@@ -1,0 +1,13 @@
+[DESIGN]
+max-attributes=12
+max-args=10
+
+[TYPECHECK]
+generated-members=S*
+ignored-modules=neatpp
+
+[BASIC]
+good-names=B0, B1c, B1s, B20, B2c, B2s, B2c_array, B2s_array, G2,
+           i, j, k, J, get_inv_L_grad_B, get_B20_mean, B20_mean,
+           get_grad_grad_B_inverse_scale_length_vs_varphi,
+           B_max, B_min, Lambda, B20_gyronimo, ax

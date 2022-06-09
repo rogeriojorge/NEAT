@@ -40,7 +40,7 @@ class metric_stellna_qs : public metric_covariant {
   const double I2() const {return I2_;};
 
   private:
-    double Bref_, G0_, G2_, I2_, iota_, iotaN_, phi0_;
+    double Bref_, G0_, G2_, I2_, iota_, iotaN_;
     double B0_, B1c_, B20_, B2c_, beta1s_;
 };
 

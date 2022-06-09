@@ -4,7 +4,8 @@ This is a guide to building documentation locally.
 
 ## Prerequsites
 
-Install *sphinx* with pip.
+Install *sphinx*, *sphinx-rtd-theme*, *sphinxcontrib-napoleon*,
+*sphinx-autodoc-napoleon-typehints* with pip.
 
 ## Build
 1. Use sphinx-build

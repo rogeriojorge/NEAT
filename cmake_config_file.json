@@ -1,8 +1,9 @@
 {
-    "comment": "This configuration file works on a macbook on which gcc and netcdf have been installed using macports.",
+    "comment": "Flags used to compile NEAT. Change this according to your needs.",
     "cmake_args": [
             "-DINSTALL_SIMPLE=OFF",
             "-DBUILD_VMEC_SUPPORT=ON",
-            "-DCMAKE_CXX_COMPILER=g++"
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DPROFILING=OFF"
         ]
 }

@@ -8,46 +8,67 @@
 [![codecov](https://codecov.io/gh/rogeriojorge/NEAT/branch/main/graph/badge.svg?token=8515A2RQL3)](https://codecov.io/gh/rogeriojorge/NEAT)
 
 NEAT is a python framework that is intended to find optimized stellarator configurations for fast particle confinement using the near-axis expansion formalism.
-The magnetic field is calculated using the code [pyQSC](https://github.com/landreman/pyQSC/), the particle orbits are traced using the code [gyronimo](https://github.com/prodrigs/gyronimo) (included as a submodule) and the optimization is done using the code [simsopt](https://github.com/hiddenSymmetries/).
+The magnetic field is calculated using the codes [pyQSC](https://github.com/landreman/pyQSC/) and [pyQIC](https://github.com/rogeriojorge/pyQIC/), the particle orbits are traced using the code [gyronimo](https://github.com/prodrigs/gyronimo) (included as a submodule) and the optimization is done using the code [simsopt](https://github.com/hiddenSymmetries/). The benchmarks are made with the [SIMPLE](https://github.com/itpplasma/SIMPLE) and [BEAMS3D](https://github.com/PrincetonUniversity/STELLOPT/tree/develop/BEAMS3D) codes (under construction).
 
-To download clone NEAT including its submodules, use the following command:
-
-```bash
-git clone --recurse-submodules https://github.com/rogeriojorge/NEAT.git
-```
-or, alternatively, after downloading this repository, in the root folder, run:
-
-```bash
-git submodule init
-git submodule update
-```
-
-# Usage
-
-NEAT could be run either directly by installing the requirements pyQSC, gyronimo and SIMSOPT, and then compiling the [NEAT.cc](src/NEAT.cc) file in the *[src](src/)* folder, or using the provided Docker image. The usage of the Docker image is recommended.
+We show here the standard way to download and install NEAT. For more information, please visit the [documentation](http://neat-docs.readthedocs.io/) present in http://neat-docs.readthedocs.io/.
 
 # Installation
 
-Make sure that you have installed all of the python packages listed in the file [requirements.txt](requirements.txt). A simple way of doing so is by running
+To install NEAT, you'll need the following libraries
 
-```
-pip install -r requirements.txt
-```
+* gsl
+* boost
+* gcc10
 
-## CMake
+and the python packages specified in [requirements.txt](requirements.txt).
+Note that [pyQSC](https://github.com/landreman/pyQSC/) and [pyQIC](https://github.com/rogeriojorge/pyQIC/) should be downloaded and installed locally.
 
-On NEAT's root directory run
+## PyPI
 
-```
-python setup.py build
-python setup.py install --user
-```
+The simplest installation of NEAT is by running the command
 
-To clean the build folders and all folders not being tracked by GIT, run
+    pip install neatstel
 
-```
-git clean -d -f -x
-```
+However, it doesn't work on every system and the code hosted in PyPI might be outdated.
+
+## From source
+
+To download, clone NEAT using the following command:
+
+    git clone https://github.com/rogeriojorge/NEAT.git
+
+
+The python packages necessary to run NEAT are listed in the file [requirements.txt](requirements.txt).
+A simple way of installing them is by running
+
+
+    pip install -r requirements.txt
+
+
+Then, to install NEAT, on its root directory run
+
+
+    pip install -e .
+
+
+If you do not have permission to install python packages to the
+default location, add the ``--user`` flag to ``pip`` so the package
+can be installed for your user only::
+
+
+    pip install --user -e .
+
+
+To debug any possible problems that might arise, you may also try to install
+using the provided ``setup.py`` file
+
+
+    python setup.py install --user
+
+
+Done! Now try running an example.
+
+Note: the python package is called `neatstel`.
 
 ## Docker
 
@@ -57,16 +78,16 @@ This section explains how to build the docker container for NEAT. It can be used
 
 The easiest way to get simsopt docker image which comes with NEAT and all of its dependencies such as gyronimo and VMEC pre-installed is to use Docker Hub. After installing docker, you can run the simsopt container directly from the simsopt docker image uploaded to Docker Hub.
 
-```
-docker run -it --rm rjorge123/neat # Linux users, prefix the command with sudo
-```
+
+    docker run -it --rm rjorge123/neat
+
 
 The above command should load the terminal that comes with the NEAT docker container. When you run it first time, the image is downloaded automatically, so be patient. You should now be able to import the module from python:
 
-```
-python3
-import neat
-```
+
+    python3
+    import neat
+
 
 ### Build locally
 
@@ -74,152 +95,25 @@ To build the image locally, instead of downloading from DockerHub, you can use t
 
 
 1. Build the docker image by running the `docker build` command in the repo root directory:
-   ```bash
+
    docker build -t neat -f docker/Dockerfile.NEAT .
-   ```
+
 This process yields an image with roughly 2 GB and may take minute to build.
 
 2. Run the docker image using the `docker run` command including your results folder:
-    ``` bash
-    docker run -v "$(pwd)/results:/home/results" neat
-    ```
 
-3. Your results folder will be populated with NEAT's results
-
-4. In case the input parameters are changed, there is no need to rebuild the image, just include your inputs file after the docker run command
-    ``` bash
-    docker run -v "$(pwd)/inputs.py:/home/neat/src/inputs.py" -v "$(pwd)/results:/home/neat/results" neat
-    ```
-
-#### Optional
-If you want to run NEAT and continue working in the container, instead run the docker image using the flag **-it** and end with **/bin*bash**
-    ```bash
-    docker run -it --entrypoint /bin/bash neat
-    ```
-
-## Development
-
-### Requirements
-To run NEAT, you'll need the following libraries
-
-* gsl
-* boost
-* gcc10
-
-and the python packages specified in [requirements.txt](requirements.txt) .
-
-### Install gyronimo
-In NEAT's root folder, run
-
-```bash
-cd external/gyronimo
-mkdir build
-cd build
-CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build -DSUPPORT_OPENMP=ON -DSUPPORT_VMEC=ON ../
-cmake --build . --target install
-```
-
-If you want to build documentation with doxygen, run
-
-```bash
-cmake --build . --target doc
-```
+    docker run -it neat
 
 
-### Compile NEAT
+3. Done! You are now in an environment with NEAT installed. You can open python and run the examples.
 
-Compilation is done in the src/ folder of the repo. The fields and metrics need to be compiled before compiling the main file NEAT.cc in the src/neatpp folder
+# Usage
 
-#### Example on MacOS
-
-```bash
-cd src/neatpp
-
-cd fields_NEAT
-g++-mp-11 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-
-cd ../metrics_NEAT
-g++-mp-11 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-
-cd ../neatpp
-```
-
-Compile the serial version (no parallelization)
-```bash
-g++ -O2 -Wall -shared -std=c++20 -undefined dynamic_lookup  NEAT.cc ../neatpp/fields_NEAT/equilibrium_stellna_qs.o ../metrics_NEAT/neatpp/metric_stellna_qs.o -o NEAT.so $(python3 -m pybind11 --includes) -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib -Wl,-rpath $(pwd)/..
-```
-
-Compile the OpenMP version
-```bash
-g++ -O2 -Wall -std=c++20 -fopenmp NEAT_openmp.cc ../neatpp/fields_NEAT/equilibrium_stellna_qs.o ../neatpp/metrics_NEAT/metric_stellna_qs.o -o NEAT_openmp -I/opt/local/include -L/opt/local/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include -Wl,-rpath $(pwd)/../../build/lib
-```
-
-The number of threads can be changed using the command
-
-```bash
-export OMP_NUM_THREADS=[number of threads]
-```
-
-#### Example on Linux
-
-```bash
-cd src/neatpp
-
-cd fields_NEAT
-g++-10 -O2 -Wall -std=c++20 equilibrium_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-
-cd ../metrics_NEAT
-g++-10 -O2 -Wall -std=c++20 metric_stellna_qs.cc -I$(pwd)/../../build/include -I$(pwd)/.. -c
-
-cd ../neatpp
-g++-10 -std=c++2a -fPIC -shared NEAT.cc -o NEAT.so $(python3 -m pybind11 --includes) -L/usr/lib -lgsl -L$(pwd)/../../build/lib -lgyronimo -I$(pwd)/.. -I$(pwd)/../../build/include  -Wl,-rpath $(pwd)/../../build/lib
-```
-
-### Install SIMPLE
-In NEAT's root folder, run
-
-```bash
-cd external/simple
-mkdir build
-cd build
-CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=../../../build ../
-cmake --build . --target install
-cp simple.x ../../../build/bin
-```
-
-The last command copies the executable of SIMPLE to the folder build/bin
-
-### Install VMEC
-First, in the external/vmec folder, change the file cmake_config_file.json to your machine using an example from the cmake/machines templates. Here is a template for MacOS running gcc11
-
-```
-{
-    "comment": "This configuration file works on a macbook on which gcc and netcdf have been installed using macports.",
-    "cmake_args": [
-           "-DCMAKE_C_COMPILER=mpicc",
-           "-DCMAKE_CXX_COMPILER=mpicxx",
-           "-DCMAKE_Fortran_COMPILER=mpif90",
-           "-DNETCDF_INC_PATH=/opt/local/include",
-           "-DNETCDF_LIB_PATH=/opt/local/lib",
-           "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch"]
-}
-```
-
-Then, in NEAT's root folder, run
-
-```bash
-cd external/vmec
-pip install numpy
-pip install cmake scikit-build ninja f90wrap
-python setup.py build_ext
-python setup.py install
-```
-
-To test VMEC's installation, you can run
-
-```
-python -c "import vmec; print('success')"
-```
+For common uses of NEAT, please check the `examples` folder.
+It has the three main current uses of NEAT:
+- Trace a single particle orbit (`examples/plot_single_orbit_qs.py`)
+- Trace an ensemble of particles (`examples/calculate_loss_fraction_qs.py`)
+- Optimize a stellarator magnetic field (`examples/optimize_loss_fraction_qs.py`)
 
 # Normalizations
 
@@ -230,12 +124,62 @@ All units are in SI, except:
 
 Lambda = mu (SI) / Energy (SI) * B (reference SI)
 
+# Profiling
+
+## Profiling Python code
+
+Use the line_profiler python extension.
+
+```pip install line_profiler```
+
+Example [here](https://stackoverflow.com/questions/22328183/python-line-profiler-code-example/43376466#43376466)
+
+## Profiling the C++ extension
+
+There is a C++ script in the `src/neatpp` directory called `neatpp_profiling.cpp` that has the
+sole purpose of helping find bottlenecks in the C++ implementation. To compile this script with
+profiling capabilities, the ``cmake_config_file.json`` should have the flag ``-DPROFILING=ON``.
+We show here an example of how to profile the code using the tool `gperftools`.
+
+    https://github.com/gperftools/gperftools
+
+On MacOs, it can be installed via Macports or Homebrew.
+On Ubuntu, it can be install via ```sudo apt-get install google-perftools```.
+
+For it to profile the code, the flag `PROFILING` should be `ON` in the `cmake_config_file.json` file.
+After compiling NEAT, it will create an executable called `profiling` in the temporary build directory.
+To profile the code using the `gperftools`, you can run
+
+    CPUPROFILE=profile.out build/path_to_profiling
+
+where the output file for the profiling was named `profile.out`.
+
+The results can be ploted using the following command
+
+    pprof --gv build/path_to_profiling profile.out
+
+On MacOs, to show the plot, one needs to install `gprof2dot`, `graphivz` and `gv`. On macports, for example, this can be done using
+
+    sudo port install py310-gprof2dot graphivz gv
+
+where the python version 3.10 was specified.
+
+If, instead of plotting, you would like text results, you can run
+
+    prof build/path_to_profiling profile.out
+
 # FAQ
 
 ## pybind11 not found by cmake
 
 Please use the following command to install ```pybind11[global]``` instead of ```pybind11```
 
-```
-pip install "pybind11[global]"
-```
+
+    pip install "pybind11[global]"
+
+
+## How to clean all folders created during installation/execution
+
+To clean the build folders and all folders not being tracked by GIT, run
+
+    git clean -d -f -x

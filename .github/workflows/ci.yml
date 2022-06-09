@@ -28,7 +28,7 @@ jobs:
     - name: install requirements
       run: |
         sudo apt-get update
-        sudo apt-get install -y git openmpi-bin libopenmpi-dev gcc-10 g++-10 gcc-10-base libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev doxygen
+        sudo apt-get install -y git openmpi-bin libopenmpi-dev gcc-10 g++-10 gcc-10-base libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev doxygen libgoogle-perftools-dev  google-perftools
         sudo apt-get install -y libblas-dev liblapack-dev python3 python3-numpy python3-h5py pgplot5 libncarg-dev libscalapack-openmpi-dev python3-pip libnetcdf-c++4-dev cmake
 
     - name: Download the VMEC2000 standalone repository
@@ -104,8 +104,8 @@ jobs:
 
     - name: Install NEAT
       run: |
-        sed -i -e '6d' cmake_config_file.json
-        sed -i -e '6i             "-DCMAKE_CXX_COMPILER=g++-10"\' cmake_config_file.json
+        sed -i -e '7d' cmake_config_file.json
+        sed -i -e '7i             "-DCMAKE_CXX_COMPILER=g++-10"\' cmake_config_file.json
         cat cmake_config_file.json
         pip3 install -e .
 

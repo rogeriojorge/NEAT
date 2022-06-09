@@ -45,6 +45,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif()
 
+add_compile_options(-DOPENMP)
 find_package(OpenMP)
 
 # Add BOOST
@@ -84,27 +85,30 @@ else()
     set(Boost_INCLUDE_DIRS ${boost_DIR}/src/${boost_target})
     message(STATUS "Boost include dirs are ${Boost_INCLUDE_DIRS}")
 endif()
-
-# Add pybind11 include directories
-execute_process(
-    COMMAND "${PYTHON}" -c
-            "import pybind11; print(pybind11.get_cmake_dir())"
-    OUTPUT_VARIABLE _tmp_dir
-    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
-    list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+include_directories(${Boost_INCLUDE_DIRS})
 
 # Add GSL
 find_package(GSL REQUIRED)
-  include_directories(${GSL_INCLUDE_DIRS})
+include_directories(${GSL_INCLUDE_DIRS})
 
 # Compile git submodules
 if(INSTALL_SIMPLE)
     add_subdirectory(external/simple)
 endif()
 
+# Add gyronimo
 add_subdirectory(external/gyronimo)
+
+# Add pybind11 include directories
+execute_process(
+    COMMAND "${PYTHON}" -c
+    "import pybind11; print(pybind11.get_cmake_dir())"
+    OUTPUT_VARIABLE _tmp_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
+    list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
 include_directories(external/gyronimo/misc/apps/include)
 find_package(pybind11 CONFIG REQUIRED)
+# include_directories(${pybind11_INCLUDE_DIRS})
 
 # Build NEAT
 pybind11_add_module(${PROJECT_NAME}
@@ -115,25 +119,54 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
     src/neatpp/neatpp.cpp
+    src/neatpp/neatpp.hh
     src/neatpp/vmectrace_stell.cc
     src/neatpp/vmectrace_stell_new.cc
     # src/neatpp/NEAT_Mercier.cc
-    # src/neatpp/ensemble.cc
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE gyronimo)
-target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
-target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${PROJECT_SOURCE_DIR}/src/neat)
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-add_compile_options(-DOPENMP)
+include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
+include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
 
-# Install neatpp
-# install(TARGETS ${PROJECT_NAME} DESTINATION .)
-# install(TARGETS ${PROJECT_NAME} DESTINATION src/neat
-#         LIBRARY DESTINATION lib
-#         RUNTIME DESTINATION bin
-# )
+if(PROFILING)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -lprofiler")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
+# Create C++ library
+target_link_libraries(${PROJECT_NAME} PRIVATE gyronimo)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+
+# Add the profiling executable
+add_library(profiling_lib
+    src/neatpp/fields_NEAT/equilibrium_stellna.cc
+    src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
+    src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
+    src/neatpp/metrics_NEAT/metric_stellna.cc
+    src/neatpp/metrics_NEAT/metric_stellna_qs.cc
+    src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+    src/neatpp/neatpp.hh
+)
+target_link_libraries(profiling_lib PRIVATE gyronimo)
+target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
+target_compile_features(profiling_lib PRIVATE cxx_std_20)
+
+add_executable(profiling src/neatpp/neatpp_profiling.cpp)
+target_link_libraries(profiling PRIVATE profiling_lib)
+target_link_libraries(profiling PRIVATE gyronimo)
+target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
+target_compile_features(profiling PRIVATE cxx_std_20)
+install(TARGETS profiling DESTINATION .)
+
+## Attempt at making an executable from neatpp.cpp directly
+# add_executable(profiling src/neatpp/neatpp.cpp)
+# target_include_directories(profiling PRIVATE ${pybind11_INCLUDE_DIRS})
+# target_link_libraries(profiling PRIVATE profiling_lib)
+# target_link_libraries(profiling PRIVATE gyronimo)
+# target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
+# target_link_libraries(profiling PRIVATE pybind11::module)
+# target_compile_features(profiling PRIVATE cxx_std_20)
+# install(TARGETS profiling DESTINATION .)

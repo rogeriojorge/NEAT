@@ -47,7 +47,7 @@ class metric_stellna_qs_partial : public metric_covariant {
 
   private:
     const double phi_modulus_factor_;
-    double Bref_, G0_, G2_, I2_, iota_, iotaN_, phi0_;
+    double Bref_, G0_, G2_, I2_, iota_, iotaN_;
     double B0_, B1c_, B2c_, beta1s_;
     double field_periods_;
     interpolator1d *B20_;
