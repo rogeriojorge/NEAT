@@ -98,7 +98,7 @@ neo_orb.init_params(Z_charge, m_mass, E_kin, dtau, dtaumax, 1e-8)
 cut_detector.load()
 
 # %%
-ntimstep = 100
+ntimstep = 1000
 neo_orb.firstrun = 1  # to re-initialize symplectic integrator in case
 
 s = 0.5
@@ -119,7 +119,10 @@ for kt in range(ntimstep):
     zs[:, kt+1] = z[[0, 1, 2, 4]]
 print(z)
 print('time elapsed: {} s'.format(time.time() - t))
-
+print('Here 3')
+plt.plot(zs[0, :]*np.cos(zs[1, :]), zs[0, :]*np.sin(zs[1, :]))
+plt.show()
+print('Here 4')
 # cut_detector.init(z)
 # ierr = 0
 # var_cut = np.zeros(6)
@@ -135,7 +138,7 @@ print('time elapsed: {} s'.format(time.time() - t))
 # print(z)
 # print('time elapsed: {} s'.format(time.time() - t))
 
-plt.plot(zs[0, :]*np.cos(zs[1, :]), zs[0, :]*np.sin(zs[1, :]))
+# plt.plot(zs[0, :]*np.cos(zs[1, :]), zs[0, :]*np.sin(zs[1, :]))
 # plt.plot(var_tips[0, :]*np.cos(var_tips[1, :]),
 #          var_tips[0, :]*np.sin(var_tips[1, :]), ',')
-plt.show
+# plt.show
