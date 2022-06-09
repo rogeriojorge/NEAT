@@ -105,7 +105,7 @@ jobs:
     - name: Install NEAT
       run: |
         sed -i -e '7d' cmake_config_file.json
-        sed -i -e '7i             "-DCMAKE_CXX_COMPILER=g++-10,"\' cmake_config_file.json
+        sed -i -e '7i             "-DCMAKE_CXX_COMPILER=g++-10",\' cmake_config_file.json
         cat cmake_config_file.json
         pip3 install -e .
 
