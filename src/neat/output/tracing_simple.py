@@ -6,8 +6,10 @@ Created on Wed Feb 13 12:35:03 2019
 @author: calbert
 """
 import time
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+
 from neat.fffi import FortranLibrary, FortranModule
 
 pi = 3.14159265358979
@@ -25,15 +27,19 @@ trace_time = 1.0e-2
 # rbig=rlarm*bmod00
 # dphi=2.d0*pi/(L1i*npoiper)
 
-v0 = np.sqrt(2.0*E_kin*ev/(m_mass*p_mass))    # alpha particle velocity, cm/s
-rlarm = v0*m_mass*p_mass*c/(Z_charge*e_charge*bmod_ref)  # reference gyroradius
-tau = trace_time*v0
+v0 = np.sqrt(2.0 * E_kin * ev / (m_mass * p_mass))  # alpha particle velocity, cm/s
+rlarm = (
+    v0 * m_mass * p_mass * c / (Z_charge * e_charge * bmod_ref)
+)  # reference gyroradius
+tau = trace_time * v0
 
 import neat
-libneo_orb = FortranLibrary('simple', path=neat.__file__[:-17])
 
-neo_orb = FortranModule(libneo_orb, 'neo_orb_global')
-neo_orb.fdef("""  
+libneo_orb = FortranLibrary("simple", path=neat.__file__[:-17])
+
+neo_orb = FortranModule(libneo_orb, "neo_orb_global")
+neo_orb.fdef(
+    """  
   subroutine init_field(ans_s, ans_tp, amultharm, aintegmode)
     integer :: ans_s, ans_tp, amultharm, aintegmode
   end
@@ -57,16 +63,20 @@ neo_orb.fdef("""
     double precision, dimension(:) :: z
     integer :: ierr
   end
-""")
+"""
+)
 
-new_vmec_stuff = FortranModule(libneo_orb, 'new_vmec_stuff_mod')
-new_vmec_stuff.fdef("""
+new_vmec_stuff = FortranModule(libneo_orb, "new_vmec_stuff_mod")
+new_vmec_stuff.fdef(
+    """
     double precision :: rmajor, h_theta, h_phi
-""")
+"""
+)
 
 
-cut_detector = FortranModule(libneo_orb, 'cut_detector_global')
-cut_detector.fdef("""
+cut_detector = FortranModule(libneo_orb, "cut_detector_global")
+cut_detector.fdef(
+    """
     subroutine init(z)
       double precision, dimension(:), intent(in) :: z
     end
@@ -77,7 +87,8 @@ cut_detector.fdef("""
       integer, intent(out) :: cut_type
       integer, intent(out) :: ierr
     end
-""")
+"""
+)
 
 libneo_orb.compile()
 neo_orb.load()
@@ -89,10 +100,10 @@ neo_orb.init_field(5, 5, 3, 1)
 print("Here 2")
 
 # %%
-npoiper2 = 24                       # interation points per field period
-rbig = new_vmec_stuff.rmajor*1.0e2  # major radius in cm
-dtaumax = 2.0*pi*rbig/npoiper2      # maximum time step for integrator
-dtau = dtaumax                   # time step for output
+npoiper2 = 24  # interation points per field period
+rbig = new_vmec_stuff.rmajor * 1.0e2  # major radius in cm
+dtaumax = 2.0 * pi * rbig / npoiper2  # maximum time step for integrator
+dtau = dtaumax  # time step for output
 neo_orb.init_params(Z_charge, m_mass, E_kin, dtau, dtaumax, 1e-8)
 # %%
 cut_detector.load()
@@ -109,20 +120,20 @@ lam = 0.22
 z = np.array([s, th, ph, 1.0, lam])
 neo_orb.init_integrator(z)
 
-zs = np.empty([4, ntimstep+1])
+zs = np.empty([4, ntimstep + 1])
 zs[:, 0] = z[[0, 1, 2, 4]]
 
 t = time.time()
 ierr = 0  # doesn't work yet with pass-by-reference
 for kt in range(ntimstep):
     neo_orb.timestep_sympl_z(z, ierr)
-    zs[:, kt+1] = z[[0, 1, 2, 4]]
+    zs[:, kt + 1] = z[[0, 1, 2, 4]]
 print(z)
-print('time elapsed: {} s'.format(time.time() - t))
-print('Here 3')
-plt.plot(zs[0, :]*np.cos(zs[1, :]), zs[0, :]*np.sin(zs[1, :]))
+print("time elapsed: {} s".format(time.time() - t))
+print("Here 3")
+plt.plot(zs[0, :] * np.cos(zs[1, :]), zs[0, :] * np.sin(zs[1, :]))
 plt.show()
-print('Here 4')
+print("Here 4")
 # cut_detector.init(z)
 # ierr = 0
 # var_cut = np.zeros(6)
