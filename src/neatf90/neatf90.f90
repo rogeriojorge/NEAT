@@ -1,13 +1,13 @@
-! subroutine sacaca(n, m, c, x)
-! 	implicit none
-!   	integer, intent(in) :: n, m
-!   	real(kind=8), intent(out), dimension(n,m) :: x
-!   	real(kind=8), intent(in) :: c(:)
+subroutine sacaca(n, m, c, x)
+	implicit none
+  	integer, intent(in) :: n, m
+  	real(kind=8), intent(out), dimension(n,m) :: x
+  	real(kind=8), intent(in) :: c(:)
 
-! 	x = 0.0d0
-! 	x(1, 1) = c(1)
+	x = 0.0d0
+	x(1, 1) = c(1)
 
-! end subroutine sacaca
+end subroutine sacaca
 
 !   use omp_lib
 !   use common, only: pi, twopi, c, e_charge, e_mass, p_mass, ev
@@ -125,38 +125,38 @@
 
 ! contains
 
-subroutine read_config
-  open(1,file='simple.in',recl=1024)
-  read (1,*) notrace_passing   !skip tracing passing prts if notrace_passing=1
-  read (1,*) nper              !number of periods for initial field line        ! TODO: increase
-  read (1,*) npoiper           !number of points per period on this field line  ! TODO: increase
-  read (1,*) ntimstep          !number of time steps per slowing down time
-  read (1,*) ntestpart         !number of test particles
-  read (1,*) bmod_ref          !reference field, G, for Boozer $B_{00}$
-  read (1,*) trace_time        !slowing down time, s
-  read (1,*) sbeg              !starting s for field line                       !<=2017
-  read (1,*) phibeg            !starting phi for field line                     !<=2017
-  read (1,*) thetabeg          !starting theta for field line                   !<=2017
-  read (1,*) loopskip          !how many loops to skip to shift random numbers
-  read (1,*) contr_pp          !control of passing particle fraction            ! UNUSED (2019)
-  read (1,*) facE_al           !facE_al test particle energy reduction factor
-  read (1,*) npoiper2          !additional integration step split factor
-  read (1,*) n_e               !test particle charge number (the same as Z)
-  read (1,*) n_d               !test particle mass number (the same as A)
-  read (1,*) netcdffile        !name of VMEC file in NETCDF format <=2017 NEW
-  read (1,*) ns_s              !spline order for 3D quantities over s variable
-  read (1,*) ns_tp             !spline order for 3D quantities over theta and phi
-  read (1,*) multharm          !angular grid factor (n_grid=multharm*n_harm_max where n_harm_max - maximum Fourier index)
-  read (1,*) isw_field_type    !field type: -1 - Testing, 0 - Canonical, 1 - VMEC, 2 - Boozer
-  read (1,*) startmode         !mode for initial conditions: 0=generate and store, 1=generate, store, and run, 2=read and run, 3=read ANTS and run
-  read (1,*) integmode         !mode for integrator: -1 = RK VMEC, 0 = RK CAN, 1 = Euler1, 2 = Euler2, 3 = Verlet
-  read (1,*) relerr            !relative error for RK integrator
-  read (1,*) tcut              !time when to do cut for classification, usually 1d-1, or -1 if no cuts desired
-  read (1,*) debug             !produce debugging output (.True./.False.). Use only in non-parallel mode!
-  read (1,*) class_plot        !write starting points at phi=const cut for classification plot (.True./.False.).  !<=AAA
-  read (1,*) cut_in_per        !normalized phi-cut position within field period, [0:1], used if class_plot=.True. !<=AAA
-  close(1)
-end subroutine read_config
+! subroutine read_config
+!   open(1,file='simple.in',recl=1024)
+!   read (1,*) notrace_passing   !skip tracing passing prts if notrace_passing=1
+!   read (1,*) nper              !number of periods for initial field line        ! TODO: increase
+!   read (1,*) npoiper           !number of points per period on this field line  ! TODO: increase
+!   read (1,*) ntimstep          !number of time steps per slowing down time
+!   read (1,*) ntestpart         !number of test particles
+!   read (1,*) bmod_ref          !reference field, G, for Boozer $B_{00}$
+!   read (1,*) trace_time        !slowing down time, s
+!   read (1,*) sbeg              !starting s for field line                       !<=2017
+!   read (1,*) phibeg            !starting phi for field line                     !<=2017
+!   read (1,*) thetabeg          !starting theta for field line                   !<=2017
+!   read (1,*) loopskip          !how many loops to skip to shift random numbers
+!   read (1,*) contr_pp          !control of passing particle fraction            ! UNUSED (2019)
+!   read (1,*) facE_al           !facE_al test particle energy reduction factor
+!   read (1,*) npoiper2          !additional integration step split factor
+!   read (1,*) n_e               !test particle charge number (the same as Z)
+!   read (1,*) n_d               !test particle mass number (the same as A)
+!   read (1,*) netcdffile        !name of VMEC file in NETCDF format <=2017 NEW
+!   read (1,*) ns_s              !spline order for 3D quantities over s variable
+!   read (1,*) ns_tp             !spline order for 3D quantities over theta and phi
+!   read (1,*) multharm          !angular grid factor (n_grid=multharm*n_harm_max where n_harm_max - maximum Fourier index)
+!   read (1,*) isw_field_type    !field type: -1 - Testing, 0 - Canonical, 1 - VMEC, 2 - Boozer
+!   read (1,*) startmode         !mode for initial conditions: 0=generate and store, 1=generate, store, and run, 2=read and run, 3=read ANTS and run
+!   read (1,*) integmode         !mode for integrator: -1 = RK VMEC, 0 = RK CAN, 1 = Euler1, 2 = Euler2, 3 = Verlet
+!   read (1,*) relerr            !relative error for RK integrator
+!   read (1,*) tcut              !time when to do cut for classification, usually 1d-1, or -1 if no cuts desired
+!   read (1,*) debug             !produce debugging output (.True./.False.). Use only in non-parallel mode!
+!   read (1,*) class_plot        !write starting points at phi=const cut for classification plot (.True./.False.).  !<=AAA
+!   read (1,*) cut_in_per        !normalized phi-cut position within field period, [0:1], used if class_plot=.True. !<=AAA
+!   close(1)
+! end subroutine read_config
 
 ! subroutine init_params
 ! ! set alpha energy, velocity, and Larmor radius
