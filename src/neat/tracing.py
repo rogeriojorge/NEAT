@@ -17,7 +17,13 @@ from scipy.interpolate import CubicSpline as spline
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
 from .fields import Stellna, StellnaQS
-from .plotting import plot_animation3d, plot_orbit2d, plot_orbit3d, plot_parameters
+from .plotting import (
+    get_vmec_boundary,
+    plot_animation3d,
+    plot_orbit2d,
+    plot_orbit3d,
+    plot_parameters,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -160,18 +166,18 @@ class ParticleOrbit:  # pylint: disable=R0902
 
         self.solution = solution
 
-        nu_array = field.varphi - field.phi
-        nu_spline_of_varphi = spline(
-            np.append(field.varphi, 2 * np.pi / field.nfp),
-            np.append(nu_array, nu_array[0]),
-            bc_type="periodic",
-        )
-
         self.time = solution[:, 0]
         self.r_pos = solution[:, 1]
         self.theta_pos = solution[:, 2]
         self.varphi_pos = solution[:, 3]
-        self.phi_pos = self.varphi_pos - nu_spline_of_varphi(self.varphi_pos)
+        if self.field.near_axis:
+            nu_array = field.varphi - field.phi
+            nu_spline_of_varphi = spline(
+                np.append(field.varphi, 2 * np.pi / field.nfp),
+                np.append(nu_array, nu_array[0]),
+                bc_type="periodic",
+            )
+            self.phi_pos = self.varphi_pos - nu_spline_of_varphi(self.varphi_pos)
         self.energy_parallel = solution[:, 4]
         self.energy_perpendicular = solution[:, 5]
         self.total_energy = self.energy_parallel + self.energy_perpendicular
@@ -183,15 +189,27 @@ class ParticleOrbit:  # pylint: disable=R0902
         self.varphidot = solution[:, 10]
         self.vparalleldot = solution[:, 11]
 
-        self.p_phi = canonical_angular_momentum(
-            particle, field, self.r_pos, self.v_parallel, self.magnetic_field_strength
-        )
-
-        self.rpos_cylindrical = np.array(
-            self.field.to_RZ(
-                np.array([self.r_pos, self.theta_pos, self.varphi_pos]).transpose()
+        if self.field.near_axis:
+            self.p_phi = canonical_angular_momentum(
+                particle,
+                field,
+                self.r_pos,
+                self.v_parallel,
+                self.magnetic_field_strength,
             )
-        )
+
+            self.rpos_cylindrical = np.array(
+                self.field.to_RZ(
+                    np.array([self.r_pos, self.theta_pos, self.varphi_pos]).transpose()
+                )
+            )
+
+        else:
+            # Canonical angular momentum still not calculated for VMEC
+            self.p_phi = np.array([1e-16] * len(self.time))
+            self.rpos_cylindrical = np.array(
+                [solution[:, 12], solution[:, 14], solution[:, 13]]
+            )
 
         self.rpos_cartesian = np.array(
             [
@@ -211,16 +229,21 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot_orbit_3d(self, r_surface=0.1, distance=6, show=True):
         """Plot particle orbit in 3D cartesian coordinates"""
-        boundary = np.array(
-            self.field.get_boundary(
-                r=r_surface,
-                nphi=110,
-                ntheta=30,
-                ntheta_fourier=16,
-                mpol=8,
-                ntor=15,
+        if self.field.near_axis:
+            boundary = np.array(
+                self.field.get_boundary(
+                    r=r_surface,
+                    nphi=110,
+                    ntheta=30,
+                    ntheta_fourier=16,
+                    mpol=8,
+                    ntor=15,
+                )
             )
-        )
+        else:
+            boundary, b_rescaled = get_vmec_boundary(  # pylint: disable=W0612
+                self.field.wout_filename
+            )
 
         plot_orbit3d(
             boundary=boundary,
@@ -235,16 +258,22 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot_animation(self, r_surface=0.1, distance=7, show=True, save_movie=False):
         """Plot three-dimensional animation of the particle orbit"""
-        boundary = np.array(
-            self.field.get_boundary(
-                r=r_surface,
-                nphi=110,
-                ntheta=30,
-                ntheta_fourier=16,
-                mpol=8,
-                ntor=15,
+        if self.field.near_axis:
+            boundary = np.array(
+                self.field.get_boundary(
+                    r=r_surface,
+                    nphi=110,
+                    ntheta=30,
+                    ntheta_fourier=16,
+                    mpol=8,
+                    ntor=15,
+                )
             )
-        )
+        else:
+            boundary, b_rescaled = get_vmec_boundary(  # pylint: disable=W0612
+                self.field.wout_filename
+            )
+
         plot_animation3d(
             boundary=boundary,
             rpos_cartesian=self.rpos_cartesian,

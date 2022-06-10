@@ -20,10 +20,10 @@
 using namespace gyronimo;
 using namespace std;
 
-class orbit_observer_new {
+class push_back_state_and_time_vmec {
 public:
   vector< vector< double > >& m_states;
-  orbit_observer_new(vector< vector< double > > &states,
+  push_back_state_and_time_vmec(vector< vector< double > > &states,
                      const IR3field_c1* e, const guiding_centre* g)
     : m_states(states), eq_pointer_(e), gc_pointer_(g) {};
   void operator()(const guiding_centre::state& s, double t) {
@@ -35,13 +35,13 @@ public:
     double v_parallel = gc_pointer_->get_vpp(s);
     m_states.push_back({
         t,
-        // x[IR3::u], x[IR3::v], x[IR3::w],
-        X[IR3::u], X[IR3::v], X[IR3::w],
+        x[IR3::u], x[IR3::v], x[IR3::w],
         gc_pointer_->energy_parallel(s), 
         gc_pointer_->energy_perpendicular(s, t),
         B, v_parallel,
         y[IR3::u], y[IR3::v], y[IR3::w],
-        gc_pointer_->get_vpp(dots)
+        gc_pointer_->get_vpp(dots),
+        X[IR3::u], X[IR3::v], X[IR3::w]
       });
   };
 private:
@@ -50,43 +50,34 @@ private:
 };
 
 vector< vector<double>>  vmectrace(
-        double mass,double charge,double energy,double s0,
-        double theta0,double phi0,double Lambda,double Tfinal,
-        size_t nsamples, string vmec_file)
+        string vmec_file,
+        double charge, double mass, double Lambda,
+        double vpp_sign, double energy, double s0,
+        double theta0, double phi0,
+        size_t nsamples, double Tfinal)
 {
   parser_vmec vmap(vmec_file);
   cubic_gsl_factory ifactory;
   metric_vmec g(&vmap, &ifactory);
   equilibrium_vmec veq(&g, &ifactory);
-  
-  double vpp_sign = copysign(1.0, Lambda);  // Lambda carries vpp sign.
-  Lambda = abs(Lambda);  // once vpp sign is stored, Lambda turns unsigned.
 
-// Computes normalisation constants:
-  double Vref = 1; // New version of Valfven
-  double Uref = 0.5*codata::m_proton*mass*Vref*Vref; // New version of Ualfven
+  double Lref = 1.0;
+  double Vref = 1.0;
+  double refEnergy = 0.5*codata::m_proton*mass*Vref*Vref;
   double energySI = energy*codata::e;
-  double Lref= 1.0;
+  double energySI_over_refEnergy = energySI/refEnergy;
+  double Bref = vmap.B_0();
 
-// Builds the guiding_centre object:
   guiding_centre gc(
-      Lref, Vref, charge/mass, Lambda*energySI/Uref, &veq);
-
-// Computes the initial conditions from the supplied constants of motion:
-  /*double zstar = charge*g.parser()->cpsurf()*veq.B_0()*veq.R_0()*veq.R_0();
-  double vstar = Vref*mass*codata::m_proton/codata::e;*/
-  //double vdagger = vstar*sqrt(energySI/Uref);
+      Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy, &veq);
   guiding_centre::state initial_state = gc.generate_state(
-      {s0, theta0, phi0}, energySI/Uref,
-      (vpp_sign > 0 ?
-        guiding_centre::plus : guiding_centre::minus));
+      {s0, theta0, phi0}, energySI_over_refEnergy,
+      (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
-// integrates for t in [0,Tfinal], with dt=Tfinal/nsamples, using RK4.
   cout.precision(16);
   cout.setf(ios::scientific);
   vector<vector< double >> x_vec;
-  orbit_observer_new observer(x_vec, &veq, &gc);
-
+  push_back_state_and_time_vmec observer(x_vec, &veq, &gc);
   boost::numeric::odeint::runge_kutta4<guiding_centre::state>
       integration_algorithm;
   boost::numeric::odeint::integrate_const(

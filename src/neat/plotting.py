@@ -9,6 +9,7 @@ attributes for NEAT.
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
+from scipy.io import netcdf
 
 ## Uncomment the two lines below if the 3D
 ## plotting/animation is not working for some reason
@@ -73,14 +74,14 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
 
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
 
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.dist = distance
 
     ax = fig.add_subplot(132, projection="3d")
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.view_init(azim=90, elev=90)
@@ -88,7 +89,7 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
 
     ax = fig.add_subplot(133, projection="3d")
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.view_init(azim=0, elev=0)
@@ -217,3 +218,65 @@ def plot_animation3d(
             bitrate=-1,
             extra_args=["-pix_fmt", "yuv420p"],
         )
+
+
+def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
+    """Obtain (X, Y, Z) of a magnetic flux surface from a vmec equilibrium"""
+    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    nsurfaces = net_file.variables["ns"][()]
+    nfp = net_file.variables["nfp"][()]
+    xn = net_file.variables["xn"][()]  # pylint: disable=C0103
+    xm = net_file.variables["xm"][()]  # pylint: disable=C0103
+    xn_nyq = net_file.variables["xn_nyq"][()]
+    xm_nyq = net_file.variables["xm_nyq"][()]
+    rmnc = net_file.variables["rmnc"][()]
+    zmns = net_file.variables["zmns"][()]
+    bmnc = net_file.variables["bmnc"][()]
+    lasym = net_file.variables["lasym__logical__"][()]
+    if lasym == 1:
+        rmns = net_file.variables["rmns"][()]
+        zmnc = net_file.variables["zmnc"][()]
+        bmns = net_file.variables["bmns"][()]
+    else:
+        rmns = 0 * rmnc
+        zmnc = 0 * rmnc
+        bmns = 0 * bmnc
+    net_file.close()
+    nmodes = len(xn)
+
+    ntheta = 50
+    nzeta = int(90 * nfp)
+    zeta_2d, theta_2d = np.meshgrid(
+        np.linspace(0, 2 * np.pi, num=nzeta), np.linspace(0, 2 * np.pi, num=ntheta)
+    )
+    iradius = nsurfaces - 1
+    r_coordinate = np.zeros((ntheta, nzeta))
+    z_coordinate = np.zeros((ntheta, nzeta))
+    b_field = np.zeros((ntheta, nzeta))
+    for imode in range(nmodes):
+        angle = xm[imode] * theta_2d - xn[imode] * zeta_2d
+        r_coordinate = (
+            r_coordinate
+            + rmnc[iradius, imode] * np.cos(angle)
+            + rmns[iradius, imode] * np.sin(angle)
+        )
+        z_coordinate = (
+            z_coordinate
+            + zmns[iradius, imode] * np.sin(angle)
+            + zmnc[iradius, imode] * np.cos(angle)
+        )
+
+    for imode, xn_nyq_i in enumerate(xn_nyq):
+        angle = xm_nyq[imode] * theta_2d - xn_nyq_i * zeta_2d
+        b_field = (
+            b_field
+            + bmnc[iradius, imode] * np.cos(angle)
+            + bmns[iradius, imode] * np.sin(angle)
+        )
+
+    x_coordinate = r_coordinate * np.cos(zeta_2d)
+    y_coordinate = r_coordinate * np.sin(zeta_2d)
+
+    b_rescaled = (b_field - b_field.min()) / (b_field.max() - b_field.min())
+
+    return [x_coordinate, y_coordinate, z_coordinate], b_rescaled

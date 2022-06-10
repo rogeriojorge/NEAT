@@ -21,6 +21,7 @@ from neatpp import (
     gc_solver_qs_ensemble,
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
+    vmectrace,
 )
 
 
@@ -41,6 +42,8 @@ class Stellna(Qic, Optimizable):
             external_dof_setter=Qic.set_dofs,
             names=self.names,
         )
+
+        self.near_axis = True
 
         assert hasattr(
             self.B0, "__len__"
@@ -138,6 +141,8 @@ class StellnaQS(Qsc, Optimizable):
             names=self.names,
         )
 
+        self.near_axis = True
+
         assert not hasattr(
             self.B0, "__len__"
         ), "The StellnaQS field requires a magnetic field with B0 a scalar constant"
@@ -218,3 +223,29 @@ class StellnaQS(Qsc, Optimizable):
     def get_grad_grad_B_inverse_scale_length_vs_varphi(self):
         """Wrapper for 1/L_gradgradB(varphi) to feed into SIMSOPT"""
         return self.grad_grad_B_inverse_scale_length_vs_varphi / np.sqrt(self.nphi)
+
+
+class Vmec:
+    """VMEC class
+
+    This class initializes a VMEC field to be
+    ready to be used in the gyronimo-based
+    particle tracer.
+
+    """
+
+    def __init__(self, wout_filename: str) -> None:
+        self.near_axis = False
+        self.wout_filename = wout_filename
+
+    def gyronimo_parameters(self):
+        """Return list of parameters to feed gyronimo-based functions"""
+        return [self.wout_filename]
+
+    def neatpp_solver(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
+        return vmectrace(*args, *kwargs)
+
+    def neatpp_solver_ensemble(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
+        raise NotImplementedError

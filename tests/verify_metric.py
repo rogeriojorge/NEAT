@@ -166,12 +166,12 @@ def plot_stellarator(ax, rR, ntheta=50, nphi=200):
             Ysurf[countT, countP] = rs * np.sin(ph)
             Zsurf[countT, countP] = zs
             Bmag[countT, countP] = Bf(rR, ph, th)
-    B_rescaled = (Bmag - Bmag.min()) / (Bmag.max() - Bmag.min())
+    b_rescaled = (Bmag - Bmag.min()) / (Bmag.max() - Bmag.min())
     ax.plot_surface(
         Xsurf,
         Ysurf,
         Zsurf,
-        facecolors=cm.jet(B_rescaled),
+        facecolors=cm.jet(b_rescaled),
         rstride=1,
         cstride=1,
         antialiased=False,
