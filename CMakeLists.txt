@@ -121,7 +121,6 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/stellna.hh
     src/neatpp/vmectrace.hh
     src/neatpp/neatpp.cpp
-    # src/neatpp/vmectrace_stell.cc
     # src/neatpp/NEAT_Mercier.cc
 )
 
