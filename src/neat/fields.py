@@ -9,9 +9,13 @@ the necessary SIMSOPT wrappers for optimization.
 
 """
 
+import os
+
 import numpy as np
+from nptyping import Integer
 from qic import Qic
 from qsc import Qsc
+from scipy.io import netcdf
 from simsopt._core.optimizable import Optimizable
 
 from neatpp import (
@@ -225,7 +229,7 @@ class StellnaQS(Qsc, Optimizable):
         return self.grad_grad_B_inverse_scale_length_vs_varphi / np.sqrt(self.nphi)
 
 
-class Vmec:
+class Vmec:  # pylint: disable=R0902
     """VMEC class
 
     This class initializes a VMEC field to be
@@ -236,7 +240,99 @@ class Vmec:
 
     def __init__(self, wout_filename: str) -> None:
         self.near_axis = False
-        self.wout_filename = wout_filename
+        self.wout_filename = os.path.abspath(wout_filename)
+        self.equilibrium_name = os.path.basename(wout_filename)[5:-3]
+
+        net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+        self.nsurfaces = net_file.variables["ns"][()]
+        self.nfp = net_file.variables["nfp"][()]
+        self.xn = net_file.variables["xn"][()]  # pylint: disable=C0103
+        self.xm = net_file.variables["xm"][()]  # pylint: disable=C0103
+        self.xn_nyq = net_file.variables["xn_nyq"][()]
+        self.xm_nyq = net_file.variables["xm_nyq"][()]
+        self.b0 = net_file.variables["b0"][()]  # pylint: disable=C0103
+        self.volavgB = net_file.variables["volavgB"][()]  # pylint: disable=C0103
+        self.nmodes = len(self.xn)
+        self.raxis_cc = net_file.variables["raxis_cc"][()]
+        self.zaxis_cs = net_file.variables["zaxis_cs"][()]
+        self.rmnc = net_file.variables["rmnc"][()]
+        self.zmns = net_file.variables["zmns"][()]
+        self.bmnc = net_file.variables["bmnc"][()]
+        self.lasym = net_file.variables["lasym__logical__"][()]
+        if self.lasym == 1:
+            self.rmns = net_file.variables["rmns"][()]
+            self.zmnc = net_file.variables["zmnc"][()]
+            self.bmns = net_file.variables["bmns"][()]
+            self.zaxis_cc = net_file.variables["zaxis_cc"][()]
+            self.raxis_cs = net_file.variables["raxis_cs"][()]
+        else:
+            self.rmns = 0 * self.rmnc
+            self.zmnc = 0 * self.rmnc
+            self.bmns = 0 * self.bmnc
+            self.zaxis_cc = 0 * self.zaxis_cs
+            self.raxis_cs = 0 * self.raxis_cc
+        net_file.close()
+
+    def magnetic_axis_rz(self, phi):
+        """Return the (R,Z) components of the magnetic axis for a given phi"""
+        r_axis = np.sum(
+            [raxis_cc * np.cos(phi * i) for i, raxis_cc in enumerate(self.raxis_cc)]
+        ) + np.sum(
+            [raxis_cs * np.sin(phi * i) for i, raxis_cs in enumerate(self.raxis_cs)]
+        )
+        z_axis = np.sum(
+            [zaxis_cc * np.cos(phi * i) for i, zaxis_cc in enumerate(self.zaxis_cc)]
+        ) + np.sum(
+            [zaxis_cs * np.sin(phi * i) for i, zaxis_cs in enumerate(self.zaxis_cs)]
+        )
+        return r_axis, z_axis
+
+    def surface_rz(self, iradius: Integer, ntheta: Integer = 50, nzeta: Integer = 200):
+        """Return the (R,Z) components of a flux surface with the index iradius"""
+        r_coordinate = np.zeros((ntheta, nzeta))
+        z_coordinate = np.zeros((ntheta, nzeta))
+        zeta_2d, theta_2d = np.meshgrid(
+            np.linspace(0, 2 * np.pi, num=nzeta), np.linspace(0, 2 * np.pi, num=ntheta)
+        )
+        for imode in range(self.nmodes):
+            angle = self.xm[imode] * theta_2d - self.xn[imode] * zeta_2d
+            r_coordinate = (
+                r_coordinate
+                + self.rmnc[iradius, imode] * np.cos(angle)
+                + self.rmns[iradius, imode] * np.sin(angle)
+            )
+            z_coordinate = (
+                z_coordinate
+                + self.zmns[iradius, imode] * np.sin(angle)
+                + self.zmnc[iradius, imode] * np.cos(angle)
+            )
+        return r_coordinate, z_coordinate
+
+    def surface_xyz(self, iradius: Integer, ntheta: Integer = 50, nzeta: Integer = 200):
+        """Return the (x,y,z) components of a flux surface with the index iradius"""
+        r_coordinate, z_coordinate = self.surface_rz(iradius, ntheta, nzeta)
+        zeta_2d, _ = np.meshgrid(
+            np.linspace(0, 2 * np.pi, num=nzeta), np.linspace(0, 2 * np.pi, num=ntheta)
+        )
+        x_coordinate = r_coordinate * np.cos(zeta_2d)
+        y_coordinate = r_coordinate * np.sin(zeta_2d)
+        return [x_coordinate, y_coordinate, z_coordinate]
+
+    def b_field_strength(
+        self, iradius: Integer, ntheta: Integer = 50, nzeta: Integer = 200
+    ):
+        """Return the modulus of the magnetic field at a given surface"""
+        zeta_2d, theta_2d = np.meshgrid(
+            np.linspace(0, 2 * np.pi, num=nzeta), np.linspace(0, 2 * np.pi, num=ntheta)
+        )
+        for imode, xn_nyq_i in enumerate(self.xn_nyq):
+            angle = self.xm_nyq[imode] * theta_2d - xn_nyq_i * zeta_2d
+            b_field = (
+                b_field
+                + self.bmnc[iradius, imode] * np.cos(angle)
+                + self.bmns[iradius, imode] * np.sin(angle)
+            )
+        return b_field
 
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
