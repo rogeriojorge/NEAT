@@ -153,13 +153,14 @@ def plot_parameters(self, show=True):
 
 
 def plot_animation3d(
-    boundary, rpos_cartesian, nsamples, distance=7, show=True, save_movie=False
+    boundary, rpos_cartesian, nsamples, distance=7, show=True, save_movie=False, fig=None
 ):
     """
     Show a three-dimensional animation of a particle
     orbit together with a flux surface of the stellarator
     """
-    fig = plt.figure(figsize=(6, 4))
+    if fig is None:
+        fig = plt.figure(figsize=(6, 4))
     ax = fig.add_subplot(111, projection="3d")
     ax.plot_surface(
         boundary[0],

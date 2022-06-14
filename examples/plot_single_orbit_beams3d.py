@@ -26,9 +26,9 @@ Lambda = 0.9  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 2000  # resolution in time
 tfinal = 4e-5  # seconds
-nr = 64  # BEAMS3D radial resolution
-nz = 64  # BEAMS3D vertical resolution
-nphi = 64  # BEAMS3D toroidal resolution
+nr = 128  # BEAMS3D radial resolution
+nz = 128  # BEAMS3D vertical resolution
+nphi = 128  # BEAMS3D toroidal resolution
 
 g_field = Vmec(wout_filename=wout_filename)
 g_particle = ChargedParticle(

@@ -544,8 +544,8 @@ class ParticleOrbitBeams3D:
         for imn in range(len(field.xm)):
             r += rc[imn] * np.cos(field.xm[imn] * theta - field.xn[imn] * phi)
             z += zs[imn] * np.sin(field.xm[imn] * theta - field.xn[imn] * phi)
-        r_spl = RectBivariateSpline(theta1d, phi1d, r)
-        z_spl = RectBivariateSpline(theta1d, phi1d, z)
+        r_spl = RectBivariateSpline(theta1d, phi1d, r, s=0, kx=3, ky=3)
+        z_spl = RectBivariateSpline(theta1d, phi1d, z, s=0, kx=3, ky=3)
         r_start = r_spl.ev([particle.theta_initial], [particle.phi_initial])[0]
         z_start = z_spl.ev([particle.theta_initial], [particle.phi_initial])[0]
 
