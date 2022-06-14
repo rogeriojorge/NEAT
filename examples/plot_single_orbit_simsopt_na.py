@@ -26,7 +26,7 @@ B0 = 4
 nsamples = 1000
 Lambda = 0.0
 
-r_initial = 0.001
+r_initial = 0.05
 theta_initial = 0.5
 phi_initial = 0.1
 
