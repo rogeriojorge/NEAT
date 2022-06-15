@@ -13,8 +13,8 @@ from scipy.io import netcdf
 
 ## Uncomment the two lines below if the 3D
 ## plotting/animation is not working for some reason
-# import mpl_toolkits.mplot3d.axes3d as p3
-# from mpl_toolkits.mplot3d import Axes3D
+import mpl_toolkits.mplot3d.axes3d as p3
+from mpl_toolkits.mplot3d import Axes3D
 
 
 def set_axes_equal(ax):
