@@ -22,8 +22,8 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.98  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 900  # resolution in time
-tfinal = 9e-5  # seconds
+nsamples = 800  # resolution in time
+tfinal = 6e-5  # seconds
 constant_b20 = True  # use a constant B20 (mean value) or the real function
 
 g_field = StellnaQS.from_paper(1, B0=B0)
