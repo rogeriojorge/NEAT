@@ -6,6 +6,7 @@ import subprocess
 import time
 
 import numpy as np
+import matplotlib.pyplot as plt
 import vmec
 from mpi4py import MPI
 
@@ -101,3 +102,42 @@ g_orbit_vmec.plot_orbit_3d(show=False)
 
 print("Creating animation plot 2")
 g_orbit_vmec.plot_animation(show=True)
+
+#Notes on ploting
+#Show=True means all before are plotted
+#Save movie doesnt seem to work
+#Orbit lines in vmec are way closer to middle
+
+print("Calculating differences between near axis and vmec")
+diff_r=(g_orbit.r_pos - g_orbit_vmec.r_pos)/g_orbit.r_pos
+diff_theta=(g_orbit.theta_pos - g_orbit_vmec.theta_pos)/(2*np.pi)
+diff_phi=(g_orbit.varphi_pos - g_orbit_vmec.varphi_pos)/(2*np.pi)
+
+#ax=plt.axes()
+_ = plt.figure(figsize=(10, 6))
+plt.subplot(1, 3, 1)
+plt.plot(g_orbit.time, diff_r, label='Particle 1')
+plt.xlabel('t')
+plt.ylabel('diff_r')
+plt.subplot(1, 3, 2)
+plt.plot(g_orbit.time, diff_theta, label='Particle 1')
+plt.xlabel('t')
+plt.ylabel('diff_theta')
+plt.subplot(1, 3, 3)
+plt.plot(g_orbit.time, diff_phi, label='Particle 1')
+plt.xlabel('t')
+plt.ylabel('diff_phi')
+plt.title('First particle tracing')
+plt.legend()
+plt.show()
+
+# For when we know how to runvmec
+
+#ictrl = np.zeros(5, dtype=np.int32)
+#ictrl[:] = 0
+#ictrl[0] = 1 + 2 + 4 + 8
+#logger = logging.getLogger('[{}]'.format(MPI.COMM_WORLD.Get_rank()) + __name__)
+#logging.basicConfig(level=logging.INFO)
+#fcomm = MPI.COMM_WORLD.py2f()
+#logger.info("Calling runvmec. ictrl={} comm={}".format(ictrl, fcomm))
+#vmec.runvmec(ictrl, filename, True, fcomm, '') 
