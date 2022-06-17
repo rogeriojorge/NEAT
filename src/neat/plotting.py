@@ -7,14 +7,14 @@ attributes for NEAT.
 """
 
 import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib import animation
-from scipy.io import netcdf
 
 ## Uncomment the two lines below if the 3D
 ## plotting/animation is not working for some reason
 import mpl_toolkits.mplot3d.axes3d as p3
+import numpy as np
+from matplotlib import animation
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.io import netcdf
 
 
 def set_axes_equal(ax):

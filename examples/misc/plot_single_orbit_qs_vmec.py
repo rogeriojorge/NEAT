@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
+import logging
 import os
+import subprocess
 import time
 
 import numpy as np
 import vmec
-import logging
 from mpi4py import MPI
+
 from neat.fields import StellnaQS, Vmec
 from neat.tracing import ChargedParticle, ParticleOrbit
-
-import subprocess
 
 """                                                                           
 Trace the orbit of a single particle in a
@@ -30,20 +30,20 @@ vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
 tfinal = 6e-4  # seconds
 constant_b20 = True  # use a constant B20 (mean value) or the real function
-#wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_W7X.nc"
+# wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_W7X.nc"
 filename = "input.nearaxis"
 wout_filename = "wout_nearaxis.nc"
 
 g_field = StellnaQS.from_paper(1, B0=B0)
 g_field.to_vmec(filename=filename)
-#ictrl = np.zeros(5, dtype=np.int32)
-#ictrl[:] = 0
-#ictrl[0] = 1 + 2 + 4 + 8
-#logger = logging.getLogger('[{}]'.format(MPI.COMM_WORLD.Get_rank()) + __name__)
-#logging.basicConfig(level=logging.INFO)
-#fcomm = MPI.COMM_WORLD.py2f()
-#logger.info("Calling runvmec. ictrl={} comm={}".format(ictrl, fcomm))
-#vmec.runvmec(ictrl, filename, True, fcomm, '') 
+# ictrl = np.zeros(5, dtype=np.int32)
+# ictrl[:] = 0
+# ictrl[0] = 1 + 2 + 4 + 8
+# logger = logging.getLogger('[{}]'.format(MPI.COMM_WORLD.Get_rank()) + __name__)
+# logging.basicConfig(level=logging.INFO)
+# fcomm = MPI.COMM_WORLD.py2f()
+# logger.info("Calling runvmec. ictrl={} comm={}".format(ictrl, fcomm))
+# vmec.runvmec(ictrl, filename, True, fcomm, '')
 subprocess.run([f"{os.path.join(os.path.dirname(__file__))}./xvmec2000", filename])
 g_field_vmec = Vmec(wout_filename=wout_filename)
 
@@ -69,7 +69,11 @@ print(f"Finished in {total_time}s")
 print("Starting particle tracer 2")
 start_time_vmec = time.time()
 g_orbit_vmec = ParticleOrbit(
-    g_particle, g_field_vmec, nsamples=nsamples, tfinal=tfinal, constant_b20=constant_b20
+    g_particle,
+    g_field_vmec,
+    nsamples=nsamples,
+    tfinal=tfinal,
+    constant_b20=constant_b20,
 )
 total_time_vmec = time.time() - start_time_vmec
 print(f"Finished in {total_time_vmec}s")

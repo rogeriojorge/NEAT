@@ -3,6 +3,7 @@
 import time
 
 import numpy as np
+
 from neat.fields import StellnaQS
 from neat.tracing import ChargedParticle, ParticleOrbit
 
