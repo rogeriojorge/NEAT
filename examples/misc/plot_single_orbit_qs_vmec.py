@@ -35,8 +35,8 @@ filename = "input.nearaxis"
 wout_filename = "wout_nearaxis.nc"
 
 g_field = StellnaQS.from_paper(1, B0=B0)
-g_field.to_vmec(filename=filename)
-subprocess.run([f"{os.path.join(os.path.dirname(__file__))}./xvmec2000", filename])
+#g_field.to_vmec(filename=filename)
+#subprocess.run([f"{os.path.join(os.path.dirname(__file__))}./xvmec2000", filename])
 g_field_vmec = Vmec(wout_filename=wout_filename)
 
 g_particle = ChargedParticle(
@@ -102,24 +102,24 @@ g_orbit_vmec.plot_animation(show=True)
 #Orbit lines in vmec are way closer to middle
 
 print("Calculating differences between near axis and vmec")
-diff_r=(g_orbit.r_pos - g_orbit_vmec.r_pos)/g_orbit.r_pos
-diff_theta=(g_orbit.theta_pos - g_orbit_vmec.theta_pos)/(2*np.pi)
-diff_phi=(g_orbit.varphi_pos - g_orbit_vmec.varphi_pos)/(2*np.pi)
+diff_r=(g_orbit.rpos_cylindrical[0] - g_orbit_vmec.rpos_cylindrical[0])/g_orbit.rpos_cylindrical[0][0]
+diff_Z=(g_orbit.rpos_cylindrical[1]- g_orbit_vmec.rpos_cylindrical[1])
+diff_phi=(g_orbit.rpos_cylindrical[2] - g_orbit_vmec.rpos_cylindrical[2])/(2*np.pi)
 
-#ax=plt.axes()
-_ = plt.figure(figsize=(10, 6))
+
+_ = plt.figure(figsize=(15, 6))
 plt.subplot(1, 3, 1)
-plt.plot(g_orbit.time, diff_r, label='Particle 1')
-plt.xlabel('t')
-plt.ylabel('diff_r')
+plt.plot(g_orbit.time*1e6, diff_r, label='Particle 1')
+plt.xlabel(r't ($\mu$s)')
+plt.ylabel(r'$\Delta  R$')
 plt.subplot(1, 3, 2)
-plt.plot(g_orbit.time, diff_theta, label='Particle 1')
-plt.xlabel('t')
-plt.ylabel('diff_theta')
+plt.plot(g_orbit.time*1e6, diff_Z, label='Particle 1')
+plt.xlabel(r't  ($\mu$s)')
+plt.ylabel(r'$\Delta  Z$')
 plt.subplot(1, 3, 3)
-plt.plot(g_orbit.time, diff_phi, label='Particle 1')
-plt.xlabel('t')
-plt.ylabel('diff_phi')
+plt.plot(g_orbit.time*1e6, diff_phi, label='Particle 1')
+plt.xlabel(r't  ($\mu$s)')
+plt.ylabel(r'$\Delta \Phi$')
 plt.title('First particle tracing')
 plt.legend()
 plt.show()
