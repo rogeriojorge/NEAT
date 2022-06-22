@@ -99,7 +99,8 @@ if(INSTALL_SIMPLE)
     add_subdirectory(src/neatf90)
 endif()
 
-# Add gyronimo
+# Add gyronimo with VMEC support
+set(BUILD_VMEC_SUPPORT "ON")
 add_subdirectory(external/gyronimo)
 
 # Add pybind11 include directories
