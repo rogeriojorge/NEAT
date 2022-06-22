@@ -2,7 +2,7 @@
     "comment": "Flags used to compile NEAT. Change this according to your needs.",
     "cmake_args": [
             "-DINSTALL_SIMPLE=ON",
-            "-DINSTALL_SIMPLEF90=ON",
+            "-DINSTALL_SIMPLE_F90=ON",
             "-DBUILD_VMEC_SUPPORT=ON",
             "-DCMAKE_C_COMPILER=gcc",
             "-DCMAKE_CXX_COMPILER=g++",

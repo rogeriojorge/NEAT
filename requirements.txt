@@ -5,4 +5,3 @@ qsc
 qicna
 setuptools
 pybind11
-textx

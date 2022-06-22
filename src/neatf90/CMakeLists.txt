@@ -8,13 +8,13 @@ project(neatf90
   LANGUAGES C CXX Fortran
   )
 
-# Safety net
-if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-  message(
-    FATAL_ERROR
-      "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.\n"
-  )
-endif()
+# # Safety net
+# if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
+#   message(
+#     FATAL_ERROR
+#       "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.\n"
+#   )
+# endif()
 
 # Load netcdf and openmp
 find_program(NF_CONFIG "nf-config")
@@ -59,8 +59,8 @@ message(STATUS ${Python_NumPy_INCLUDE_DIRS})
 
 # Vars
 set(f2py_module_name "neatf90")
-set(fortran_pyf_file "${CMAKE_SOURCE_DIR}/neatf90.pyf")
-set(fortran_src_file "${CMAKE_SOURCE_DIR}/neatf90.f90")
+set(fortran_pyf_file "${PROJECT_SOURCE_DIR}/neatf90.pyf")
+set(fortran_src_file "${PROJECT_SOURCE_DIR}/neatf90.f90")
 set(f2py_module_c "${f2py_module_name}module.c")
 set(generated_module_file "${f2py_module_name}${Python_SOABI}")
 
@@ -78,43 +78,47 @@ add_custom_command(
   DEPENDS ${fortran_pyf_file} # Fortran source
   )
 
-  add_library (simple_lib SHARED
-  external/simple/SRC/canonical_coordinates_mod.f90
-  external/simple/SRC/nctools_module.f90
-  external/simple/SRC/odeint_rkf45.f90
-  external/simple/SRC/contrib/minpack.f90
-  external/simple/SRC/magfie.f90
-  external/simple/SRC/boozer_converter.f90
-  external/simple/SRC/binsrc.f90
-  external/simple/SRC/plag_coeff.f90
-  external/simple/SRC/chamb_m.f90
-  external/simple/SRC/sub_alpha_lifetime_can.f90
-  external/simple/SRC/vmecinm_m.f90
-  external/simple/SRC/spline_vmec_data.f90
-  external/simple/SRC/spl_three_to_five.f90
-  external/simple/SRC/new_vmec_allocation_stuff.f90
-  external/simple/SRC/get_canonical_coordinates.f90
-  external/simple/SRC/testing.f90
-  external/simple/SRC/field_can.f90
-  external/simple/SRC/orbit_symplectic.f90
-  external/simple/SRC/orbit_symplectic_quasi.f90
-  external/simple/SRC/common.f90
-  external/simple/SRC/simple.f90
-  external/simple/SRC/bench.f90
-  external/simple/SRC/parse_ants.f90
-  external/simple/SRC/zzg.f90
-  external/simple/SRC/sorting.f90
-  external/simple/SRC/check_orbit_type.f90
-)
-add_library ( rkf45_lib SHARED
-  external/simple/SRC/contrib/rkf45.f90
-)
-target_link_libraries(simple_lib rkf45_lib netcdf netcdff lapack blas)
-target_link_libraries(simple_lib gomp)
-#target_link_libraries(genpyf simple_lib)
+if (NOT TARGET simple)
+    set(SIMPLE_LOCATION "${PROJECT_SOURCE_DIR}/../../external/simple/SRC")
+    add_library (simple SHARED
+      ${SIMPLE_LOCATION}/canonical_coordinates_mod.f90
+      ${SIMPLE_LOCATION}/nctools_module.f90
+      ${SIMPLE_LOCATION}/odeint_rkf45.f90
+      ${SIMPLE_LOCATION}/contrib/minpack.f90
+      ${SIMPLE_LOCATION}/magfie.f90
+      ${SIMPLE_LOCATION}/boozer_converter.f90
+      ${SIMPLE_LOCATION}/binsrc.f90
+      ${SIMPLE_LOCATION}/plag_coeff.f90
+      ${SIMPLE_LOCATION}/chamb_m.f90
+      ${SIMPLE_LOCATION}/sub_alpha_lifetime_can.f90
+      ${SIMPLE_LOCATION}/vmecinm_m.f90
+      ${SIMPLE_LOCATION}/spline_vmec_data.f90
+      ${SIMPLE_LOCATION}/spl_three_to_five.f90
+      ${SIMPLE_LOCATION}/new_vmec_allocation_stuff.f90
+      ${SIMPLE_LOCATION}/get_canonical_coordinates.f90
+      ${SIMPLE_LOCATION}/testing.f90
+      ${SIMPLE_LOCATION}/field_can.f90
+      ${SIMPLE_LOCATION}/orbit_symplectic.f90
+      ${SIMPLE_LOCATION}/orbit_symplectic_quasi.f90
+      ${SIMPLE_LOCATION}/common.f90
+      ${SIMPLE_LOCATION}/simple.f90
+      ${SIMPLE_LOCATION}/bench.f90
+      ${SIMPLE_LOCATION}/parse_ants.f90
+      ${SIMPLE_LOCATION}/zzg.f90
+      ${SIMPLE_LOCATION}/sorting.f90
+      ${SIMPLE_LOCATION}/check_orbit_type.f90
+    )
+    add_library ( rkf45lib SHARED
+      ${SIMPLE_LOCATION}/contrib/rkf45.f90
+    )
+    target_link_libraries(simple rkf45lib netcdf netcdff lapack blas)
+    target_link_libraries(simple gomp)
+    # target_link_libraries(genpyf simple)
+endif()
 
 # Set up target
-add_library(${CMAKE_PROJECT_NAME} SHARED
+set(neatf90_library_name neatf90)
+add_library(${neatf90_library_name} SHARED
   "${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_c}" # Generated
   "${F2PY_INCLUDE_DIR}/fortranobject.c" # From NumPy
   "${fortran_src_file}" # Fortran source(s)
@@ -122,12 +126,15 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 
 
 # Depend on sources
-add_dependencies(${CMAKE_PROJECT_NAME} genpyf)
-target_link_libraries(${CMAKE_PROJECT_NAME} ${PYTHON_LIBRARIES} simple_lib)
+add_dependencies(${neatf90_library_name} genpyf)
+# target_link_libraries(${neatf90_library_name} PRIVATE ${PYTHON_LIBRARIES} simple)
+target_link_libraries(${neatf90_library_name} PRIVATE simple)
+target_link_libraries(${neatf90_library_name} PRIVATE ${PYTHON_LIBRARIES})
 set_target_properties(
-     ${CMAKE_PROJECT_NAME}
+     ${neatf90_library_name}
     PROPERTIES
         PREFIX ""
-        OUTPUT_NAME "${CMAKE_PROJECT_NAME}"
+        OUTPUT_NAME "${neatf90_library_name}"
         LINKER_LANGUAGE C
+        SUFFIX ".so"
     )
