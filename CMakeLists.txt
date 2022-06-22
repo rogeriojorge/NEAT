@@ -10,7 +10,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Use python version that satisfies version constraints
 set(Python_FIND_STRATEGY LOCATION)
 # Make sure that python libraries such as numpy are found
-find_package(Python 3 COMPONENTS Interpreter Development.Module NumPy)
+find_package(Python 3 COMPONENTS Interpreter Development NumPy)
 # Use relative paths in MacOS
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")

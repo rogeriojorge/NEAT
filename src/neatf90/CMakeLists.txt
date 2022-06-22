@@ -127,9 +127,9 @@ add_library(${neatf90_library_name} SHARED
 
 # Depend on sources
 add_dependencies(${neatf90_library_name} genpyf)
-# target_link_libraries(${neatf90_library_name} PRIVATE ${PYTHON_LIBRARIES} simple)
+# target_link_libraries(${neatf90_library_name} PRIVATE ${Python_LIBRARIES} simple)
 target_link_libraries(${neatf90_library_name} PRIVATE simple)
-target_link_libraries(${neatf90_library_name} PRIVATE ${PYTHON_LIBRARIES})
+target_link_libraries(${neatf90_library_name} PRIVATE ${Python_LIBRARIES})
 set_target_properties(
      ${neatf90_library_name}
     PROPERTIES
