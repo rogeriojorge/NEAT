@@ -20,7 +20,7 @@ B0 = 6  # Tesla, magnetic field on-axis
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.98  # = mu * B0 / energy
+Lambda = 0.2  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 800  # resolution in time
 tfinal = 6e-5  # seconds
@@ -52,8 +52,8 @@ g_orbit.plot(show=False)
 print("Creating 2D plot")
 g_orbit.plot_orbit(show=False)
 
-print("Creating 3D plot")
-g_orbit.plot_orbit_3d(show=False)
+#print("Creating 3D plot")
+#g_orbit.plot_orbit_3d(show=True)
 
 print("Creating animation plot")
 g_orbit.plot_animation(show=True, save_movie=False)
