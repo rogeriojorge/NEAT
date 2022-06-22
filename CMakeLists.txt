@@ -95,8 +95,8 @@ include_directories(${GSL_INCLUDE_DIRS})
 # Compile git submodules
 if(INSTALL_SIMPLE)
     add_subdirectory(external/simple)
-    include_directories("${CMAKE_CURRENT_BINARY_DIR}/external/simple")
-    add_subdirectory(src/neatf90)
+    # include_directories("${CMAKE_CURRENT_BINARY_DIR}/external/simple")
+    # add_subdirectory(src/neatf90)
 endif()
 
 # Add gyronimo with VMEC support
