@@ -245,3 +245,4 @@ CMakeDoxyfile.in
 CMakeDoxygenDefaults.cmake
 .vscode/settings.json
 .vscode/c_cpp_properties.json
+healaxis.dat
