@@ -135,7 +135,7 @@ def plot_parameters(self, show=True):
     plt.plot(self.time, self.rdot, label=r"$\dot r$")
     plt.plot(self.time, self.thetadot, label=r"$\dot \theta$")
     plt.plot(self.time, self.varphidot, label=r"$\dot \varphi$")
-    plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
+    # plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
     plt.xlabel(r"$t (s)$")
     plt.legend()
     plt.subplot(3, 3, 8)
