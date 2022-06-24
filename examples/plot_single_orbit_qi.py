@@ -54,6 +54,9 @@ g_orbit = ParticleOrbit(
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
+print("Creating B contour plot")
+g_orbit.plot_orbit_contourB(show=False)
+
 print("Creating parameter plot")
 g_orbit.plot(show=False)
 

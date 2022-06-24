@@ -20,13 +20,20 @@ B0 = 6  # Tesla, magnetic field on-axis
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.2  # = mu * B0 / energy
+Lambda = 0.99  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 800  # resolution in time
 tfinal = 6e-5  # seconds
-constant_b20 = True  # use a constant B20 (mean value) or the real function
+constant_b20 = False  # use a constant B20 (mean value) or the real function
 
 g_field = StellnaQS.from_paper(1, B0=B0)
+
+# import matplotlib.pyplot as plt
+# phi=np.linspace(0,10*np.pi,100)
+# plt.plot(phi,g_field.B_mag(0.1, g_field.iota * phi, phi))
+# plt.show()
+# exit()
+
 g_particle = ChargedParticle(
     r_initial=r_initial,
     theta_initial=theta_initial,
@@ -45,6 +52,12 @@ g_orbit = ParticleOrbit(
 )
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
+
+# import matplotlib.pyplot as plt
+# plt.plot(g_orbit.magnetic_field_strength)
+
+print("Creating B contour plot")
+g_orbit.plot_orbit_contourB(show=False)
 
 print("Creating parameter plot")
 g_orbit.plot(show=False)

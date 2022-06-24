@@ -23,6 +23,7 @@ from .plotting import (
     plot_orbit2d,
     plot_orbit3d,
     plot_parameters,
+    get_vmec_magB,
 )
 
 logger = logging.getLogger(__name__)
@@ -283,6 +284,26 @@ class ParticleOrbit:  # pylint: disable=R0902
             save_movie=save_movie,
         )
 
+    def plot_orbit_contourB(self, ntheta=100, nphi=120, ncontours=20, show=True):
+        """Plot particle orbit superimposed in B contours"""
+        theta_array = np.linspace(0, 2 * np.pi, ntheta)
+        phi_array = np.linspace(0, 2 * np.pi, nphi)
+        phi_2D, theta_2D = np.meshgrid(phi_array, theta_array)
+        if self.field.near_axis:
+            b_on_surface = self.field.B_mag(self.r_pos[0], theta_2D, phi_2D, Boozer_toroidal=True)
+        else:
+            b_on_surface = get_vmec_magB(wout_filename=self.field.wout_filename, spos=self.r_pos[0], ntheta=ntheta, nzeta=nphi)
+        fig, ax = plt.subplots()
+        plt.contourf(phi_2D,theta_2D,b_on_surface,ncontours)
+        # plt.title(titles[i]+'\n1-based index='+str(iradius+1))
+        ax.scatter(np.mod(self.varphi_pos,2*np.pi),np.mod(self.theta_pos,2*np.pi),marker='.',color='k',s=0.7)
+        ax.scatter(np.mod(self.varphi_pos[0],2*np.pi),np.mod(self.theta_pos[0],2*np.pi),marker='o',color='b',s=60)
+        plt.xlabel(r'$\phi$')
+        plt.ylabel(r'$\theta$')
+        plt.colorbar()
+        plt.xlim([0,2*np.pi])
+        plt.ylim([0,2*np.pi])
+        if show: plt.show()
 
 class ParticleEnsembleOrbit:  # pylint: disable=R0902
     r"""

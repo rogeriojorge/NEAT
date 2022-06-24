@@ -35,7 +35,7 @@ public:
     double v_parallel = gc_pointer_->get_vpp(s);
     m_states.push_back({
         t,
-        x[IR3::u], x[IR3::v], x[IR3::w],
+        x[IR3::u], x[IR3::w], x[IR3::v],
         gc_pointer_->energy_parallel(s), 
         gc_pointer_->energy_perpendicular(s, t),
         B, v_parallel,
