@@ -136,18 +136,25 @@ def plot_parameters(self, show=True):
     plt.plot(self.time, self.rdot, label=r"$\dot r$")
     plt.plot(self.time, self.thetadot, label=r"$\dot \theta$")
     plt.plot(self.time, self.varphidot, label=r"$\dot \varphi$")
-    plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
+    # plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
     plt.xlabel(r"$t (s)$")
     plt.legend()
     plt.subplot(3, 3, 8)
-    plt.plot(self.r_pos * np.cos(self.theta_pos), self.r_pos * np.sin(self.theta_pos))
+    if self.field.near_axis:
+        angle = self.theta_pos
+    else:
+        angle = self.theta_pos - self.field.nfp * self.varphi_pos
+    plt.plot(self.r_pos * np.cos(angle), self.r_pos * np.sin(angle))
     plt.gca().set_aspect("equal", adjustable="box")
-    plt.xlabel(r"r cos($\theta$)")
-    plt.ylabel(r"r sin($\theta$)")
+    plt.xlabel(r"r cos($\theta-N \phi$)")
+    plt.ylabel(r"r sin($\theta-N \phi$)")
     plt.subplot(3, 3, 9)
-    plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
-    plt.xlabel(r"$R$")
-    plt.ylabel(r"$Z$")
+    # plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
+    # plt.xlabel(r"$R$")
+    # plt.ylabel(r"$Z$")
+    plt.plot(self.time, self.magnetic_field_strength)
+    plt.xlabel(r"$t$")
+    plt.ylabel(r"$|B|$")
     plt.tight_layout()
     if show:
         plt.show()
@@ -281,7 +288,10 @@ def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
 
     return [x_coordinate, y_coordinate, z_coordinate], b_rescaled
 
-def get_vmec_magB(wout_filename, spos=None, ntheta = 50, nzeta = 100):  # pylint: disable=R0914
+
+def get_vmec_magB(
+    wout_filename, spos=None, ntheta=50, nzeta=100
+):  # pylint: disable=R0914
     """Obtain contours of B on a magnetic flux surface from a vmec equilibrium"""
     net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
     nsurfaces = net_file.variables["ns"][()]
@@ -313,5 +323,5 @@ def get_vmec_magB(wout_filename, spos=None, ntheta = 50, nzeta = 100):  # pylint
             + bmnc[iradius, imode] * np.cos(angle)
             + bmns[iradius, imode] * np.sin(angle)
         )
-    
+
     return b_field

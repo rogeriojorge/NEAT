@@ -19,11 +19,11 @@ from .constants import ELEMENTARY_CHARGE, PROTON_MASS
 from .fields import Stellna, StellnaQS
 from .plotting import (
     get_vmec_boundary,
+    get_vmec_magB,
     plot_animation3d,
     plot_orbit2d,
     plot_orbit3d,
     plot_parameters,
-    get_vmec_magB,
 )
 
 logger = logging.getLogger(__name__)
@@ -290,20 +290,41 @@ class ParticleOrbit:  # pylint: disable=R0902
         phi_array = np.linspace(0, 2 * np.pi, nphi)
         phi_2D, theta_2D = np.meshgrid(phi_array, theta_array)
         if self.field.near_axis:
-            b_on_surface = self.field.B_mag(self.r_pos[0], theta_2D, phi_2D, Boozer_toroidal=True)
+            b_on_surface = self.field.B_mag(
+                self.r_pos[0], theta_2D, phi_2D, Boozer_toroidal=True
+            )
         else:
-            b_on_surface = get_vmec_magB(wout_filename=self.field.wout_filename, spos=self.r_pos[0], ntheta=ntheta, nzeta=nphi)
+            b_on_surface = get_vmec_magB(
+                wout_filename=self.field.wout_filename,
+                spos=self.r_pos[0],
+                ntheta=ntheta,
+                nzeta=nphi,
+            )
         fig, ax = plt.subplots()
-        plt.contourf(phi_2D,theta_2D,b_on_surface,ncontours)
+        plt.contourf(phi_2D, theta_2D, b_on_surface, ncontours)
         # plt.title(titles[i]+'\n1-based index='+str(iradius+1))
-        ax.scatter(np.mod(self.varphi_pos,2*np.pi),np.mod(self.theta_pos,2*np.pi),marker='.',color='k',s=0.7)
-        ax.scatter(np.mod(self.varphi_pos[0],2*np.pi),np.mod(self.theta_pos[0],2*np.pi),marker='o',color='b',s=60)
-        plt.xlabel(r'$\phi$')
-        plt.ylabel(r'$\theta$')
+        ax.scatter(
+            np.mod(self.varphi_pos, 2 * np.pi),
+            np.mod(self.theta_pos, 2 * np.pi),
+            marker=".",
+            color="k",
+            s=0.7,
+        )
+        ax.scatter(
+            np.mod(self.varphi_pos[0], 2 * np.pi),
+            np.mod(self.theta_pos[0], 2 * np.pi),
+            marker="o",
+            color="b",
+            s=60,
+        )
+        plt.xlabel(r"$\phi$")
+        plt.ylabel(r"$\theta$")
         plt.colorbar()
-        plt.xlim([0,2*np.pi])
-        plt.ylim([0,2*np.pi])
-        if show: plt.show()
+        plt.xlim([0, 2 * np.pi])
+        plt.ylim([0, 2 * np.pi])
+        if show:
+            plt.show()
+
 
 class ParticleEnsembleOrbit:  # pylint: disable=R0902
     r"""

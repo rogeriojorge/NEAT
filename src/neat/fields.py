@@ -12,6 +12,7 @@ the necessary SIMSOPT wrappers for optimization.
 import numpy as np
 from qic import Qic
 from qsc import Qsc
+from scipy.io import netcdf
 from simsopt._core.optimizable import Optimizable
 
 from neatpp import (
@@ -237,6 +238,9 @@ class Vmec:
     def __init__(self, wout_filename: str) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
+        net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+        self.nfp = net_file.variables["nfp"][()]
+        net_file.close()
 
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""

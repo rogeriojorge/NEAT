@@ -65,8 +65,8 @@ g_orbit.plot(show=False)
 print("Creating 2D plot")
 g_orbit.plot_orbit(show=False)
 
-#print("Creating 3D plot")
-#g_orbit.plot_orbit_3d(show=True)
+# print("Creating 3D plot")
+# g_orbit.plot_orbit_3d(show=True)
 
 print("Creating animation plot")
 g_orbit.plot_animation(show=True, save_movie=False)

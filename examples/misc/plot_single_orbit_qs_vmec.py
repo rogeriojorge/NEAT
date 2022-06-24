@@ -5,8 +5,8 @@ import os
 import subprocess
 import time
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import vmec
 from mpi4py import MPI
 
@@ -35,8 +35,8 @@ filename = "input.nearaxis"
 wout_filename = "wout_nearaxis.nc"
 
 g_field = StellnaQS.from_paper(1, B0=B0)
-#g_field.to_vmec(filename=filename)
-#subprocess.run([f"{os.path.join(os.path.dirname(__file__))}./xvmec2000", filename])
+# g_field.to_vmec(filename=filename)
+# subprocess.run([f"{os.path.join(os.path.dirname(__file__))}./xvmec2000", filename])
 g_field_vmec = Vmec(wout_filename=wout_filename)
 
 g_particle = ChargedParticle(
@@ -96,41 +96,45 @@ g_orbit_vmec.plot_animation(show=True)
 
 """
 
-#Notes on ploting
-#Show=True means all before are plotted
-#Save movie doesnt seem to work
-#Orbit lines in vmec are way closer to middle
+# Notes on ploting
+# Show=True means all before are plotted
+# Save movie doesnt seem to work
+# Orbit lines in vmec are way closer to middle
 
 print("Calculating differences between near axis and vmec")
-diff_r=(g_orbit.rpos_cylindrical[0] - g_orbit_vmec.rpos_cylindrical[0])/g_orbit.rpos_cylindrical[0][0]
-diff_Z=(g_orbit.rpos_cylindrical[1]- g_orbit_vmec.rpos_cylindrical[1])
-diff_phi=(g_orbit.rpos_cylindrical[2] - g_orbit_vmec.rpos_cylindrical[2])/(2*np.pi)
+diff_r = (
+    g_orbit.rpos_cylindrical[0] - g_orbit_vmec.rpos_cylindrical[0]
+) / g_orbit.rpos_cylindrical[0][0]
+diff_Z = g_orbit.rpos_cylindrical[1] - g_orbit_vmec.rpos_cylindrical[1]
+diff_phi = (g_orbit.rpos_cylindrical[2] - g_orbit_vmec.rpos_cylindrical[2]) / (
+    2 * np.pi
+)
 
 
 _ = plt.figure(figsize=(15, 6))
 plt.subplot(1, 3, 1)
-plt.plot(g_orbit.time*1e6, diff_r, label='Particle 1')
-plt.xlabel(r't ($\mu$s)')
-plt.ylabel(r'$\Delta  R$')
+plt.plot(g_orbit.time * 1e6, diff_r, label="Particle 1")
+plt.xlabel(r"t ($\mu$s)")
+plt.ylabel(r"$\Delta  R$")
 plt.subplot(1, 3, 2)
-plt.plot(g_orbit.time*1e6, diff_Z, label='Particle 1')
-plt.xlabel(r't  ($\mu$s)')
-plt.ylabel(r'$\Delta  Z$')
+plt.plot(g_orbit.time * 1e6, diff_Z, label="Particle 1")
+plt.xlabel(r"t  ($\mu$s)")
+plt.ylabel(r"$\Delta  Z$")
 plt.subplot(1, 3, 3)
-plt.plot(g_orbit.time*1e6, diff_phi, label='Particle 1')
-plt.xlabel(r't  ($\mu$s)')
-plt.ylabel(r'$\Delta \Phi$')
-plt.title('First particle tracing')
+plt.plot(g_orbit.time * 1e6, diff_phi, label="Particle 1")
+plt.xlabel(r"t  ($\mu$s)")
+plt.ylabel(r"$\Delta \Phi$")
+plt.title("First particle tracing")
 plt.legend()
 plt.show()
 
 # For when we know how to runvmec -> insert after g_field.to_vmec(filename=filename)
 
-#ictrl = np.zeros(5, dtype=np.int32)
-#ictrl[:] = 0
-#ictrl[0] = 1 + 2 + 4 + 8
-#logger = logging.getLogger('[{}]'.format(MPI.COMM_WORLD.Get_rank()) + __name__)
-#logging.basicConfig(level=logging.INFO)
-#fcomm = MPI.COMM_WORLD.py2f()
-#logger.info("Calling runvmec. ictrl={} comm={}".format(ictrl, fcomm))
-#vmec.runvmec(ictrl, filename, True, fcomm, '') 
+# ictrl = np.zeros(5, dtype=np.int32)
+# ictrl[:] = 0
+# ictrl[0] = 1 + 2 + 4 + 8
+# logger = logging.getLogger('[{}]'.format(MPI.COMM_WORLD.Get_rank()) + __name__)
+# logging.basicConfig(level=logging.INFO)
+# fcomm = MPI.COMM_WORLD.py2f()
+# logger.info("Calling runvmec. ictrl={} comm={}".format(ictrl, fcomm))
+# vmec.runvmec(ictrl, filename, True, fcomm, '')

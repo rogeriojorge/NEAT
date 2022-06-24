@@ -14,7 +14,7 @@ quasisymmetric stellarator
 
 # Initialize an alpha particle at a radius = r_initial
 r_initial = 0.06  # meters
-theta_initial = 0*np.pi / 2  # initial poloidal angle
+theta_initial = 0 * np.pi / 2  # initial poloidal angle
 phi_initial = np.pi  # initial poloidal angle
 B0 = 5  # Tesla, mean magnetic field on-axis
 energy = 3.52e6  # electron-volt
