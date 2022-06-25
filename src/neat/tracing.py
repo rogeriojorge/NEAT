@@ -139,7 +139,7 @@ class ParticleOrbit:  # pylint: disable=R0902
     """
 
     def __init__(
-        self, particle, field, nsamples=1000, tfinal=0.0001, constant_b20=False
+        self, particle, field, nsamples=1000, tfinal=0.0001, constant_b20=True
     ) -> None:
 
         self.particle = particle
@@ -339,7 +339,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         nsamples=800,
         tfinal=0.0001,
         nthreads=2,
-        constant_b20=False,
+        constant_b20=True,
     ) -> None:
 
         self.particles = particles

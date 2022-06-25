@@ -84,7 +84,7 @@ class EffectiveVelocityResidual(Optimizable):
         tfinal=0.0003,
         nthreads=2,
         r_max=0.12,
-        constant_b20=False,
+        constant_b20=True,
     ) -> None:
 
         self.field = field
