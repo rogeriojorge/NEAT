@@ -1,3 +1,6 @@
 [submodule "external/gyronimo"]
 	path = external/gyronimo
 	url = https://github.com/rogeriojorge/gyronimo.git
+[submodule "external/simple"]
+	path = external/simple
+	url = https://github.com/itpplasma/SIMPLE.git
