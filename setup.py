@@ -68,14 +68,13 @@ class CMakeBuild(build_ext):
             # exported for Ninja to pick it up, which is a little tricky to do.
             # Users can override the generator with CMAKE_GENERATOR in CMake
             # 3.15+.
-            # if not cmake_generator:
-            #     cmake_args += ["-GNinja"]
-            pass
+            if not cmake_generator:
+                cmake_args += ["-GNinja"]
 
         else:
 
             # Single config generators are handled "normally"
-            # single_config = any(x in cmake_generator for x in {"NMake", "Ninja"})
+            single_config = any(x in cmake_generator for x in {"NMake", "Ninja"})
 
             # CMake allows an arch-in-generator style for backward compatibility
             contains_arch = any(x in cmake_generator for x in {"ARM", "Win64"})
