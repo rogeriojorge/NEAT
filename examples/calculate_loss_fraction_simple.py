@@ -12,6 +12,8 @@ import os
 nparticles = 64
 tfinal = 1e-2
 s_initial = 0.5
+B_scale = 2 # Scale the magnetic field 
+Aminor_scale = 2 # Scale the size of the plasma
 wout_filename = "wout_W7X.nc"
 wout_filename_prefix = f"{os.path.join(os.path.dirname(__file__))}/inputs/"
 
@@ -24,6 +26,8 @@ for item in dir(p):
         print(f'{item}: NULL')
 
 vmec_stuff.multharm = 3     # Fast but inaccurate splines
+vmec_stuff.vmec_b_scale = B_scale
+vmec_stuff.vmec_rz_scale = Aminor_scale
 p.ntestpart = nparticles
 p.trace_time = tfinal
 p.contr_pp = -1     # Trace all passing passing
