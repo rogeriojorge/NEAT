@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
+from pysimple import new_vmec_stuff_mod as stuff  # isort:skip
+from pysimple import simple, params  # isort:skip
+from pysimple import can_to_vmec, orbit_symplectic, vmec_to_can, vmec_to_cyl
 
-#%%
-import os
+import matplotlib.pyplot as plt  # isort:skip
+from mpl_toolkits import mplot3d  # isort:skip
+import numpy as np  # isort:skip
+import os  # isort:skip
 
-import matplotlib.pyplot as plt
-import numpy as np
-from mpl_toolkits import mplot3d
-from pysimple import can_to_vmec
-from pysimple import new_vmec_stuff_mod as stuff
-from pysimple import orbit_symplectic, params, simple, vmec_to_can, vmec_to_cyl
-
-#%%
 ## Input parameters
 nsamples = 5000
 s_initial = 0.5
@@ -22,7 +19,6 @@ Aminor_scale = 2  # Scale the size of the plasma
 wout_filename = "wout_W7X.nc"
 wout_filename_prefix = f"{os.path.join(os.path.dirname(__file__))}/inputs/"
 
-#%%
 tracy = params.Tracer()
 stuff.vmec_b_scale = B_scale
 stuff.vmec_rz_scale = Aminor_scale
@@ -40,11 +36,11 @@ simple.init_field(
 )
 simple.init_params(tracy, 2, 4, 3.5e6, 256, 1, 1e-13)
 
-#%% Initial conditions
+# s, th, ph, v/v_th, v_par/v
 z0_vmec = np.array(
     [s_initial, theta_initial, phi_initial, 1.0, vparallel_over_v_initial]
-)  # s, th, ph, v/v_th, v_par/v
-z0_can = z0_vmec.copy()  # s, th_c, ph_c, v/v_th, v_par/v
+)
+z0_can = z0_vmec.copy()
 
 z0_can[1:3] = vmec_to_can(z0_vmec[0], z0_vmec[1], z0_vmec[2])
 
@@ -91,7 +87,6 @@ plt.ylabel(r"$v_\parallel/v$")
 # plt.title('Velocities over time')
 
 # Poloidal orbit in RZ
-
 plt.figure()
 plt.plot(z_cyl[:, 0], z_cyl[:, 1])
 plt.xlabel("R")
@@ -99,7 +94,6 @@ plt.ylabel("Z")
 plt.title("Poloidal orbit projection")
 
 # 3D orbit in RZ
-
 plt.figure()
 ax = plt.axes(projection="3d")
 ax.plot(
@@ -112,7 +106,5 @@ ax.set_title("Orbit in real space")
 ax.set_xlim(-1400, 1400)
 ax.set_ylim(-1400, 1400)
 ax.set_zlim(-1400, 1400)
-
-# %%
 
 plt.show()
