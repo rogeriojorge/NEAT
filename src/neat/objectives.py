@@ -14,10 +14,10 @@ from typing import Union
 import numpy as np
 from qic import Qic
 from qsc import Qsc
-from simsopt.objectives import LeastSquaresProblem
-from simsopt.solve import least_squares_serial_solve, least_squares_mpi_solve
-from simsopt.util import MpiPartition
 from simsopt._core.optimizable import Optimizable
+from simsopt.objectives import LeastSquaresProblem
+from simsopt.solve import least_squares_mpi_solve, least_squares_serial_solve
+from simsopt.util import MpiPartition
 
 from neat.tracing import ParticleEnsembleOrbit
 
