@@ -15,6 +15,7 @@ from typing import Union
 import numpy as np
 from qic import Qic
 from qsc import Qsc
+
 try:
     from simsopt._core.optimizable import Optimizable
     from simsopt.objectives import LeastSquaresProblem
