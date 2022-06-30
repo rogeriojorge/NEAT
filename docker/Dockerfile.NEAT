@@ -29,7 +29,7 @@ WORKDIR /home/external
 RUN git clone https://github.com/hiddensymmetries/VMEC2000.git vmec
 WORKDIR /home/external/vmec
 RUN cp cmake/machines/ubuntu.json cmake_config_file.json
-RUN sed -i -e '9i   "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch,",\' cmake_config_file.json
+# RUN sed -i -e '9i   "-DCMAKE_Fortran_FLAGS=-fallow-argument-mismatch,",\' cmake_config_file.json
 RUN pip3 install .
 
 # Install pyQSC
