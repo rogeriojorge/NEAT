@@ -12,7 +12,13 @@ the necessary SIMSOPT wrappers for optimization.
 import numpy as np
 from qic import Qic
 from qsc import Qsc
-from simsopt._core.optimizable import Optimizable
+try:
+    from simsopt._core import Optimizable
+except ImportError as error:
+    # print(error.__class__.__name__ + ": " + error.message)
+    class Optimizable:
+        def __init__(self, *args, **kwargs):
+            pass
 
 from neatpp import (
     gc_solver,
