@@ -9,18 +9,21 @@ the necessary SIMSOPT wrappers for optimization.
 
 """
 
+try:
+    from pysimple import new_vmec_stuff_mod as stuff  # isort:skip
+    from pysimple import simple, params  # isort:skip
+    from pysimple import orbit_symplectic  # isort:skip
+    from pysimple import can_to_vmec, vmec_to_can, vmec_to_cyl
+
+    simple_loaded = True
+except ImportError as error:
+    simple_loaded = False
+
+from scipy.io import netcdf
 import numpy as np
+
 from qic import Qic
 from qsc import Qsc
-
-try:
-    from simsopt._core import Optimizable
-except ImportError as error:
-    # print(error.__class__.__name__ + ": " + error.message)
-    class Optimizable:
-        def __init__(self, *args, **kwargs):
-            pass
-
 
 from neatpp import (
     gc_solver,
@@ -30,6 +33,17 @@ from neatpp import (
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
 )
+
+try:
+    from simsopt._core import Optimizable
+
+    simsopt_loaded = True
+except ImportError as error:
+    simsopt_loaded = False
+
+    class Optimizable:
+        def __init__(self, *args, **kwargs):
+            pass
 
 
 class Stellna(Qic, Optimizable):
@@ -226,3 +240,160 @@ class StellnaQS(Qsc, Optimizable):
     def get_grad_grad_B_inverse_scale_length_vs_varphi(self):
         """Wrapper for 1/L_gradgradB(varphi) to feed into SIMSOPT"""
         return self.grad_grad_B_inverse_scale_length_vs_varphi / np.sqrt(self.nphi)
+
+
+if simple_loaded:
+
+    class Simple:
+        """SIMPLE class
+        This class initializes a SIMPLE-based particle
+        tracer that reads vmec input files.
+        SIMPLE code: https://github.com/itpplasma/SIMPLE
+        """
+
+        def __init__(
+            self,
+            wout_filename: str,
+            B_scale: float,
+            Aminor_scale: float,
+            multharm: int = 3,
+        ) -> None:
+        
+            self.near_axis = False
+            self.wout_filename = wout_filename
+            net_file = netcdf.netcdf_file(self.wout_filename, "r", mmap=False)
+            self.nfp = net_file.variables["nfp"][()]
+            self.Rmajor = net_file.variables["Rmajor_p"][()]
+            net_file.close()
+            self.B_scale = B_scale
+            self.Aminor_scale = Aminor_scale
+            self.multharm = multharm
+
+            self.params = params
+            self.stuff = stuff
+            self.simple = simple
+
+            self.tracy = self.params.Tracer()
+            self.stuff.vmec_b_scale = B_scale
+            self.stuff.vmec_rz_scale = Aminor_scale
+            self.stuff.multharm = multharm  # Fast but inaccurate splines
+            self.stuff.ns_s = 3
+            self.stuff.ns_tp = 3
+
+            self.simple.init_field(
+                self.tracy,
+                wout_filename,
+                self.stuff.ns_s,
+                self.stuff.ns_tp,
+                self.stuff.multharm,
+                self.params.integmode,
+            )
+
+        def gyronimo_parameters(self):
+            """Return list of parameters to feed gyronimo-based functions"""
+            return [
+                self.tracy,
+                self.Rmajor,
+                self.simple,
+            ]
+
+        def neatpp_solver(self, *args, **kwargs):
+            """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
+            return self.simple_single_particle_tracer(*args, *kwargs)
+
+        def neatpp_solver_ensemble(self, *args, **kwargs):
+            """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
+            raise NotImplementedError
+
+        def simple_single_particle_tracer(
+            self,
+            Tracy,
+            Rmajor,
+            Simple: simple,
+            charge,
+            mass,
+            Lambda,
+            vpp_sign,
+            energy,
+            r_initial,
+            theta_initial,
+            phi_initial,
+            nsamples,
+            tfinal,
+        ):
+
+            relative_error = 1e-13
+            npoints = 256
+            Simple.init_params(Tracy, charge, mass, energy, npoints, 1, relative_error)
+
+            # s, th, ph, v/v_th, v_par/v
+            abs_v_parallel_over_v = np.sqrt(1 - Lambda)
+            z0_vmec = np.array(
+                [
+                    r_initial,
+                    theta_initial,
+                    phi_initial,
+                    1.0,
+                    vpp_sign * abs_v_parallel_over_v,
+                ]
+            )
+            z0_can = z0_vmec.copy()
+
+            z0_can[1:3] = vmec_to_can(z0_vmec[0], z0_vmec[1], z0_vmec[2])
+
+            simple.init_integrator(Tracy, z0_can)
+
+            print(f"B = {Tracy.f.bmod}")
+
+            nt = nsamples
+            # dtaumin (time step of the integrator) = 2*pi*Rmajor/npoiper2
+            # actual time step dt = dtaumin/v_th
+            # v_th = sqrt(2*Ekin/mass)
+            # Rmajor = Rmajor_p from VMEC
+            z_integ = np.zeros([nt, 4])  # s, th_c, ph_c, p_phi
+            z_vmec = np.zeros([nt, 5])  # s, th, ph, v/v_th, v_par/v
+            z_cyl = np.zeros([nt, 3])
+            z_integ[0, :] = Tracy.si.z
+            z_vmec[0, :] = z0_vmec
+            z_cyl[0, :2] = vmec_to_cyl(z_vmec[0, 0], z_vmec[0, 1], z_vmec[0, 2])
+            z_cyl[0, 2] = z_vmec[0, 2]
+
+            for kt in range(nt - 1):
+                orbit_symplectic.orbit_timestep_sympl(Tracy.si, Tracy.f)
+                z_integ[kt + 1, :] = Tracy.si.z
+                z_vmec[kt + 1, 0] = z_integ[kt + 1, 0]
+                z_vmec[kt + 1, 1:3] = can_to_vmec(
+                    z_integ[kt + 1, 0], z_integ[kt + 1, 1], z_integ[kt + 1, 2]
+                )
+                z_vmec[kt + 1, 3] = np.sqrt(
+                    Tracy.f.mu * Tracy.f.bmod + 0.5 * Tracy.f.vpar**2
+                )
+                z_vmec[kt + 1, 4] = Tracy.f.vpar / (z_vmec[kt + 1, 3] * np.sqrt(2))
+                z_cyl[kt + 1, :2] = vmec_to_cyl(
+                    z_vmec[kt + 1, 0], z_vmec[kt + 1, 1], z_vmec[kt + 1, 2]
+                )
+                z_cyl[kt + 1, 2] = z_vmec[kt + 1, 2]
+
+            dtaumin = 2*np.pi*Rmajor/npoints
+            v_th =np.sqrt(2*energy/mass)
+            time = np.linspace(
+                dtaumin/v_th, nt * dtaumin/v_th, nt
+            )
+
+            return np.array([
+                time,
+                z_vmec[:, 0],
+                z_vmec[:, 1],
+                z_vmec[:, 2],
+                np.array([np.sqrt(2 * energy / mass) * (1 - Lambda)] * len(z_vmec[:, 2])), # parallel energy
+                np.array([Lambda * np.sqrt(2 * energy / mass)] * len(z_vmec[:, 2])), # perpendicular energy
+                np.array([0] * len(z_vmec[:, 2])),  # magnetic_field_strength,
+                z_vmec[:, 4], # parallel velocity
+                np.array([0] * len(z_vmec[:, 2])),  # rdot,
+                np.array([0] * len(z_vmec[:, 2])),  # thetadot,
+                np.array([0] * len(z_vmec[:, 2])),  # varphidot,
+                np.array([0] * len(z_vmec[:, 2])),  # vparalleldot,
+                z_cyl[:, 0],
+                z_cyl[:, 1],
+                z_cyl[:, 2]]
+            )

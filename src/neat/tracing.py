@@ -8,16 +8,16 @@ ensemble orbits.
 
 """
 
+from .constants import ELEMENTARY_CHARGE, PROTON_MASS
+from .fields import Simple, Stellna, StellnaQS
+# from .plotting import plot_animation3d, plot_orbit2d, plot_orbit3d, plot_parameters
+
 import logging
 from typing import Union
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import CubicSpline as spline
-
-from .constants import ELEMENTARY_CHARGE, PROTON_MASS
-from .fields import Stellna, StellnaQS
-from .plotting import plot_animation3d, plot_orbit2d, plot_orbit3d, plot_parameters
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +132,12 @@ class ParticleOrbit:  # pylint: disable=R0902
     """
 
     def __init__(
-        self, particle, field, nsamples=1000, tfinal=0.0001, constant_b20=False
+        self,
+        particle: ChargedParticle,
+        field: Union[StellnaQS, Stellna, Simple],
+        nsamples=1000,
+        tfinal=0.0001,
+        constant_b20=False,
     ) -> None:
 
         self.particle = particle
@@ -159,19 +164,20 @@ class ParticleOrbit:  # pylint: disable=R0902
         )
 
         self.solution = solution
-
-        nu_array = field.varphi - field.phi
-        nu_spline_of_varphi = spline(
-            np.append(field.varphi, 2 * np.pi / field.nfp),
-            np.append(nu_array, nu_array[0]),
-            bc_type="periodic",
-        )
+        print(solution)
 
         self.time = solution[:, 0]
         self.r_pos = solution[:, 1]
         self.theta_pos = solution[:, 2]
         self.varphi_pos = solution[:, 3]
-        self.phi_pos = self.varphi_pos - nu_spline_of_varphi(self.varphi_pos)
+        if self.field.near_axis:
+            nu_array = field.varphi - field.phi
+            nu_spline_of_varphi = spline(
+                np.append(field.varphi, 2 * np.pi / field.nfp),
+                np.append(nu_array, nu_array[0]),
+                bc_type="periodic",
+            )
+            self.phi_pos = self.varphi_pos - nu_spline_of_varphi(self.varphi_pos)
         self.energy_parallel = solution[:, 4]
         self.energy_perpendicular = solution[:, 5]
         self.total_energy = self.energy_parallel + self.energy_perpendicular
@@ -183,15 +189,27 @@ class ParticleOrbit:  # pylint: disable=R0902
         self.varphidot = solution[:, 10]
         self.vparalleldot = solution[:, 11]
 
-        self.p_phi = canonical_angular_momentum(
-            particle, field, self.r_pos, self.v_parallel, self.magnetic_field_strength
-        )
-
-        self.rpos_cylindrical = np.array(
-            self.field.to_RZ(
-                np.array([self.r_pos, self.theta_pos, self.varphi_pos]).transpose()
+        if self.field.near_axis:
+            self.p_phi = canonical_angular_momentum(
+                particle,
+                field,
+                self.r_pos,
+                self.v_parallel,
+                self.magnetic_field_strength,
             )
-        )
+
+            self.rpos_cylindrical = np.array(
+                self.field.to_RZ(
+                    np.array([self.r_pos, self.theta_pos, self.varphi_pos]).transpose()
+                )
+            )
+
+        else:
+            # Canonical angular momentum still not calculated for VMEC fields yet
+            self.p_phi = np.array([1e-16] * len(self.time))
+            self.rpos_cylindrical = np.array(
+                [solution[:, 12], solution[:, 13], solution[:, 14]]
+            )
 
         self.rpos_cartesian = np.array(
             [
@@ -201,8 +219,10 @@ class ParticleOrbit:  # pylint: disable=R0902
             ]
         )
 
+
     def plot_orbit(self, show=True):
         """Plot particle orbit in 2D flux coordinates"""
+        from .plotting import plot_orbit2d
         plot_orbit2d(
             x_position=self.r_pos * np.cos(self.theta_pos),
             y_position=self.r_pos * np.sin(self.theta_pos),
@@ -211,16 +231,23 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot_orbit_3d(self, r_surface=0.1, distance=6, show=True):
         """Plot particle orbit in 3D cartesian coordinates"""
-        boundary = np.array(
-            self.field.get_boundary(
-                r=r_surface,
-                nphi=110,
-                ntheta=30,
-                ntheta_fourier=16,
-                mpol=8,
-                ntor=15,
+        from .plotting import plot_orbit3d, get_vmec_boundary
+
+        if self.field.near_axis:
+            boundary = np.array(
+                self.field.get_boundary(
+                    r=r_surface,
+                    nphi=110,
+                    ntheta=30,
+                    ntheta_fourier=16,
+                    mpol=8,
+                    ntor=15,
+                )
             )
-        )
+        else:
+            boundary, b_rescaled = get_vmec_boundary(  # pylint: disable=W0612
+                self.field.wout_filename
+            )
 
         plot_orbit3d(
             boundary=boundary,
@@ -231,20 +258,28 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot(self, show=True):
         """Plot relevant physics parameters of the particle orbit"""
+        from .plotting import plot_parameters
         plot_parameters(self=self, show=show)
 
     def plot_animation(self, r_surface=0.1, distance=7, show=True, save_movie=False):
         """Plot three-dimensional animation of the particle orbit"""
-        boundary = np.array(
-            self.field.get_boundary(
-                r=r_surface,
-                nphi=110,
-                ntheta=30,
-                ntheta_fourier=16,
-                mpol=8,
-                ntor=15,
+        from .plotting import plot_animation3d, get_vmec_boundary
+        if self.field.near_axis:
+            boundary = np.array(
+                self.field.get_boundary(
+                    r=r_surface,
+                    nphi=110,
+                    ntheta=30,
+                    ntheta_fourier=16,
+                    mpol=8,
+                    ntor=15,
+                )
             )
-        )
+        else:
+            boundary, b_rescaled = get_vmec_boundary(  # pylint: disable=W0612
+                self.field.wout_filename
+            )
+
         plot_animation3d(
             boundary=boundary,
             rpos_cartesian=self.rpos_cartesian,
@@ -254,6 +289,49 @@ class ParticleOrbit:  # pylint: disable=R0902
             save_movie=save_movie,
         )
 
+    def plot_orbit_contourB(self, ntheta=100, nphi=120, ncontours=20, show=True):
+        """Plot particle orbit superimposed in B contours"""
+        from .plotting import get_vmec_magB
+        import matplotlib.pyplot as plt
+
+        theta_array = np.linspace(0, 2 * np.pi, ntheta)
+        phi_array = np.linspace(0, 2 * np.pi, nphi)
+        phi_2D, theta_2D = np.meshgrid(phi_array, theta_array)
+        if self.field.near_axis:
+            b_on_surface = self.field.B_mag(
+                self.r_pos[0], theta_2D, phi_2D, Boozer_toroidal=True
+            )
+        else:
+            b_on_surface = get_vmec_magB(
+                wout_filename=self.field.wout_filename,
+                spos=self.r_pos[0],
+                ntheta=ntheta,
+                nzeta=nphi,
+            )
+        fig, ax = plt.subplots()
+        plt.contourf(phi_2D, theta_2D, b_on_surface, ncontours)
+        # plt.title(titles[i]+'\n1-based index='+str(iradius+1))
+        ax.scatter(
+            np.mod(self.varphi_pos, 2 * np.pi),
+            np.mod(self.theta_pos, 2 * np.pi),
+            marker=".",
+            color="k",
+            s=0.7,
+        )
+        ax.scatter(
+            np.mod(self.varphi_pos[0], 2 * np.pi),
+            np.mod(self.theta_pos[0], 2 * np.pi),
+            marker="o",
+            color="b",
+            s=60,
+        )
+        plt.xlabel(r"$\phi$")
+        plt.ylabel(r"$\theta$")
+        plt.colorbar()
+        plt.xlim([0, 2 * np.pi])
+        plt.ylim([0, 2 * np.pi])
+        if show:
+            plt.show()
 
 class ParticleEnsembleOrbit:  # pylint: disable=R0902
     r"""
@@ -264,7 +342,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
     def __init__(
         self,
         particles: ChargedParticleEnsemble,
-        field: Union[StellnaQS, Stellna],
+        field: Union[StellnaQS, Stellna, Simple],
         nsamples=800,
         tfinal=0.0001,
         nthreads=2,
@@ -414,6 +492,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
 
     def plot_loss_fraction(self, show=True):
         """Make a plot of the fraction of total particles lost over time"""
+        import matplotlib.pyplot as plt
         plt.semilogx(self.time, self.loss_fraction_array)
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
