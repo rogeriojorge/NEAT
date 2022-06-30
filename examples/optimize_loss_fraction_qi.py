@@ -12,11 +12,7 @@ from simsopt.util.mpi import MpiPartition, log
 
 from neat.fields import Stellna
 from neat.objectives import EffectiveVelocityResidual, LossFractionResidual
-from neat.tracing_gyronimo import (
-    ChargedParticle,
-    ChargedParticleEnsemble,
-    ParticleOrbit,
-)
+from neat.tracing import ChargedParticle, ChargedParticleEnsemble, ParticleOrbit
 
 r_initial = 0.04
 r_max = 0.1

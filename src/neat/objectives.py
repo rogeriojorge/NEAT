@@ -19,7 +19,7 @@ from simsopt._core.optimizable import Optimizable
 from simsopt.solve.mpi import least_squares_mpi_solve
 from simsopt.util.mpi import MpiPartition
 
-from neat.tracing_gyronimo import ParticleEnsembleOrbit
+from neat.tracing import ParticleEnsembleOrbit
 
 
 class LossFractionResidual(Optimizable):

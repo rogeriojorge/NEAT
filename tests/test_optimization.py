@@ -4,7 +4,7 @@ import unittest
 
 from neat.fields import StellnaQS
 from neat.objectives import OptimizeLossFractionSkeleton
-from neat.tracing_gyronimo import ChargedParticleEnsemble
+from neat.tracing import ChargedParticleEnsemble
 
 
 class NEATtests(unittest.TestCase):

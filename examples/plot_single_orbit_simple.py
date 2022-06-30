@@ -1,39 +1,49 @@
 #!/usr/bin/env python3
 
+#%%
 import os
-from optparse import AmbiguousOptionError
 
 import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits import mplot3d
 from pysimple import can_to_vmec
-from pysimple import new_vmec_stuff_mod as vmec_stuff
+from pysimple import new_vmec_stuff_mod as stuff
 from pysimple import orbit_symplectic, params, simple, vmec_to_can, vmec_to_cyl
 
+#%%
 ## Input parameters
-nsamples = 30000
+nsamples = 5000
 s_initial = 0.5
 theta_initial = np.pi / 2
 phi_initial = 0.1
 vparallel_over_v_initial = -0.2
-B_scale = 3
-Aminor_scale = 3
-# wout_filename = "wout_ESTELL.nc"
-# wout_filename = "wout_ITER.nc"
+B_scale = 2  # Scale the magnetic field
+Aminor_scale = 2  # Scale the size of the plasma
 wout_filename = "wout_W7X.nc"
 wout_filename_prefix = f"{os.path.join(os.path.dirname(__file__))}/inputs/"
 
+#%%
 tracy = params.Tracer()
-vmec_stuff.vmec_b_scale = B_scale
-vmec_stuff.vmec_rz_scale = Aminor_scale
+stuff.vmec_b_scale = B_scale
+stuff.vmec_rz_scale = Aminor_scale
+stuff.multharm = 3  # Fast but inaccurate splines
+stuff.ns_s = 3
+stuff.ns_tp = 3
 
-simple.init_field(tracy, wout_filename_prefix + wout_filename, 3, 3, 3, 1)
+simple.init_field(
+    tracy,
+    wout_filename_prefix + wout_filename,
+    stuff.ns_s,
+    stuff.ns_tp,
+    stuff.multharm,
+    params.integmode,
+)
 simple.init_params(tracy, 2, 4, 3.5e6, 256, 1, 1e-13)
 
-# Initial conditions
-# z0_vmec = np.array([0.5, 0.3, 0.2, 1.0, 0.1])   # s, th, ph, v/v_th, v_par/v
+#%% Initial conditions
 z0_vmec = np.array(
     [s_initial, theta_initial, phi_initial, 1.0, vparallel_over_v_initial]
-)  # s, th_c, ph_c, v/v_th (should be 1 as we're non relativstic), v_par/v
+)  # s, th, ph, v/v_th, v_par/v
 z0_can = z0_vmec.copy()  # s, th_c, ph_c, v/v_th, v_par/v
 
 z0_can[1:3] = vmec_to_can(z0_vmec[0], z0_vmec[1], z0_vmec[2])
@@ -67,44 +77,18 @@ for kt in range(nt - 1):
 
 plt.figure()
 plt.plot(z_vmec[:, 0] * np.cos(z_vmec[:, 1]), z_vmec[:, 0] * np.sin(z_vmec[:, 1]))
-plt.xlabel(r"$s \cdot \cos(\theta)$")
-plt.ylabel(r"$s \cdot \sin(\theta)$")
+plt.xlabel(r"$s ~ \cos(\theta)$")
+plt.ylabel(r"$s ~ \sin(\theta)$")
 plt.title("Poloidal orbit topology")
 
 
 plt.figure()
 # plt.plot(z_vmec[:, 3])
 plt.plot(z_vmec[:, 4])
-plt.xlabel("Timestep")
-plt.ylabel("Normalized velocity")
+plt.xlabel("Time (s)")
+plt.ylabel(r"$v_\parallel/v$")
 # plt.legend(['v/v_0', 'v_par/v'])
-plt.legend([r"$v_parallel/v$"])
-plt.title("Velocities over time")
-
-# 3D plot
-from mpl_toolkits import mplot3d
-
-# R = S0 + s*cos(th)
-# Z = s*sin(th)
-# X = R*cos(ph)
-# Y = R*sin(ph)
-# Z = Z
-
-S0 = 5.0
-plt.figure()
-ax = plt.axes(projection="3d")
-ax.plot3D(
-    (S0 + z_vmec[:, 0] * np.cos(z_vmec[:, 1])) * np.cos(z_vmec[:, 2]),
-    (S0 + z_vmec[:, 0] * np.cos(z_vmec[:, 1])) * np.sin(z_vmec[:, 2]),
-    z_vmec[:, 0] * np.sin(z_vmec[:, 1]),
-)
-ax.set_xlabel("(5 + s * cos(th))*cos(ph)")
-ax.set_ylabel("(5 + s * sin(th))*cos(ph)")
-ax.set_zlabel("s*cos(ph)")
-ax.set_title("3D orbit topology")
-ax.set_xlim(-5, 5)
-ax.set_ylim(-5, 5)
-ax.set_zlim(-5, 5)
+# plt.title('Velocities over time')
 
 # Poloidal orbit in RZ
 
@@ -129,5 +113,6 @@ ax.set_xlim(-1400, 1400)
 ax.set_ylim(-1400, 1400)
 ax.set_zlim(-1400, 1400)
 
+# %%
 
 plt.show()

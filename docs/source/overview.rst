@@ -37,4 +37,4 @@ Classes and functions in NEAT are organized into several modules:
 - :obj:`neat.fields` contains the classes for the stellarator magnetic fields, including the near-axis field.
 - :obj:`neat.objectives` contains the objective functions used for optimizing stellarators.
 - :obj:`neat.plotting` contains the plotting and animation routines.
-- :obj:`neat.tracing_gyronimo` contains the tracing classes that treats the input and output to the ``neatpp`` package.
+- :obj:`neat.tracing` contains the tracing classes that treats the input and output to the ``neatpp`` package.

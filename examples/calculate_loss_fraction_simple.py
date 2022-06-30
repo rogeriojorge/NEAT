@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
 
+#%%
 import os
-from random import uniform
+import random
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pysimple import new_vmec_stuff_mod as vmec_stuff
+from pysimple import new_vmec_stuff_mod as stuff
 from pysimple import params as p
 from pysimple import simple, simple_main
 from scipy.io import netcdf
 
 ## Input parameters
-nparticles = 64
-tfinal = 1e-2
-s_initial = 0.5
-B_scale = 2  # Scale the magnetic field
-Aminor_scale = 2  # Scale the size of the plasma
-wout_filename = "wout_W7X.nc"
+nparticles = 128
+tfinal = 1e-3
+s_initial = 0.6
+B_scale = 1  # Scale the magnetic field
+Aminor_scale = 1  # Scale the size of the plasma
+wout_filename = "wout_ESTELL.nc"
 wout_filename_prefix = f"{os.path.join(os.path.dirname(__file__))}/inputs/"
+vparallel_over_v_min = -0.5
+vparallel_over_v_max = 0.5
+
 
 ## Run the SIMPLE code
 for item in dir(p):
@@ -28,26 +32,25 @@ for item in dir(p):
     except:
         print(f"{item}: NULL")
 
-vmec_stuff.multharm = 3  # Fast but inaccurate splines
-vmec_stuff.vmec_b_scale = B_scale
-vmec_stuff.vmec_rz_scale = Aminor_scale
+stuff.multharm = 3  # Fast but inaccurate splines
+stuff.vmec_b_scale = B_scale
+stuff.vmec_rz_scale = Aminor_scale
 p.ntestpart = nparticles
 p.trace_time = tfinal
-p.contr_pp = -1  # Trace all passing passing
+p.contr_pp = -1e10  # Trace all passing passing
 p.startmode = -1  # Manual start conditions
 
 tracy = p.Tracer()
-
+print(stuff.ns_s, stuff.ns_tp, stuff.multharm, p.integmode)
 simple.init_field(
     tracy,
     wout_filename_prefix + wout_filename,
-    vmec_stuff.ns_s,
-    vmec_stuff.ns_tp,
-    vmec_stuff.multharm,
+    stuff.ns_s,
+    stuff.ns_tp,
+    stuff.multharm,
     p.integmode,
 )
 
-print(vmec_stuff.ns_s, vmec_stuff.ns_tp, vmec_stuff.multharm, p.integmode)
 
 p.params_init()
 #%%
@@ -60,10 +63,10 @@ p.zstart = (
         [
             [
                 s_initial,
-                uniform(0, 2 * np.pi),
-                uniform(0, 2 * np.pi / nfp),
+                random.uniform(0, 2 * np.pi),
+                random.uniform(0, 2 * np.pi / nfp),
                 1,
-                uniform(-1, 1),
+                random.uniform(vparallel_over_v_min, vparallel_over_v_max),
             ]
             for i in range(nparticles)
         ]
@@ -71,7 +74,6 @@ p.zstart = (
     .reshape(nparticles, 5)
     .T
 )
-
 #%%
 simple_main.run(tracy)
 
@@ -81,16 +83,14 @@ t = np.linspace(p.dtau / p.v0, p.trace_time, p.ntimstep)
 
 plt.figure()
 plt.semilogx(t, 1 - (p.confpart_pass + p.confpart_trap))
-plt.xlim([1e-6, p.trace_time])
+plt.xlim([1e-5, p.trace_time])
 plt.xlabel("Time (s)")
 plt.ylabel("Loss Fraction")
 
 plt.figure()
 condi = np.logical_and(p.times_lost > 0, p.times_lost < p.trace_time)
 plt.semilogx(p.times_lost[condi], p.perp_inv[condi], "x")
-plt.xlim([1e-6, p.trace_time])
-plt.xlabel("loss time")
-plt.ylabel("perpendicular invariant")
+plt.xlim([1e-5, p.trace_time])
+plt.xlabel("Loss Time")
+plt.ylabel("Perpendicular Invariant")
 plt.show()
-
-# %%

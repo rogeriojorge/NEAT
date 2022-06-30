@@ -33,10 +33,10 @@ neat.plotting module
    :undoc-members:
    :show-inheritance:
 
-neat.tracing_gyronimo module
+neat.tracing module
 ^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: neat.tracing_gyronimo
+.. automodule:: neat.tracing
    :members:
    :undoc-members:
    :show-inheritance:
