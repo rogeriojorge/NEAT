@@ -567,7 +567,8 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
                 self.nsamples,
                 self.tfinal,
                 self.nthreads
-            ), dtype=object
+            ),
+            dtype=object,
         )
 
         (
