@@ -8,23 +8,29 @@ ensemble orbits.
 
 """
 
+try:
+    from .fields import Simple
+except ImportError as error:
+    pass
+try:
+    from .fields import Stellna
+except ImportError as error:
+    pass
+try:
+    from .fields import StellnaQS
+except ImportError as error:
+    pass
+
 import logging
 from typing import Union
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import CubicSpline as spline
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
-from .fields import Stellna, StellnaQS
-from .plotting import (
-    get_vmec_boundary,
-    get_vmec_magB,
-    plot_animation3d,
-    plot_orbit2d,
-    plot_orbit3d,
-    plot_parameters,
-)
+
+# from .plotting import plot_animation3d, plot_orbit2d, plot_orbit3d, plot_parameters
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +145,12 @@ class ParticleOrbit:  # pylint: disable=R0902
     """
 
     def __init__(
-        self, particle, field, nsamples=1000, tfinal=0.0001, constant_b20=True
+        self,
+        particle: ChargedParticle,
+        field: Union[StellnaQS, Stellna],
+        nsamples=1000,
+        tfinal=0.0001,
+        constant_b20=False,
     ) -> None:
 
         self.particle = particle
@@ -206,7 +217,7 @@ class ParticleOrbit:  # pylint: disable=R0902
             )
 
         else:
-            # Canonical angular momentum still not calculated for VMEC
+            # Canonical angular momentum still not calculated for VMEC fields yet
             self.p_phi = np.array([1e-16] * len(self.time))
             self.rpos_cylindrical = np.array(
                 [solution[:, 12], solution[:, 14], solution[:, 13]]
@@ -222,6 +233,8 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot_orbit(self, show=True):
         """Plot particle orbit in 2D flux coordinates"""
+        from .plotting import plot_orbit2d
+
         plot_orbit2d(
             x_position=self.r_pos * np.cos(self.theta_pos),
             y_position=self.r_pos * np.sin(self.theta_pos),
@@ -230,6 +243,8 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot_orbit_3d(self, r_surface=0.1, distance=6, show=True):
         """Plot particle orbit in 3D cartesian coordinates"""
+        from .plotting import get_vmec_boundary, plot_orbit3d
+
         if self.field.near_axis:
             boundary = np.array(
                 self.field.get_boundary(
@@ -255,10 +270,14 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot(self, show=True):
         """Plot relevant physics parameters of the particle orbit"""
+        from .plotting import plot_parameters
+
         plot_parameters(self=self, show=show)
 
     def plot_animation(self, r_surface=0.1, distance=7, show=True, save_movie=False):
         """Plot three-dimensional animation of the particle orbit"""
+        from .plotting import get_vmec_boundary, plot_animation3d
+
         if self.field.near_axis:
             boundary = np.array(
                 self.field.get_boundary(
@@ -286,6 +305,10 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot_orbit_contourB(self, ntheta=100, nphi=120, ncontours=20, show=True):
         """Plot particle orbit superimposed in B contours"""
+        import matplotlib.pyplot as plt
+
+        from .plotting import get_vmec_magB
+
         theta_array = np.linspace(0, 2 * np.pi, ntheta)
         phi_array = np.linspace(0, 2 * np.pi, nphi)
         phi_2D, theta_2D = np.meshgrid(phi_array, theta_array)
@@ -485,10 +508,105 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
 
     def plot_loss_fraction(self, show=True):
         """Make a plot of the fraction of total particles lost over time"""
+        import matplotlib.pyplot as plt
+
         plt.semilogx(self.time, self.loss_fraction_array)
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
+        if show:
+            plt.show()
+
+
+class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
+    r"""
+    Interface function with the SIMPLE compiled Fortran functions.
+    Receives a particle and field instance from neat.
+    """
+
+    def __init__(
+        self,
+        particles: ChargedParticleEnsemble,
+        field: Union[StellnaQS, Stellna],
+        nsamples=800,
+        tfinal=0.0001,
+        nthreads=2,
+        nparticles=32,
+        vparallel_over_v_min=-0.3,
+        vparallel_over_v_max=0.3,
+    ) -> None:
+
+        self.particles = particles
+        # Change latter to a definition of a variable called nparticles
+        self.nparticles = nparticles
+        self.particles.ntheta = nparticles
+        self.particles.nphi = 1
+        self.particles.nlambda_passing = 1
+        self.particles.nlambda_trapped = 1
+        self.field = field
+        self.nsamples = nsamples
+        self.nthreads = nthreads
+        self.tfinal = tfinal
+
+        # self.field.constant_b20 = constant_b20
+
+        self.gyronimo_parameters = [
+            *self.field.gyronimo_parameters(),
+            *self.particles.gyronimo_parameters(),
+            self.nsamples,
+            self.tfinal,
+            self.nthreads,
+            vparallel_over_v_min,
+            vparallel_over_v_max,
+        ]
+
+        solution = np.array(
+            self.field.neatpp_solver_ensemble(
+                *self.field.gyronimo_parameters(),
+                *self.particles.gyronimo_parameters(),
+                self.nsamples,
+                self.tfinal,
+                self.nthreads
+            )
+        )
+
+        (
+            self.time,
+            self.confpart_pass,
+            self.confpart_trap,
+            self.trace_time,
+            self.lost_times_of_particles,
+            self.perp_inv,
+        ) = solution
+
+        self.condi = np.logical_and(
+            self.lost_times_of_particles > 0,
+            self.lost_times_of_particles < self.trace_time,
+        )
+
+        self.loss_fraction_array = 1 - (self.confpart_pass + self.confpart_trap)
+        self.total_particles_lost = self.loss_fraction_array[-1]
+
+    def plot_loss_fraction(self, show=True):
+        """Make a plot of the fraction of total particles lost over time"""
+
+        import matplotlib.pyplot as plt
+
+        plt.figure()
+        plt.semilogx(self.time, 1 - (self.confpart_pass + self.confpart_trap))
+        plt.xlim([1e-5, self.trace_time])
+        plt.xlabel("Time (s)")
+        plt.ylabel("Loss Fraction")
+        plt.tight_layout()
+
+        plt.figure()
+        plt.semilogx(
+            self.lost_times_of_particles[self.condi], self.perp_inv[self.condi], "x"
+        )
+        plt.xlim([1e-5, self.trace_time])
+        plt.xlabel("Loss Time")
+        plt.ylabel("Perpendicular Invariant")
+
         if show:
             plt.show()
 

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-project(neatpp)
+project(neatpp
+  LANGUAGES C CXX Fortran
+)
 
 # Enable output of compile commands during generation.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -8,7 +10,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Use python version that satisfies version constraints
 set(Python_FIND_STRATEGY LOCATION)
 # Make sure that python libraries such as numpy are found
-find_package(Python 3 COMPONENTS Interpreter Development.Module NumPy)
+find_package(Python 3 COMPONENTS Interpreter Development NumPy)
 # Use relative paths in MacOS
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
@@ -90,13 +92,15 @@ include_directories(${Boost_INCLUDE_DIRS})
 # Add GSL
 find_package(GSL REQUIRED)
 include_directories(${GSL_INCLUDE_DIRS})
-
 # Compile git submodules
 if(INSTALL_SIMPLE)
     add_subdirectory(external/simple)
+    # include_directories("${CMAKE_CURRENT_BINARY_DIR}/external/simple")
+    # add_subdirectory(src/neatf90)
 endif()
 
-# Add gyronimo
+# Add gyronimo with VMEC support
+set(BUILD_VMEC_SUPPORT "ON")
 add_subdirectory(external/gyronimo)
 
 # Add pybind11 include directories

@@ -24,12 +24,12 @@ energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 ntheta = 14  # resolution in theta
-nphi = 8  # resolution in phi
-nlambda_trapped = 20  # number of pitch angles for trapped particles
+nphi = 6  # resolution in phi
+nlambda_trapped = 18  # number of pitch angles for trapped particles
 nlambda_passing = 3  # number of pitch angles for passing particles
 nsamples = 1000  # resolution in time
 tfinal = 1e-4  # seconds
-nthreads_array = [1, 2, 4]
+nthreads_array = [4]
 constant_b20 = False  # use a constant B20 (mean value) or the real function
 stellarator_index = "QI Jorge"
 
