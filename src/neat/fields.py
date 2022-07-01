@@ -11,13 +11,15 @@ the necessary SIMSOPT wrappers for optimization.
 
 try:
     from pysimple import new_vmec_stuff_mod as stuff  # isort:skip
-    from pysimple import simple, params  # isort:skip
+    from pysimple import simple, simple_main, params  # isort:skip
     from pysimple import orbit_symplectic  # isort:skip
     from pysimple import can_to_vmec, vmec_to_can, vmec_to_cyl
 
     simple_loaded = True
 except ImportError as error:
     simple_loaded = False
+
+import random
 
 import numpy as np
 from qic import Qic
@@ -304,7 +306,7 @@ if simple_loaded:
 
         def neatpp_solver_ensemble(self, *args, **kwargs):
             """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
-            raise NotImplementedError
+            return self.simple_ensemble_particle_tracer(*args, *kwargs)
 
         def simple_single_particle_tracer(
             self,
@@ -322,6 +324,7 @@ if simple_loaded:
             nsamples,
             tfinal,
         ):
+            """Single particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
 
             relative_error = 1e-13
             npoints = 256
@@ -400,3 +403,68 @@ if simple_loaded:
                     z_cyl[:, 2],
                 ]
             ).T
+
+        def simple_ensemble_particle_tracer(
+            self,
+            tracy,
+            Rmajor,
+            simple,
+            charge,
+            mass,
+            energy,
+            nlambda_trapped,
+            nlambda_passing,
+            r_initial,
+            r_max,
+            ntheta,
+            nphi,
+            nsamples,
+            tfinal,
+            nthreads,
+        ):
+            """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
+            nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
+
+            params.ntestpart = nparticles
+            params.trace_time = tfinal
+            params.contr_pp = -1e10  # Trace all passing passing
+            params.startmode = -1  # Manual start conditions
+
+            tracy = params.Tracer()
+
+            params.params_init()
+
+            vparallel_over_v_min = -1
+            vparallel_over_v_max = 1
+            params.zstart = (
+                np.array(
+                    [
+                        [
+                            r_initial,
+                            random.uniform(0, 2 * np.pi),
+                            random.uniform(0, 2 * np.pi / self.nfp),
+                            1,
+                            random.uniform(vparallel_over_v_min, vparallel_over_v_max),
+                        ]
+                        for i in range(nparticles)
+                    ]
+                )
+                .reshape(nparticles, 5)
+                .T
+            )
+
+            simple_main.run(tracy)
+
+            time = np.linspace(
+                params.dtau / params.v0, params.trace_time, params.ntimstep
+            )
+            # condi = np.logical_and(params.times_lost > 0, params.times_lost < params.trace_time)
+
+            return (
+                time,
+                params.confpart_pass,
+                params.confpart_trap,
+                params.trace_time,
+                params.times_lost,
+                params.perp_inv,
+            )

@@ -147,7 +147,7 @@ class ParticleOrbit:  # pylint: disable=R0902
     def __init__(
         self,
         particle: ChargedParticle,
-        field: Union[StellnaQS, Stellna, Simple],
+        field: Union[StellnaQS, Stellna],
         nsamples=1000,
         tfinal=0.0001,
         constant_b20=False,
@@ -358,7 +358,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
     def __init__(
         self,
         particles: ChargedParticleEnsemble,
-        field: Union[StellnaQS, Stellna, Simple],
+        field: Union[StellnaQS, Stellna],
         nsamples=800,
         tfinal=0.0001,
         nthreads=2,
@@ -514,6 +514,95 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
+        if show:
+            plt.show()
+
+
+class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
+    r"""
+    Interface function with the SIMPLE compiled Fortran functions.
+    Receives a particle and field instance from neat.
+    """
+
+    def __init__(
+        self,
+        particles: ChargedParticleEnsemble,
+        field: Union[StellnaQS, Stellna],
+        nsamples=800,
+        tfinal=0.0001,
+        nthreads=2,
+        nparticles=32,
+    ) -> None:
+
+        self.particles = particles
+        # Change latter to a definition of a variable called nparticles
+        self.nparticles = nparticles
+        self.particles.ntheta = nparticles
+        self.particles.nphi = 1
+        self.particles.nlambda_passing = 1
+        self.particles.nlambda_trapped = 1
+        self.field = field
+        self.nsamples = nsamples
+        self.nthreads = nthreads
+        self.tfinal = tfinal
+
+        # self.field.constant_b20 = constant_b20
+
+        self.gyronimo_parameters = [
+            *self.field.gyronimo_parameters(),
+            *self.particles.gyronimo_parameters(),
+            self.nsamples,
+            self.tfinal,
+            self.nthreads,
+        ]
+
+        solution = np.array(
+            self.field.neatpp_solver_ensemble(
+                *self.field.gyronimo_parameters(),
+                *self.particles.gyronimo_parameters(),
+                self.nsamples,
+                self.tfinal,
+                self.nthreads
+            )
+        )
+
+        (
+            self.time,
+            self.confpart_pass,
+            self.confpart_trap,
+            self.trace_time,
+            self.lost_times_of_particles,
+            self.perp_inv,
+        ) = solution
+
+        self.condi = np.logical_and(
+            self.lost_times_of_particles > 0,
+            self.lost_times_of_particles < self.trace_time,
+        )
+
+        self.loss_fraction_array = 1 - (self.confpart_pass + self.confpart_trap)
+        self.total_particles_lost = self.loss_fraction_array[-1]
+
+    def plot_loss_fraction(self, show=True):
+        """Make a plot of the fraction of total particles lost over time"""
+
+        import matplotlib.pyplot as plt
+
+        plt.figure()
+        plt.semilogx(self.time, 1 - (self.confpart_pass + self.confpart_trap))
+        plt.xlim([1e-6, self.trace_time])
+        plt.xlabel("Time (s)")
+        plt.ylabel("Loss Fraction")
+        plt.tight_layout()
+
+        plt.figure()
+        plt.semilogx(
+            self.lost_times_of_particles[self.condi], self.perp_inv[self.condi], "x"
+        )
+        plt.xlim([1e-6, self.trace_time])
+        plt.xlabel("Loss Time")
+        plt.ylabel("Perpendicular Invariant")
+
         if show:
             plt.show()
 
