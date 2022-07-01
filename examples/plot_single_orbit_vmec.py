@@ -14,13 +14,13 @@ vmec equilibrium
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.4  # meters
-theta_initial = np.pi  # initial poloidal angle
-phi_initial = np.pi / 2  # initial poloidal angle
+r_initial = 0.2  # meters
+theta_initial = np.pi / 2  # initial poloidal angle
+phi_initial = 1.2  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.99  # = mu * B0 / energy
+Lambda = 0.9  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
 tfinal = 5e-5  # seconds

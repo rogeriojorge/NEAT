@@ -12,7 +12,7 @@ pybind11
 
 To expose the C++ code to python, we use the 
 `pybind11 <https://github.com/pybind/pybind11>`_ library.
-The interfacing happens in the ``neatpp.cpp`` and ``neatpp.hh`` files.
+The interfacing happens in the ``neatpp.cpp`` file.
 
 
 Lifetime of objects:
