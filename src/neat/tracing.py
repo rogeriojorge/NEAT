@@ -8,9 +8,18 @@ ensemble orbits.
 
 """
 
-from .constants import ELEMENTARY_CHARGE, PROTON_MASS
-from .fields import Simple, Stellna, StellnaQS
-# from .plotting import plot_animation3d, plot_orbit2d, plot_orbit3d, plot_parameters
+try:
+    from .fields import Simple
+except ImportError as error:
+    pass
+try:
+    from .fields import Stellna
+except ImportError as error:
+    pass
+try:
+    from .fields import StellnaQS
+except ImportError as error:
+    pass
 
 import logging
 from typing import Union
@@ -18,6 +27,10 @@ from typing import Union
 # import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import CubicSpline as spline
+
+from .constants import ELEMENTARY_CHARGE, PROTON_MASS
+
+# from .plotting import plot_animation3d, plot_orbit2d, plot_orbit3d, plot_parameters
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +177,6 @@ class ParticleOrbit:  # pylint: disable=R0902
         )
 
         self.solution = solution
-        print(solution)
 
         self.time = solution[:, 0]
         self.r_pos = solution[:, 1]
@@ -219,10 +231,10 @@ class ParticleOrbit:  # pylint: disable=R0902
             ]
         )
 
-
     def plot_orbit(self, show=True):
         """Plot particle orbit in 2D flux coordinates"""
         from .plotting import plot_orbit2d
+
         plot_orbit2d(
             x_position=self.r_pos * np.cos(self.theta_pos),
             y_position=self.r_pos * np.sin(self.theta_pos),
@@ -231,7 +243,7 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot_orbit_3d(self, r_surface=0.1, distance=6, show=True):
         """Plot particle orbit in 3D cartesian coordinates"""
-        from .plotting import plot_orbit3d, get_vmec_boundary
+        from .plotting import get_vmec_boundary, plot_orbit3d
 
         if self.field.near_axis:
             boundary = np.array(
@@ -259,11 +271,13 @@ class ParticleOrbit:  # pylint: disable=R0902
     def plot(self, show=True):
         """Plot relevant physics parameters of the particle orbit"""
         from .plotting import plot_parameters
+
         plot_parameters(self=self, show=show)
 
     def plot_animation(self, r_surface=0.1, distance=7, show=True, save_movie=False):
         """Plot three-dimensional animation of the particle orbit"""
-        from .plotting import plot_animation3d, get_vmec_boundary
+        from .plotting import get_vmec_boundary, plot_animation3d
+
         if self.field.near_axis:
             boundary = np.array(
                 self.field.get_boundary(
@@ -291,8 +305,9 @@ class ParticleOrbit:  # pylint: disable=R0902
 
     def plot_orbit_contourB(self, ntheta=100, nphi=120, ncontours=20, show=True):
         """Plot particle orbit superimposed in B contours"""
-        from .plotting import get_vmec_magB
         import matplotlib.pyplot as plt
+
+        from .plotting import get_vmec_magB
 
         theta_array = np.linspace(0, 2 * np.pi, ntheta)
         phi_array = np.linspace(0, 2 * np.pi, nphi)
@@ -332,6 +347,7 @@ class ParticleOrbit:  # pylint: disable=R0902
         plt.ylim([0, 2 * np.pi])
         if show:
             plt.show()
+
 
 class ParticleEnsembleOrbit:  # pylint: disable=R0902
     r"""
@@ -493,6 +509,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
     def plot_loss_fraction(self, show=True):
         """Make a plot of the fraction of total particles lost over time"""
         import matplotlib.pyplot as plt
+
         plt.semilogx(self.time, self.loss_fraction_array)
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")

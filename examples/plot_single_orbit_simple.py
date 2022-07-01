@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-from neat.fields import Simple
-from neat.tracing import ChargedParticle, ParticleOrbit
+from neat.fields import Simple  # isort:skip
+from neat.tracing import ChargedParticle, ParticleOrbit  # isort:skip
+import os
+import time
 
 import numpy as np
-import time
-import os
 
 """                                                                           
 Trace the orbit of a single particle in a
@@ -13,16 +13,16 @@ quasisymmetric stellarator
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.1  # meters
-theta_initial = np.pi / 2  # initial poloidal angle
-phi_initial = 0.1  # initial poloidal angle
+r_initial = 0.25  # meters
+theta_initial = np.pi / 3  # initial poloidal angle
+phi_initial = 1.5  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.1  # = mu * B0 / energy
+Lambda = 0.98  # = mu * B0 / energy
 vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 100  # resolution in time
-tfinal = 1e-3  # seconds
+nsamples = 100  # resolution in time, ignored in the current version of the code
+tfinal = 5e-4  # seconds
 wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_QHdrevlak.nc"
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor

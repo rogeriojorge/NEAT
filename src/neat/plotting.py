@@ -219,6 +219,7 @@ def plot_animation3d(
             extra_args=["-pix_fmt", "yuv420p"],
         )
 
+
 def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
     """Obtain (X, Y, Z) of a magnetic flux surface from a vmec equilibrium"""
     net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
@@ -279,6 +280,7 @@ def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
     b_rescaled = (b_field - b_field.min()) / (b_field.max() - b_field.min())
 
     return [x_coordinate, y_coordinate, z_coordinate], b_rescaled
+
 
 def get_vmec_magB(
     wout_filename, spos=None, ntheta=50, nzeta=100

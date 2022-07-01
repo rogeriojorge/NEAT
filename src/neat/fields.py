@@ -19,11 +19,10 @@ try:
 except ImportError as error:
     simple_loaded = False
 
-from scipy.io import netcdf
 import numpy as np
-
 from qic import Qic
 from qsc import Qsc
+from scipy.io import netcdf
 
 from neatpp import (
     gc_solver,
@@ -33,6 +32,8 @@ from neatpp import (
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
 )
+
+from .constants import ELEMENTARY_CHARGE, PROTON_MASS
 
 try:
     from simsopt._core import Optimizable
@@ -258,7 +259,7 @@ if simple_loaded:
             Aminor_scale: float,
             multharm: int = 3,
         ) -> None:
-        
+
             self.near_axis = False
             self.wout_filename = wout_filename
             net_file = netcdf.netcdf_file(self.wout_filename, "r", mmap=False)
@@ -343,9 +344,11 @@ if simple_loaded:
 
             simple.init_integrator(Tracy, z0_can)
 
-            print(f"B = {Tracy.f.bmod}")
-
-            nt = nsamples
+            # nt = nsamples
+            dtaumin = 2 * np.pi * Rmajor / npoints
+            v_th = np.sqrt(2 * energy * ELEMENTARY_CHARGE / (mass * PROTON_MASS))
+            nt = int(tfinal * v_th / dtaumin)
+            time = np.linspace(dtaumin / v_th, nt * dtaumin / v_th, nt)
             # dtaumin (time step of the integrator) = 2*pi*Rmajor/npoiper2
             # actual time step dt = dtaumin/v_th
             # v_th = sqrt(2*Ekin/mass)
@@ -374,26 +377,26 @@ if simple_loaded:
                 )
                 z_cyl[kt + 1, 2] = z_vmec[kt + 1, 2]
 
-            dtaumin = 2*np.pi*Rmajor/npoints
-            v_th =np.sqrt(2*energy/mass)
-            time = np.linspace(
-                dtaumin/v_th, nt * dtaumin/v_th, nt
-            )
-
-            return np.array([
-                time,
-                z_vmec[:, 0],
-                z_vmec[:, 1],
-                z_vmec[:, 2],
-                np.array([np.sqrt(2 * energy / mass) * (1 - Lambda)] * len(z_vmec[:, 2])), # parallel energy
-                np.array([Lambda * np.sqrt(2 * energy / mass)] * len(z_vmec[:, 2])), # perpendicular energy
-                np.array([0] * len(z_vmec[:, 2])),  # magnetic_field_strength,
-                z_vmec[:, 4], # parallel velocity
-                np.array([0] * len(z_vmec[:, 2])),  # rdot,
-                np.array([0] * len(z_vmec[:, 2])),  # thetadot,
-                np.array([0] * len(z_vmec[:, 2])),  # varphidot,
-                np.array([0] * len(z_vmec[:, 2])),  # vparalleldot,
-                z_cyl[:, 0],
-                z_cyl[:, 1],
-                z_cyl[:, 2]]
-            )
+            return np.array(
+                [
+                    time,
+                    z_vmec[:, 0],
+                    z_vmec[:, 1],
+                    z_vmec[:, 2],
+                    np.array(
+                        [np.sqrt(2 * energy / mass) * (1 - Lambda)] * len(z_vmec[:, 2])
+                    ),  # parallel energy
+                    np.array(
+                        [Lambda * np.sqrt(2 * energy / mass)] * len(z_vmec[:, 2])
+                    ),  # perpendicular energy
+                    np.array([0] * len(z_vmec[:, 2])),  # magnetic_field_strength,
+                    z_vmec[:, 4],  # parallel velocity
+                    np.array([0] * len(z_vmec[:, 2])),  # rdot,
+                    np.array([0] * len(z_vmec[:, 2])),  # thetadot,
+                    np.array([0] * len(z_vmec[:, 2])),  # varphidot,
+                    np.array([0] * len(z_vmec[:, 2])),  # vparalleldot,
+                    z_cyl[:, 0],
+                    z_cyl[:, 1],
+                    z_cyl[:, 2],
+                ]
+            ).T
