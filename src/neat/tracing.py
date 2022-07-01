@@ -220,7 +220,7 @@ class ParticleOrbit:  # pylint: disable=R0902
             # Canonical angular momentum still not calculated for VMEC fields yet
             self.p_phi = np.array([1e-16] * len(self.time))
             self.rpos_cylindrical = np.array(
-                [solution[:, 12], solution[:, 13], solution[:, 14]]
+                [solution[:, 12], solution[:, 14], solution[:, 13]]
             )
 
         self.rpos_cartesian = np.array(
@@ -362,7 +362,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         nsamples=800,
         tfinal=0.0001,
         nthreads=2,
-        constant_b20=False,
+        constant_b20=True,
     ) -> None:
 
         self.particles = particles

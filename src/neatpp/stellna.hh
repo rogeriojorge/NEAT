@@ -1,6 +1,3 @@
-#ifndef NEATPP
-#define NEATPP
-
 #include <omp.h>
 #include <numbers>
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
@@ -29,12 +26,13 @@ double energySIoverRefEnergy(double mass, double energy){
     return energySI/refEnergy;
 }
 
+
 // Definition linspace function
 template<typename T>
-std::vector<double> neat_linspace(T start_in, T end_in, int num_in)
+vector<double> neat_linspace(T start_in, T end_in, int num_in)
 {
 
-  std::vector<double> linspaced;
+  vector<double> linspaced;
 
   double start = static_cast<double>(start_in);
   double end = static_cast<double>(end_in);
@@ -467,5 +465,3 @@ vector< vector<double>> gc_solver_ensemble(
 
     return x_vec;
 }
-
-#endif //NEATPP

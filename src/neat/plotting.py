@@ -7,14 +7,11 @@ attributes for NEAT.
 """
 
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 from matplotlib import animation
+from mpl_toolkits.mplot3d import Axes3D
 from scipy.io import netcdf
-
-## Uncomment the two lines below if the 3D
-## plotting/animation is not working for some reason
-# import mpl_toolkits.mplot3d.axes3d as p3
-# from mpl_toolkits.mplot3d import Axes3D
 
 
 def set_axes_equal(ax):
@@ -73,15 +70,14 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
     ax = fig.add_subplot(131, projection="3d")
 
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.dist = distance
 
     ax = fig.add_subplot(132, projection="3d")
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.view_init(azim=90, elev=90)
@@ -89,7 +85,7 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
 
     ax = fig.add_subplot(133, projection="3d")
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.view_init(azim=0, elev=0)
@@ -105,7 +101,7 @@ def plot_parameters(self, show=True):
     Make a single plot with relevant physics parameters
     of a single particle orbit on a magnetic field.
     """
-    _ = plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 6))
     plt.subplot(3, 3, 1)
     plt.plot(self.time, self.r_pos)
     plt.xlabel(r"$t (s)$")
@@ -140,14 +136,21 @@ def plot_parameters(self, show=True):
     plt.xlabel(r"$t (s)$")
     plt.legend()
     plt.subplot(3, 3, 8)
-    plt.plot(self.r_pos * np.cos(self.theta_pos), self.r_pos * np.sin(self.theta_pos))
+    if self.field.near_axis:
+        angle = self.theta_pos
+    else:
+        angle = self.theta_pos - self.field.nfp * self.varphi_pos
+    plt.plot(self.r_pos * np.cos(angle), self.r_pos * np.sin(angle))
     plt.gca().set_aspect("equal", adjustable="box")
-    plt.xlabel(r"r cos($\theta$)")
-    plt.ylabel(r"r sin($\theta$)")
+    plt.xlabel(r"r cos($\theta-N \phi$)")
+    plt.ylabel(r"r sin($\theta-N \phi$)")
     plt.subplot(3, 3, 9)
-    plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
-    plt.xlabel(r"$R$")
-    plt.ylabel(r"$Z$")
+    # plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
+    # plt.xlabel(r"$R$")
+    # plt.ylabel(r"$Z$")
+    plt.plot(self.time, self.magnetic_field_strength)
+    plt.xlabel(r"$t$")
+    plt.ylabel(r"$|B|$")
     plt.tight_layout()
     if show:
         plt.show()

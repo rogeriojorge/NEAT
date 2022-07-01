@@ -110,6 +110,7 @@ execute_process(
     OUTPUT_VARIABLE _tmp_dir
     OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
     list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+include_directories(external/gyronimo/misc/apps/include)
 find_package(pybind11 CONFIG REQUIRED)
 # include_directories(${pybind11_INCLUDE_DIRS})
 
@@ -121,8 +122,9 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/metrics_NEAT/metric_stellna.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+    src/neatpp/stellna.hh
+    src/neatpp/vmectrace.hh
     src/neatpp/neatpp.cpp
-    src/neatpp/neatpp.hh
     # src/neatpp/NEAT_Mercier.cc
 )
 
@@ -149,7 +151,8 @@ add_library(profiling_lib
     src/neatpp/metrics_NEAT/metric_stellna.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
-    src/neatpp/neatpp.hh
+    src/neatpp/stellna.hh
+    src/neatpp/vmectrace.hh
 )
 target_link_libraries(profiling_lib PRIVATE gyronimo)
 target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})

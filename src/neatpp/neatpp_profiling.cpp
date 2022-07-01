@@ -1,4 +1,4 @@
-#include "neatpp.hh"
+#include "stellna.hh"
 #include <chrono>
 using namespace std;
 
