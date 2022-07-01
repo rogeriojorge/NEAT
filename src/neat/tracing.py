@@ -532,6 +532,8 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         tfinal=0.0001,
         nthreads=2,
         nparticles=32,
+        vparallel_over_v_min=-0.3,
+        vparallel_over_v_max=0.3,
     ) -> None:
 
         self.particles = particles
@@ -554,6 +556,8 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
             self.nsamples,
             self.tfinal,
             self.nthreads,
+            vparallel_over_v_min,
+            vparallel_over_v_max,
         ]
 
         solution = np.array(

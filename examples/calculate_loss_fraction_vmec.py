@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 
 from neat.fields import Simple  # isort:skip
-from neat.tracing import (
-    ChargedParticleEnsemble,
-    ParticleEnsembleOrbit_Simple,
-)  # isort:skip
+from neat.tracing import ChargedParticleEnsemble, ParticleEnsembleOrbit_Simple
 
-import os
-import time
-
-import matplotlib.pyplot as plt
+import os  # isort:skip
+import time  # isort:skip
 
 """                                                                           
 Calculate the loss fraction of a distribution of particles
@@ -30,6 +25,12 @@ tfinal = 1e-2  # seconds
 wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_W7X.nc"
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor
+vparallel_over_v_min = (
+    -0.3
+)  # Define the minimum parallel velocity (trapped particles close to vparallel=0)
+vparallel_over_v_max = (
+    0.3  # Define the maximum parallel velocity (trapped particles close to vparallel=0)
+)
 
 g_field = Simple(
     wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
@@ -48,6 +49,8 @@ g_orbits = ParticleEnsembleOrbit_Simple(
     nsamples=nsamples,
     tfinal=tfinal,
     nparticles=nparticles,
+    vparallel_over_v_min=vparallel_over_v_min,
+    vparallel_over_v_max=vparallel_over_v_max,
 )
 total_time = time.time() - start_time
 print(f"  Running with {g_orbits.nparticles} particles took {total_time}s")

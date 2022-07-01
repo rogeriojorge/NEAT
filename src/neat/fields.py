@@ -421,6 +421,8 @@ if simple_loaded:
             nsamples,
             tfinal,
             nthreads,
+            vparallel_over_v_min=-0.3,
+            vparallel_over_v_max=0.3,
         ):
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
             nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
@@ -434,8 +436,6 @@ if simple_loaded:
 
             params.params_init()
 
-            vparallel_over_v_min = -1
-            vparallel_over_v_max = 1
             params.zstart = (
                 np.array(
                     [
