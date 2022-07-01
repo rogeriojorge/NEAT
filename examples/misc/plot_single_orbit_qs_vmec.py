@@ -110,7 +110,6 @@ diff_phi = (np.mod(g_orbit.rpos_cylindrical[2], 2*np.pi) - np.mod(g_orbit_vmec.r
     2 * np.pi
 )
 
-
 _ = plt.figure(figsize=(15, 6))
 plt.subplot(3, 4, 1)
 plt.plot(g_orbit.time*1e6, g_orbit.rpos_cylindrical[0], label='Particle 1')

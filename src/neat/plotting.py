@@ -7,9 +7,6 @@ attributes for NEAT.
 """
 
 import matplotlib.pyplot as plt
-
-## Uncomment the two lines below if the 3D
-## plotting/animation is not working for some reason
 import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 from matplotlib import animation
@@ -73,7 +70,6 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
     ax = fig.add_subplot(131, projection="3d")
 
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-
     ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
@@ -105,7 +101,7 @@ def plot_parameters(self, show=True):
     Make a single plot with relevant physics parameters
     of a single particle orbit on a magnetic field.
     """
-    _ = plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 6))
     plt.subplot(3, 3, 1)
     plt.plot(self.time, self.r_pos)
     plt.xlabel(r"$t (s)$")

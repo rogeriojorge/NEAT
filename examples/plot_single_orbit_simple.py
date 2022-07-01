@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
+from neat.fields import Simple  # isort:skip
+from neat.tracing import ChargedParticle, ParticleOrbit  # isort:skip
 import os
 import time
 
 import numpy as np
 
-from neat.fields import Vmec
-from neat.tracing import ChargedParticle, ParticleOrbit
-
 """                                                                           
 Trace the orbit of a single particle in a
-vmec equilibrium                
+quasisymmetric stellarator                 
 """
 
 # Initialize an alpha particle at a radius = r_initial
@@ -20,13 +19,17 @@ phi_initial = 1.2  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.92  # = mu * B0 / energy
+Lambda = 0.96  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 3000  # resolution in time
+nsamples = 100  # IGNORED - resolution in time
 tfinal = 2e-4  # seconds
 wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_ARIESCS.nc"
+B_scale = 1  # Scale the magnetic field by a factor
+Aminor_scale = 1  # Scale the machine size by a factor
 
-g_field = Vmec(wout_filename=wout_filename)
+g_field = Simple(
+    wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
+)
 g_particle = ChargedParticle(
     r_initial=r_initial,
     theta_initial=theta_initial,
@@ -42,7 +45,6 @@ start_time = time.time()
 g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
-
 
 print("Creating B contour plot")
 g_orbit.plot_orbit_contourB(show=False)
