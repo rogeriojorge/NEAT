@@ -594,7 +594,7 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
 
         plt.figure()
         plt.semilogx(self.time, 1 - (self.confpart_pass + self.confpart_trap))
-        plt.xlim([1e-6, self.trace_time])
+        plt.xlim([1e-5, self.trace_time])
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
@@ -603,7 +603,7 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         plt.semilogx(
             self.lost_times_of_particles[self.condi], self.perp_inv[self.condi], "x"
         )
-        plt.xlim([1e-6, self.trace_time])
+        plt.xlim([1e-5, self.trace_time])
         plt.xlabel("Loss Time")
         plt.ylabel("Perpendicular Invariant")
 
