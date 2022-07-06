@@ -7,6 +7,7 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
+from sympy import I
 import vmec
 from mpi4py import MPI
 
@@ -19,17 +20,17 @@ quasisymmetric stellarator using Near Axis and VMEC
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.1  # meters
-theta_initial = np.pi / 2  # initial poloidal angle
-phi_initial = np.pi / 2  # initial toroidal angle
-B0 = 5  # Tesla, magnetic field on-axis
-energy = 3.52e3  # electron-volt
+r_initial = 0.05  # meters
+theta_initial = np.pi / 2   # initial poloidal angle
+phi_initial = np.pi   # initial toroidal angle
+B0 = 10  # Tesla, magnetic field on-axis
+energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.2  # = mu * B0 / energy
+Lambda = 0.8  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 10000 # resolution in time
-tfinal = 6e-3  # seconds
+tfinal = 5e-7  # seconds
 constant_b20 = True  # use a constant B20 (mean value) or the real function
 filename = "input.nearaxis"
 wout_filename = "wout_nearaxis.nc"
@@ -53,7 +54,7 @@ g_particle = ChargedParticle(
 
 g_particle_vmec = ChargedParticle(
     r_initial=r_initial,
-    theta_initial=phi_initial, #affects phi_cil
+    theta_initial=phi_initial,     #affects phi_cil
     phi_initial=theta_initial,     #doesnt affect phi_cil
     energy=energy,
     Lambda=Lambda,
@@ -112,17 +113,34 @@ g_orbit_vmec.plot_animation(show=True)
 # Show=True means all before are plotted
 # Save movie doesnt seem to work
 # Orbit lines in vmec are way closer to middle
+# Interpolation of VMEC at E propto 3e5 fails for l>0.8
+# Phi and theta seem to be switched
+# Cant seem to achieve 3e6, only 3e5, for B=5 -> Problem solved with B=10
+# phi=0 and theta=0 vmec gets a uniform path 
 
 print("Calculating differences between near axis and vmec")
+"""
+diff_r=np.zeros(len(g_orbit.time))
+diff_Z=np.zeros(len(g_orbit.time))
+for i in range(len(g_orbit.time)):
+    diff_r[i] = (
+        g_orbit.rpos_cylindrical[0][i] - g_orbit_vmec.rpos_cylindrical[0][i]
+    ) / g_orbit_vmec.rpos_cylindrical[0][i]
+    diff_Z[i] = (g_orbit.rpos_cylindrical[1][i] - g_orbit_vmec.rpos_cylindrical[1][i]
+    ) / (g_orbit_vmec.rpos_cylindrical[1][i])
+    if diff_Z[i]>1:
+        print(g_orbit_vmec.rpos_cylindrical[1][i])
+"""
 diff_r = (
-    g_orbit.rpos_cylindrical[0] - g_orbit_vmec.rpos_cylindrical[0]
-) / g_orbit.rpos_cylindrical[0][0]
-diff_Z = g_orbit.rpos_cylindrical[1] - g_orbit_vmec.rpos_cylindrical[1]
+        g_orbit.rpos_cylindrical[0] - g_orbit_vmec.rpos_cylindrical[0]
+    ) / g_orbit_vmec.rpos_cylindrical[0]
+diff_Z = (g_orbit.rpos_cylindrical[1] - g_orbit_vmec.rpos_cylindrical[1]
+    ) / (np.max(g_orbit_vmec.rpos_cylindrical[1]))
 diff_phi= (
     np.unwrap(np.mod(g_orbit.rpos_cylindrical[2], 2*np.pi)) - np.unwrap(np.mod(g_orbit_vmec.rpos_cylindrical[2], 2*np.pi))
 ) / (2 * np.pi)
 
-_ = plt.figure(figsize=(15, 6))
+_ = plt.figure(figsize=(20, 8))
 plt.subplot(3, 4, 1)
 plt.plot(g_orbit.time*1e6, g_orbit.rpos_cylindrical[0], label='Particle 1')
 plt.xlabel(r't ($\mu$s)')
@@ -137,8 +155,8 @@ plt.xlabel(r't  ($\mu$s)')
 plt.ylabel(r'$\Phi$')
 plt.subplot(3, 4, 4)
 plt.plot(g_orbit.rpos_cylindrical[0], g_orbit.rpos_cylindrical[1], label='Particle 1')
-plt.xlabel(r'$R_V$')
-plt.ylabel(r'$Z_V$')
+plt.xlabel(r'$R$')
+plt.ylabel(r'$Z$')
 plt.subplot(3, 4, 5)
 plt.plot(g_orbit_vmec.time*1e6, g_orbit_vmec.rpos_cylindrical[0], label='Particle 1')
 plt.xlabel(r't ($\mu$s)')
@@ -156,17 +174,17 @@ plt.plot(g_orbit_vmec.rpos_cylindrical[0], g_orbit_vmec.rpos_cylindrical[1], lab
 plt.xlabel(r'$R_V$')
 plt.ylabel(r'$Z_V$')
 plt.subplot(3, 4, 9)
-plt.plot(g_orbit_vmec.time*1e6, diff_r, label='Particle 1')
+plt.plot(g_orbit_vmec.time*1e6, diff_r*100, label='Particle 1')
 plt.xlabel(r't ($\mu$s)')
-plt.ylabel(r'$\Delta  R$')
+plt.ylabel(r'$\Delta  R (\%)$')
 plt.subplot(3, 4, 10)
 plt.plot(g_orbit_vmec.time*1e6, diff_Z, label='Particle 1')
 plt.xlabel(r't  ($\mu$s)')
-plt.ylabel(r'$\Delta  Z$')
+plt.ylabel(r'$\Delta  Z_{normalized}$')
 plt.subplot(3, 4, 11)
 plt.plot(g_orbit_vmec.time*1e6, diff_phi, label='Particle 1')
 plt.xlabel(r't  ($\mu$s)')
-plt.ylabel(r'$\Delta \Phi$')
+plt.ylabel(r'$\Delta \Phi (turns)$')
 #plt.subplot(3, 4, 12)
 #plt.plot(diff_r,diff_Z, label='Particle 1')
 #plt.xlabel(r'$\Delta R$')
