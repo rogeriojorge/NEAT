@@ -12,10 +12,14 @@ class NEATtests(unittest.TestCase):
         r_max = 0.07
         r_initial = 0.03
         energy = 1e4
+        tfinal = 1e-4
+        nsamples = 1000
 
         g_field = StellnaQS.from_paper(4, B0=4, nphi=131)
         g_particle = ChargedParticleEnsemble(r_initial=r_initial, energy=energy)
-        optimizer = OptimizeLossFractionSkeleton(g_field, g_particle, r_max)
+        optimizer = OptimizeLossFractionSkeleton(
+            g_field, g_particle, r_max, tfinal=tfinal, nsamples=nsamples
+        )
         initial_loss_fraction = optimizer.residual.J()
         optimizer.run(n_iterations=4)
         final_loss_fraction = optimizer.residual.J()

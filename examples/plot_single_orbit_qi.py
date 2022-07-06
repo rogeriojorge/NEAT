@@ -13,19 +13,19 @@ quasisymmetric stellarator
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.1  # meters
-theta_initial = np.pi / 2  # initial poloidal angle
+r_initial = 0.06  # meters
+theta_initial = 0 * np.pi / 2  # initial poloidal angle
 phi_initial = np.pi  # initial poloidal angle
 B0 = 5  # Tesla, mean magnetic field on-axis
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.98  # = mu * B0 / energy
+Lambda = 0.883  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
-tfinal = 6e-5  # seconds
+tfinal = 4e-5  # seconds
 constant_b20 = False  # use a constant B20 (mean value) or the real function
-stellarator_index = "QI NFP1 r2"
+stellarator_index = "QI NFP2 r2"
 
 # Quasi-isodynamic
 g_field_temp = Stellna.from_paper(stellarator_index, nphi=201)
@@ -54,14 +54,17 @@ g_orbit = ParticleOrbit(
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
+print("Creating B contour plot")
+g_orbit.plot_orbit_contourB(show=False)
+
 print("Creating parameter plot")
 g_orbit.plot(show=False)
 
 # print("Creating 2D plot")
-# g_orbit.plot_orbit(show=False)
+g_orbit.plot_orbit(show=False)
 
 print("Creating 3D plot")
 g_orbit.plot_orbit_3d(r_surface=0.1, show=False)
 
-print("Creating animation plot")
-g_orbit.plot_animation(r_surface=0.1, distance=8, show=True)
+# print("Creating animation plot")
+g_orbit.plot_animation(r_surface=0.1, distance=8, show=True, save_movie=False)

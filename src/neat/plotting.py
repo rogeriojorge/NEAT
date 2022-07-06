@@ -7,13 +7,11 @@ attributes for NEAT.
 """
 
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 from matplotlib import animation
-
-## Uncomment the two lines below if the 3D
-## plotting/animation is not working for some reason
-# import mpl_toolkits.mplot3d.axes3d as p3
-# from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D
+from scipy.io import netcdf
 
 
 def set_axes_equal(ax):
@@ -72,15 +70,14 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
     ax = fig.add_subplot(131, projection="3d")
 
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.dist = distance
 
     ax = fig.add_subplot(132, projection="3d")
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.view_init(azim=90, elev=90)
@@ -88,7 +85,7 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
 
     ax = fig.add_subplot(133, projection="3d")
     ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
-    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.5)
+    ax.plot_surface(boundary[0], boundary[1], boundary[2], alpha=0.25)
     set_axes_equal(ax)
     ax.set_axis_off()
     ax.view_init(azim=0, elev=0)
@@ -104,7 +101,7 @@ def plot_parameters(self, show=True):
     Make a single plot with relevant physics parameters
     of a single particle orbit on a magnetic field.
     """
-    _ = plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 6))
     plt.subplot(3, 3, 1)
     plt.plot(self.time, self.r_pos)
     plt.xlabel(r"$t (s)$")
@@ -135,7 +132,7 @@ def plot_parameters(self, show=True):
     plt.plot(self.time, self.rdot, label=r"$\dot r$")
     plt.plot(self.time, self.thetadot, label=r"$\dot \theta$")
     plt.plot(self.time, self.varphidot, label=r"$\dot \varphi$")
-    plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
+    # plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
     plt.xlabel(r"$t (s)$")
     plt.legend()
     plt.subplot(3, 3, 8)
@@ -144,9 +141,12 @@ def plot_parameters(self, show=True):
     plt.xlabel(r"r cos($\theta$)")
     plt.ylabel(r"r sin($\theta$)")
     plt.subplot(3, 3, 9)
-    plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
-    plt.xlabel(r"$R$")
-    plt.ylabel(r"$Z$")
+    # plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
+    # plt.xlabel(r"$R$")
+    # plt.ylabel(r"$Z$")
+    plt.plot(self.time, self.magnetic_field_strength)
+    plt.xlabel(r"$t$")
+    plt.ylabel(r"$|B|$")
     plt.tight_layout()
     if show:
         plt.show()
@@ -217,3 +217,103 @@ def plot_animation3d(
             bitrate=-1,
             extra_args=["-pix_fmt", "yuv420p"],
         )
+
+
+def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
+    """Obtain (X, Y, Z) of a magnetic flux surface from a vmec equilibrium"""
+    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    nsurfaces = net_file.variables["ns"][()]
+    nfp = net_file.variables["nfp"][()]
+    xn = net_file.variables["xn"][()]  # pylint: disable=C0103
+    xm = net_file.variables["xm"][()]  # pylint: disable=C0103
+    xn_nyq = net_file.variables["xn_nyq"][()]
+    xm_nyq = net_file.variables["xm_nyq"][()]
+    rmnc = net_file.variables["rmnc"][()]
+    zmns = net_file.variables["zmns"][()]
+    bmnc = net_file.variables["bmnc"][()]
+    lasym = net_file.variables["lasym__logical__"][()]
+    if lasym == 1:
+        rmns = net_file.variables["rmns"][()]
+        zmnc = net_file.variables["zmnc"][()]
+        bmns = net_file.variables["bmns"][()]
+    else:
+        rmns = 0 * rmnc
+        zmnc = 0 * rmnc
+        bmns = 0 * bmnc
+    net_file.close()
+    nmodes = len(xn)
+
+    ntheta = 50
+    nzeta = int(90 * nfp)
+    zeta_2d, theta_2d = np.meshgrid(
+        np.linspace(0, 2 * np.pi, num=nzeta), np.linspace(0, 2 * np.pi, num=ntheta)
+    )
+    iradius = nsurfaces - 1
+    r_coordinate = np.zeros((ntheta, nzeta))
+    z_coordinate = np.zeros((ntheta, nzeta))
+    b_field = np.zeros((ntheta, nzeta))
+    for imode in range(nmodes):
+        angle = xm[imode] * theta_2d - xn[imode] * zeta_2d
+        r_coordinate = (
+            r_coordinate
+            + rmnc[iradius, imode] * np.cos(angle)
+            + rmns[iradius, imode] * np.sin(angle)
+        )
+        z_coordinate = (
+            z_coordinate
+            + zmns[iradius, imode] * np.sin(angle)
+            + zmnc[iradius, imode] * np.cos(angle)
+        )
+
+    for imode, xn_nyq_i in enumerate(xn_nyq):
+        angle = xm_nyq[imode] * theta_2d - xn_nyq_i * zeta_2d
+        b_field = (
+            b_field
+            + bmnc[iradius, imode] * np.cos(angle)
+            + bmns[iradius, imode] * np.sin(angle)
+        )
+
+    x_coordinate = r_coordinate * np.cos(zeta_2d)
+    y_coordinate = r_coordinate * np.sin(zeta_2d)
+
+    b_rescaled = (b_field - b_field.min()) / (b_field.max() - b_field.min())
+
+    return [x_coordinate, y_coordinate, z_coordinate], b_rescaled
+
+
+def get_vmec_magB(
+    wout_filename, spos=None, ntheta=50, nzeta=100
+):  # pylint: disable=R0914
+    """Obtain contours of B on a magnetic flux surface from a vmec equilibrium"""
+    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    nsurfaces = net_file.variables["ns"][()]
+    xn_nyq = net_file.variables["xn_nyq"][()]
+    xm_nyq = net_file.variables["xm_nyq"][()]
+    bmnc = net_file.variables["bmnc"][()]
+    lasym = net_file.variables["lasym__logical__"][()]
+    if lasym == 1:
+        bmns = net_file.variables["bmns"][()]
+    else:
+        bmns = 0 * bmnc
+    net_file.close()
+
+    zeta_2d, theta_2d = np.meshgrid(
+        np.linspace(0, 2 * np.pi, num=nzeta), np.linspace(0, 2 * np.pi, num=ntheta)
+    )
+
+    if not spos:
+        iradius = nsurfaces - 1
+    else:
+        iradius = int(nsurfaces * spos)
+
+    b_field = np.zeros((ntheta, nzeta))
+
+    for imode, xn_nyq_i in enumerate(xn_nyq):
+        angle = xm_nyq[imode] * theta_2d - xn_nyq_i * zeta_2d
+        b_field = (
+            b_field
+            + bmnc[iradius, imode] * np.cos(angle)
+            + bmns[iradius, imode] * np.sin(angle)
+        )
+
+    return b_field

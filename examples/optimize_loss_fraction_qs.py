@@ -16,21 +16,21 @@ from neat.tracing import ChargedParticle, ChargedParticleEnsemble, ParticleOrbit
 
 r_initial = 0.05
 r_max = 0.1
-n_iterations = 10
+n_iterations = 20
 ftol = 1e-5
 B0 = 5
-B2c = B0 / 8
-nsamples = 800
-tfinal = 0.00004
+B2c = B0 / 7
+nsamples = 600
+tfinal = 4e-5
 stellarator_index = 2
 constant_b20 = True
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-ntheta = 14  # resolution in theta
-nphi = 8  # resolution in phi
-nlambda_trapped = 20  # number of pitch angles for trapped particles
-nlambda_passing = 3  # number of pitch angles for passing particles
+ntheta = 10  # resolution in theta
+nphi = 4  # resolution in phi
+nlambda_trapped = 14  # number of pitch angles for trapped particles
+nlambda_passing = 2  # number of pitch angles for passing particles
 nthreads = 4
 
 
@@ -70,23 +70,23 @@ class optimize_loss_fraction:
         )
 
         self.field.fix_all()
-        # self.field.unfix("etabar")
-        # self.field.unfix("rc(1)")
-        # self.field.unfix("zs(1)")
+        self.field.unfix("etabar")
+        self.field.unfix("rc(1)")
+        self.field.unfix("zs(1)")
         self.field.unfix("rc(2)")
-        # self.field.unfix("zs(2)")
+        self.field.unfix("zs(2)")
         self.field.unfix("rc(3)")
-        # self.field.unfix("zs(3)")
+        self.field.unfix("zs(3)")
         self.field.unfix("B2c")
 
         # Define objective function
         self.prob = LeastSquaresProblem.from_tuples(
             [
                 (self.residual.J, 0, 40),
-                # (self.field.get_elongation, 0.0, 2),
-                (self.field.get_inv_L_grad_B, 0, 0.1),
-                (self.field.get_grad_grad_B_inverse_scale_length_vs_varphi, 0, 0.1),
-                # (self.field.get_B20_mean, 0, 0.1),
+                # (self.field.get_elongation, 0.0, 0.5),
+                # (self.field.get_inv_L_grad_B, 0, 0.1),
+                (self.field.get_grad_grad_B_inverse_scale_length_vs_varphi, 0, 0.01),
+                (self.field.get_B20_mean, 0, 0.01),
             ]
         )
 
@@ -127,7 +127,9 @@ optimizer = optimize_loss_fraction(
     nsamples=nsamples,
     constant_b20=constant_b20,
 )
-test_particle = ChargedParticle(r_initial=r_initial, theta_initial=np.pi, Lambda=1.0)
+test_particle = ChargedParticle(
+    r_initial=r_initial, theta_initial=np.pi / 2, phi_initial=np.pi, Lambda=1.00
+)
 ##################
 if optimizer.mpi.proc0_world:
     print("Before run:")

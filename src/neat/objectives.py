@@ -9,15 +9,20 @@ script makes heavy use of SIMSOPT's Optimizable class.
 
 """
 
+from ast import Import
 from typing import Union
 
 import numpy as np
 from qic import Qic
 from qsc import Qsc
-from simsopt import LeastSquaresProblem, least_squares_serial_solve
-from simsopt._core.optimizable import Optimizable
-from simsopt.solve.mpi import least_squares_mpi_solve
-from simsopt.util.mpi import MpiPartition
+
+try:
+    from simsopt._core.optimizable import Optimizable
+    from simsopt.objectives import LeastSquaresProblem
+    from simsopt.solve import least_squares_mpi_solve, least_squares_serial_solve
+    from simsopt.util import MpiPartition
+except ImportError as error:
+    print(error.__class__.__name__ + ": " + error.message)
 
 from neat.tracing import ParticleEnsembleOrbit
 
@@ -84,7 +89,7 @@ class EffectiveVelocityResidual(Optimizable):
         tfinal=0.0003,
         nthreads=2,
         r_max=0.12,
-        constant_b20=False,
+        constant_b20=True,
     ) -> None:
 
         self.field = field

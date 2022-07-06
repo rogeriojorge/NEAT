@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-project(neatpp)
+project(neatpp
+  LANGUAGES C CXX Fortran
+)
 
 # Enable output of compile commands during generation.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -8,7 +10,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Use python version that satisfies version constraints
 set(Python_FIND_STRATEGY LOCATION)
 # Make sure that python libraries such as numpy are found
-find_package(Python 3 COMPONENTS Interpreter Development.Module NumPy)
+find_package(Python 3 COMPONENTS Interpreter Development NumPy)
 # Use relative paths in MacOS
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
@@ -90,13 +92,15 @@ include_directories(${Boost_INCLUDE_DIRS})
 # Add GSL
 find_package(GSL REQUIRED)
 include_directories(${GSL_INCLUDE_DIRS})
-
 # Compile git submodules
 if(INSTALL_SIMPLE)
     add_subdirectory(external/simple)
+    # include_directories("${CMAKE_CURRENT_BINARY_DIR}/external/simple")
+    # add_subdirectory(src/neatf90)
 endif()
 
-# Add gyronimo
+# Add gyronimo with VMEC support
+set(BUILD_VMEC_SUPPORT "ON")
 add_subdirectory(external/gyronimo)
 
 # Add pybind11 include directories
@@ -106,6 +110,7 @@ execute_process(
     OUTPUT_VARIABLE _tmp_dir
     OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
     list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+include_directories(external/gyronimo/misc/apps/include)
 find_package(pybind11 CONFIG REQUIRED)
 # include_directories(${pybind11_INCLUDE_DIRS})
 
@@ -117,8 +122,9 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/metrics_NEAT/metric_stellna.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+    src/neatpp/stellna.hh
+    src/neatpp/vmectrace.hh
     src/neatpp/neatpp.cpp
-    src/neatpp/neatpp.hh
     # src/neatpp/NEAT_Mercier.cc
 )
 
@@ -145,7 +151,8 @@ add_library(profiling_lib
     src/neatpp/metrics_NEAT/metric_stellna.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
-    src/neatpp/neatpp.hh
+    src/neatpp/stellna.hh
+    src/neatpp/vmectrace.hh
 )
 target_link_libraries(profiling_lib PRIVATE gyronimo)
 target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
