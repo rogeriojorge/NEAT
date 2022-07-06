@@ -136,14 +136,10 @@ def plot_parameters(self, show=True):
     plt.xlabel(r"$t (s)$")
     plt.legend()
     plt.subplot(3, 3, 8)
-    if self.field.near_axis:
-        angle = self.theta_pos
-    else:
-        angle = self.theta_pos - self.field.nfp * self.varphi_pos
-    plt.plot(self.r_pos * np.cos(angle), self.r_pos * np.sin(angle))
+    plt.plot(self.r_pos * np.cos(self.theta_pos), self.r_pos * np.sin(self.theta_pos))
     plt.gca().set_aspect("equal", adjustable="box")
-    plt.xlabel(r"r cos($\theta-N \phi$)")
-    plt.ylabel(r"r sin($\theta-N \phi$)")
+    plt.xlabel(r"r cos($\theta$)")
+    plt.ylabel(r"r sin($\theta$)")
     plt.subplot(3, 3, 9)
     # plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
     # plt.xlabel(r"$R$")

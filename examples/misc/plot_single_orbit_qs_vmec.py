@@ -20,29 +20,29 @@ quasisymmetric stellarator using Near Axis and VMEC
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.05  # meters
-theta_initial = np.pi / 2   # initial poloidal angle
-phi_initial = np.pi   # initial toroidal angle
-B0 = 10  # Tesla, magnetic field on-axis
-energy = 3.52e6  # electron-volt
+s_initial = 0.05  # psi/psi_a
+theta_initial = 0   # initial poloidal angle
+phi_initial = 0  # initial toroidal angle
+B0 = 1  # Tesla, magnetic field on-axis
+energy = 3.52e4  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.8  # = mu * B0 / energy
+Lambda = 0.9  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 10000 # resolution in time
-tfinal = 5e-7  # seconds
-constant_b20 = True  # use a constant B20 (mean value) or the real function
+nsamples = 2000 # resolution in time
+tfinal = 1e-4  # seconds
+constant_b20 = False  # use a constant B20 (mean value) or the real function
 filename = "input.nearaxis"
 wout_filename = "wout_nearaxis.nc"
 
-g_field = StellnaQS.from_paper(1, B0=B0)
-#g_field.to_vmec(filename=filename)
+g_field = StellnaQS.from_paper(1, B0=B0, nphi=201)
+# g_field.to_vmec(filename=filename)
 #subprocess.run([f"{os.path.join(os.path.dirname(__file__))}./xvmec2000", filename])
 g_field_vmec = Vmec(wout_filename=wout_filename)
 
-psi_a=(B0*0.05)*(B0*0.05)
+psi_a=(B0*0.1)*(0.1)/2
 g_particle = ChargedParticle(
-    r_initial=np.sqrt(2*r_initial*psi_a/B0),
+    r_initial=0.1*np.sqrt(s_initial),#np.sqrt(2*r_initial*psi_a/B0),
     theta_initial=theta_initial, #doesnt affect phi_cil
     phi_initial=phi_initial,     #affects phi_cil
     energy=energy,
@@ -53,14 +53,14 @@ g_particle = ChargedParticle(
 )
 
 g_particle_vmec = ChargedParticle(
-    r_initial=r_initial,
-    theta_initial=phi_initial,     #affects phi_cil
-    phi_initial=theta_initial,     #doesnt affect phi_cil
+    r_initial=s_initial,
+    theta_initial=theta_initial,     #affects phi_cil
+    phi_initial=phi_initial,     #doesnt affect phi_cil
     energy=energy,
     Lambda=Lambda,
     charge=charge,
     mass=mass,
-    vpp_sign=vpp_sign,
+    vpp_sign=-vpp_sign,
 )
 
 print("Starting particle tracer 1")
@@ -83,7 +83,7 @@ g_orbit_vmec = ParticleOrbit(
 total_time_vmec = time.time() - start_time_vmec
 print(f"Finished in {total_time_vmec}s")
 
-"""""
+
 print("Creating parameter plot")
 g_orbit.plot(show=False)
 
@@ -93,6 +93,15 @@ g_orbit.plot(show=False)
 print("Creating 3D plot")
 g_orbit.plot_orbit_3d(show=False)
 
+print("Creating parameter plot")
+g_orbit_vmec.plot(show=False)
+
+# print("Creating 2D plot")
+# g_orbit.plot_orbit(show=False)
+
+print("Creating 3D plot")
+g_orbit_vmec.plot_orbit_3d(show=False)
+"""""
 print("Creating animation plot")
 g_orbit.plot_animation(show=True)
 
@@ -135,7 +144,7 @@ diff_r = (
         g_orbit.rpos_cylindrical[0] - g_orbit_vmec.rpos_cylindrical[0]
     ) / g_orbit_vmec.rpos_cylindrical[0]
 diff_Z = (g_orbit.rpos_cylindrical[1] - g_orbit_vmec.rpos_cylindrical[1]
-    ) / (np.max(g_orbit_vmec.rpos_cylindrical[1]))
+    ) / (np.max(abs(g_orbit_vmec.rpos_cylindrical[1])))
 diff_phi= (
     np.unwrap(np.mod(g_orbit.rpos_cylindrical[2], 2*np.pi)) - np.unwrap(np.mod(g_orbit_vmec.rpos_cylindrical[2], 2*np.pi))
 ) / (2 * np.pi)

@@ -39,7 +39,7 @@ public:
         gc_pointer_->energy_parallel(s), 
         gc_pointer_->energy_perpendicular(s, t),
         B, v_parallel,
-        y[IR3::u], y[IR3::v], y[IR3::w],
+        y[IR3::u], y[IR3::w], y[IR3::v],
         gc_pointer_->get_vpp(dots),
         X[IR3::u], X[IR3::v], X[IR3::w]
       });
@@ -68,10 +68,12 @@ vector< vector<double>>  vmectrace(
   double energySI_over_refEnergy = energySI/refEnergy;
   double Bref = vmap.B_0();
 
+  // Lambda*energySI_over_refEnergy = energy*Bref/(2*Binicial*Uref)*(1-vparallel_over_v^2)
+
   guiding_centre gc(
       Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy, &veq);
   guiding_centre::state initial_state = gc.generate_state(
-      {s0, theta0, phi0}, energySI_over_refEnergy,
+      {s0, phi0, theta0}, energySI_over_refEnergy,
       (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
   cout.precision(16);
