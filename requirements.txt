@@ -6,3 +6,4 @@ qicna
 setuptools
 pybind11
 f90wrap
+ninja
