@@ -21,12 +21,34 @@ set(CMAKE_INSTALL_LIBDIR lib)
 # else()
 #   set(_pip_args "--user")
 # endif()
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+if(APPLE)
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_C "${CMAKE_C_COMPILER}")
+        set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+        set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
+        set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+        set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+        set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+      set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+      set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+      set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+      set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+      set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    #   add_compile_options(-stdlib=libc++)
+    endif()
+endif()
+
 # Logging messages to debug possible Python issues
-find_program(PYTHON "python3")
+find_program(PYTHON "python")
 message(status " Python executable is ${PYTHON}")
 message(status " Python Development Module found value is ${Python_Development.Module_FOUND}")
 message(status " Python version is ${Python_VERSION}")
@@ -91,6 +113,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 # Add GSL
 find_package(GSL REQUIRED)
+message(STATUS "GSL include dirs are ${GSL_INCLUDE_DIRS}")
 include_directories(${GSL_INCLUDE_DIRS})
 # Compile git submodules
 if(INSTALL_SIMPLE)
@@ -102,6 +125,7 @@ endif()
 # Add gyronimo with VMEC support
 set(BUILD_VMEC_SUPPORT "ON")
 add_subdirectory(external/gyronimo)
+include_directories(external/gyronimo/misc/apps/include)
 
 # Add pybind11 include directories
 execute_process(
@@ -110,7 +134,6 @@ execute_process(
     OUTPUT_VARIABLE _tmp_dir
     OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
     list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
-include_directories(external/gyronimo/misc/apps/include)
 find_package(pybind11 CONFIG REQUIRED)
 # include_directories(${pybind11_INCLUDE_DIRS})
 
