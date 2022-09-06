@@ -12,7 +12,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update
 RUN apt-get install -y git gfortran openmpi-bin libopenmpi-dev gfortran g++ libnetcdf-dev libnetcdff-dev libhdf5-openmpi-dev hdf5-tools libgsl-dev libboost-dev doxygen google-perftools libgoogle-perftools-dev
 RUN apt-get install -y libblas-dev liblapack-dev python3 python3-numpy python3-h5py python3-tk pgplot5 libncarg-dev libscalapack-openmpi-dev python3-pip libnetcdf-c++4-dev cmake vim wget nano
-RUN pip3 install matplotlib numpy scipy ninja cmake joblib scikit-build pybind11 f90wrap ninja toml ipython jupyter notebook mpi4py jax jaxlib f90nml netCDF4
+RUN pip3 install matplotlib numpy scipy ninja cmake joblib scikit-build f90wrap ninja toml ipython jupyter notebook mpi4py jax jaxlib f90nml netCDF4 "pybind11[global]"
 
 # Add to LD_LIBRARY_PATH so scalapack etc can be found
 RUN PATH="/usr/lib64/openmpi/bin:${PATH}"

@@ -27,25 +27,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-if(APPLE)
-    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-        set(OpenMP_C "${CMAKE_C_COMPILER}")
-        set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
-        set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
-        set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-        set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-        set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
-    endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-      set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-      set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
-      set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
-      set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-      set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-      set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-    #   add_compile_options(-stdlib=libc++)
-    endif()
-endif()
+# if(APPLE)
+#     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+#         set(OpenMP_C "${CMAKE_C_COMPILER}")
+#         set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+#         set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
+#         set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+#         set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+#         set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+#     endif()
+#     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+#       set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+#       set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+#       set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+#       set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+#       set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+#       set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+#     #   add_compile_options(-stdlib=libc++)
+#     endif()
+# endif()
 
 # Logging messages to debug possible Python issues
 find_program(PYTHON "python")
@@ -122,6 +122,18 @@ if(INSTALL_SIMPLE)
     # add_subdirectory(src/neatf90)
 endif()
 
+find_program(NCXX4_CONFIG "ncxx4-config")
+if (NCXX4_CONFIG)
+  execute_process(COMMAND "ncxx4-config" --libs
+      OUTPUT_VARIABLE netcdf_cxx_libs)
+  execute_process(COMMAND "ncxx4-config" --cflags
+      OUTPUT_VARIABLE netcdf_cxx_flags)
+else()
+  message(SEND_ERROR "ncxx4-config not found. Please install Unidata's netCDF-CXX4 package")
+endif()
+string(STRIP ${netcdf_cxx_libs} netcdf_cxx_libs)
+string(STRIP ${netcdf_cxx_flags} netcdf_cxx_flags)
+
 # Add gyronimo with VMEC support
 set(BUILD_VMEC_SUPPORT "ON")
 add_subdirectory(external/gyronimo)
@@ -164,29 +176,35 @@ endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE gyronimo)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
+target_compile_options(${PROJECT_NAME} PRIVATE ${netcdf_cxx_flags})
+target_compile_options(${PROJECT_NAME} PRIVATE ${netcdf_cxx_libs})
+target_compile_options(gyronimo PUBLIC ${netcdf_cxx_flags})
+target_compile_options(gyronimo PUBLIC ${netcdf_cxx_libs})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 # Add the profiling executable
-add_library(profiling_lib
-    src/neatpp/fields_NEAT/equilibrium_stellna.cc
-    src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
-    src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
-    src/neatpp/metrics_NEAT/metric_stellna.cc
-    src/neatpp/metrics_NEAT/metric_stellna_qs.cc
-    src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
-    src/neatpp/stellna.hh
-    src/neatpp/vmectrace.hh
-)
-target_link_libraries(profiling_lib PRIVATE gyronimo)
-target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
-target_compile_features(profiling_lib PRIVATE cxx_std_20)
+if(PROFILING)
+    add_library(profiling_lib
+        src/neatpp/fields_NEAT/equilibrium_stellna.cc
+        src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
+        src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
+        src/neatpp/metrics_NEAT/metric_stellna.cc
+        src/neatpp/metrics_NEAT/metric_stellna_qs.cc
+        src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+        src/neatpp/stellna.hh
+        src/neatpp/vmectrace.hh
+    )
+    target_link_libraries(profiling_lib PRIVATE gyronimo)
+    target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
+    target_compile_features(profiling_lib PRIVATE cxx_std_20)
 
-add_executable(profiling src/neatpp/neatpp_profiling.cpp)
-target_link_libraries(profiling PRIVATE profiling_lib)
-target_link_libraries(profiling PRIVATE gyronimo)
-target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
-target_compile_features(profiling PRIVATE cxx_std_20)
-install(TARGETS profiling DESTINATION .)
+    add_executable(profiling src/neatpp/neatpp_profiling.cpp)
+    target_link_libraries(profiling PRIVATE profiling_lib)
+    target_link_libraries(profiling PRIVATE gyronimo)
+    target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
+    target_compile_features(profiling PRIVATE cxx_std_20)
+    install(TARGETS profiling DESTINATION .)
+endif()
 
 ## Attempt at making an executable from neatpp.cpp directly
 # add_executable(profiling src/neatpp/neatpp.cpp)

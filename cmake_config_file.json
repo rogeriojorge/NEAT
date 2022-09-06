@@ -4,7 +4,7 @@
             "-DINSTALL_SIMPLE=OFF",
             "-DCMAKE_C_COMPILER=gcc",
             "-DCMAKE_CXX_COMPILER=g++",
-            "-DCMAKE_Fortran_COMPILER=gfortran",
+            "-DCMAKE_Fortran_COMPILER=gfortran-mp-10",
             "-DPROFILING=OFF"
         ]
 }
