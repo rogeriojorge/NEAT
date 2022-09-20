@@ -262,8 +262,8 @@ if simple_loaded:
         def __init__(
             self,
             wout_filename: str,
-            B_scale: float,
-            Aminor_scale: float,
+            B_scale: float = 1,
+            Aminor_scale: float = 1,
             multharm: int = 3,
         ) -> None:
 
