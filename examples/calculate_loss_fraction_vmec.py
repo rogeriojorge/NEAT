@@ -26,8 +26,8 @@ wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_ARIESCS.
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor
 # Define the min/max parallel velocities (trapped particles lie close to vparallel=0)
-vparallel_over_v_min = -0.5
-vparallel_over_v_max = 0.5
+vparallel_over_v_min = -1.0
+vparallel_over_v_max = 1.0
 
 g_field = Simple(
     wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
