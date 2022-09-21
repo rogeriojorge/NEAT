@@ -277,10 +277,12 @@ if simple_loaded:
             self.B_scale = B_scale
             self.Aminor_scale = Aminor_scale
             self.multharm = multharm
-
-            self.params = copy.deepcopy(params)
-            self.stuff = copy.deepcopy(stuff)
-            self.simple = copy.deepcopy(simple)
+            
+            from pysimple import simple as simple_local, params as params_local
+            from pysimple import new_vmec_stuff_mod as stuff_local
+            self.params = copy.deepcopy(params_local)
+            self.stuff = copy.deepcopy(stuff_local)
+            self.simple = copy.deepcopy(simple_local)
 
             self.tracy = self.params.Tracer()
             self.stuff.vmec_b_scale = self.B_scale
@@ -412,7 +414,7 @@ if simple_loaded:
 
         def simple_ensemble_particle_tracer(
             self,
-            tracy,
+            Tracy,
             Rmajor,
             simple,
             charge,
@@ -427,8 +429,6 @@ if simple_loaded:
             nsamples,
             tfinal,
             nthreads,
-            vparallel_over_v_min=-1.0,
-            vparallel_over_v_max=1.0,
         ):
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
             nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
@@ -436,33 +436,15 @@ if simple_loaded:
             self.params.ntestpart = nparticles
             self.params.trace_time = tfinal
             self.params.contr_pp = -1e10  # Trace all passing passing
-            self.params.startmode = -1  # Manual start conditions
-
-            tracy = self.params.Tracer()
+            self.params.startmode = 1 # automatically select initial particle distribution
 
             self.params.params_init()
 
-            self.params.zstart = (
-                np.array(
-                    [
-                        [
-                            r_initial,
-                            random.uniform(0, 2 * np.pi),
-                            random.uniform(0, 2 * np.pi / self.nfp),
-                            1,
-                            random.uniform(vparallel_over_v_min, vparallel_over_v_max),
-                        ]
-                        for i in range(nparticles)
-                    ]
-                )
-                .reshape(nparticles, 5)
-                .T
-            )
-
-            simple_main.run(tracy)
+            from pysimple import simple_main as simple_main_local
+            simple_main_local.run(Tracy)
 
             time = np.linspace(
-                params.dtau / params.v0, params.trace_time, params.ntimstep
+                self.params.dtau / self.params.v0, self.params.trace_time, self.params.ntimstep
             )
             # condi = np.logical_and(params.times_lost > 0, params.times_lost < params.trace_time)
 
