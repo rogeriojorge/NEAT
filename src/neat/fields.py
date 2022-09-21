@@ -20,6 +20,7 @@ except ImportError as error:
     simple_loaded = False
 
 import random
+import copy
 
 import numpy as np
 from qic import Qic
@@ -277,20 +278,20 @@ if simple_loaded:
             self.Aminor_scale = Aminor_scale
             self.multharm = multharm
 
-            self.params = params
-            self.stuff = stuff
-            self.simple = simple
+            self.params = copy.deepcopy(params)
+            self.stuff = copy.deepcopy(stuff)
+            self.simple = copy.deepcopy(simple)
 
             self.tracy = self.params.Tracer()
-            self.stuff.vmec_b_scale = B_scale
-            self.stuff.vmec_rz_scale = Aminor_scale
-            self.stuff.multharm = multharm  # Fast but inaccurate splines
+            self.stuff.vmec_b_scale = self.B_scale
+            self.stuff.vmec_rz_scale = self.Aminor_scale
+            self.stuff.multharm = self.multharm
             self.stuff.ns_s = 3
             self.stuff.ns_tp = 3
 
             self.simple.init_field(
                 self.tracy,
-                wout_filename,
+                self.wout_filename,
                 self.stuff.ns_s,
                 self.stuff.ns_tp,
                 self.stuff.multharm,
@@ -350,7 +351,7 @@ if simple_loaded:
 
             z0_can[1:3] = vmec_to_can(z0_vmec[0], z0_vmec[1], z0_vmec[2])
 
-            simple.init_integrator(Tracy, z0_can)
+            self.simple.init_integrator(Tracy, z0_can)
 
             # nt = nsamples
             dtaumin = 2 * np.pi * Rmajor / npoints
@@ -432,16 +433,16 @@ if simple_loaded:
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
             nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
 
-            params.ntestpart = nparticles
-            params.trace_time = tfinal
-            params.contr_pp = -1e10  # Trace all passing passing
-            params.startmode = -1  # Manual start conditions
+            self.params.ntestpart = nparticles
+            self.params.trace_time = tfinal
+            self.params.contr_pp = -1e10  # Trace all passing passing
+            self.params.startmode = -1  # Manual start conditions
 
-            tracy = params.Tracer()
+            tracy = self.params.Tracer()
 
-            params.params_init()
+            self.params.params_init()
 
-            params.zstart = (
+            self.params.zstart = (
                 np.array(
                     [
                         [
@@ -467,11 +468,11 @@ if simple_loaded:
 
             return (
                 time,
-                params.confpart_pass,
-                params.confpart_trap,
-                params.trace_time,
-                params.times_lost,
-                params.perp_inv,
+                self.params.confpart_pass,
+                self.params.confpart_trap,
+                self.params.trace_time,
+                self.params.times_lost,
+                self.params.perp_inv,
             )
 
 
