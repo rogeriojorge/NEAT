@@ -426,8 +426,6 @@ if simple_loaded:
             nsamples,
             tfinal,
             nthreads,
-            vparallel_over_v_min=-1.0,
-            vparallel_over_v_max=1.0,
         ):
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
             nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
@@ -435,28 +433,11 @@ if simple_loaded:
             params.ntestpart = nparticles
             params.trace_time = tfinal
             params.contr_pp = -1e10  # Trace all passing passing
-            params.startmode = -1  # Manual start conditions
+            params.startmode = 1  # Manual start conditions
 
             tracy = params.Tracer()
 
             params.params_init()
-
-            params.zstart = (
-                np.array(
-                    [
-                        [
-                            r_initial,
-                            random.uniform(0, 2 * np.pi),
-                            random.uniform(0, 2 * np.pi / self.nfp),
-                            1,
-                            random.uniform(vparallel_over_v_min, vparallel_over_v_max),
-                        ]
-                        for i in range(nparticles)
-                    ]
-                )
-                .reshape(nparticles, 5)
-                .T
-            )
 
             simple_main.run(tracy)
 
