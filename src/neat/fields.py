@@ -435,8 +435,13 @@ if simple_loaded:
 
             self.params.ntestpart = nparticles
             self.params.trace_time = tfinal
-            self.params.contr_pp = -1e10  # Trace all passing passing
+            self.params.contr_pp = -1e10  # Trace all passing particles
             self.params.startmode = 1 # automatically select initial particle distribution
+            self.params.ntimstep = nsamples
+            self.params.sbeg = r_initial
+            self.params.npoiper2 = 128
+            self.params.n_e = charge
+            self.params.n_d = mass
 
             self.params.params_init()
 
