@@ -19,8 +19,8 @@ try:
 except ImportError as error:
     simple_loaded = False
 
-import random
 import copy
+import random
 
 import numpy as np
 from qic import Qic
@@ -266,6 +266,8 @@ if simple_loaded:
             B_scale: float = 1,
             Aminor_scale: float = 1,
             multharm: int = 3,
+            ns_s: int = 3,
+            ns_tp: int = 3,
         ) -> None:
 
             self.near_axis = False
@@ -277,9 +279,11 @@ if simple_loaded:
             self.B_scale = B_scale
             self.Aminor_scale = Aminor_scale
             self.multharm = multharm
-            
-            from pysimple import simple as simple_local, params as params_local
+
             from pysimple import new_vmec_stuff_mod as stuff_local
+            from pysimple import params as params_local
+            from pysimple import simple as simple_local
+
             self.params = copy.deepcopy(params_local)
             self.stuff = copy.deepcopy(stuff_local)
             self.simple = copy.deepcopy(simple_local)
@@ -288,8 +292,8 @@ if simple_loaded:
             self.stuff.vmec_b_scale = self.B_scale
             self.stuff.vmec_rz_scale = self.Aminor_scale
             self.stuff.multharm = self.multharm
-            self.stuff.ns_s = 3
-            self.stuff.ns_tp = 3
+            self.stuff.ns_s = ns_s
+            self.stuff.ns_tp = ns_tp
 
             self.simple.init_field(
                 self.tracy,
@@ -430,6 +434,9 @@ if simple_loaded:
             tfinal,
             nthreads,
             notrace_passing,
+            npoiper,
+            npoiper2,
+            nper,
         ):
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
             nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
@@ -437,10 +444,14 @@ if simple_loaded:
             self.params.ntestpart = nparticles
             self.params.trace_time = tfinal
             self.params.contr_pp = -1e10  # Trace all passing particles
-            self.params.startmode = 1 # automatically select initial particle distribution
+            self.params.startmode = (
+                1  # automatically select initial particle distribution
+            )
             self.params.ntimstep = nsamples
             self.params.sbeg = r_initial
-            self.params.npoiper2 = 128
+            self.params.npoiper2 = npoiper2
+            self.params.npoiper = npoiper
+            self.params.nper = nper
             self.params.n_e = charge
             self.params.n_d = mass
             self.params.notrace_passing = notrace_passing
@@ -448,10 +459,13 @@ if simple_loaded:
             self.params.params_init()
 
             from pysimple import simple_main as simple_main_local
+
             simple_main_local.run(Tracy)
 
             time = np.linspace(
-                self.params.dtau / self.params.v0, self.params.trace_time, self.params.ntimstep
+                self.params.dtau / self.params.v0,
+                self.params.trace_time,
+                self.params.ntimstep,
             )
             # condi = np.logical_and(params.times_lost > 0, params.times_lost < params.trace_time)
 

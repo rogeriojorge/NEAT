@@ -172,7 +172,7 @@ class ParticleOrbit:  # pylint: disable=R0902
                 *self.field.gyronimo_parameters(),
                 *self.particle.gyronimo_parameters(),
                 self.nsamples,
-                self.tfinal
+                self.tfinal,
             )
         )
 
@@ -387,7 +387,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
                 *self.particles.gyronimo_parameters(),
                 self.nsamples,
                 self.tfinal,
-                self.nthreads
+                self.nthreads,
             )
         )
 
@@ -533,10 +533,13 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         nthreads=2,
         nparticles=32,
         notrace_passing=1,
+        npoiper=100,
+        npoiper2=128,
+        nper=1000,
     ) -> None:
 
         self.particles = particles
-        # Change latter to a definition of a variable called nparticles
+        # Change later to a definition of a variable called nparticles
         self.nparticles = nparticles
         self.particles.ntheta = nparticles
         self.particles.nphi = 1
@@ -547,6 +550,9 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self.nthreads = nthreads
         self.tfinal = tfinal
         self.notrace_passing = notrace_passing
+        self.npoiper = npoiper
+        self.npoiper2 = npoiper2
+        self.nper = nper
 
         # self.field.constant_b20 = constant_b20
 
@@ -557,6 +563,9 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
             self.tfinal,
             self.nthreads,
             self.notrace_passing,
+            self.npoiper,
+            self.npoiper2,
+            self.nper,
         ]
 
         solution = np.array(
@@ -567,6 +576,9 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
                 self.tfinal,
                 self.nthreads,
                 self.notrace_passing,
+                self.npoiper,
+                self.npoiper2,
+                self.nper,
             ),
             dtype=object,
         )
