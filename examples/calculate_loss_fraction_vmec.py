@@ -19,12 +19,13 @@ s_initial = 0.4  # initial normalized toroidal magnetic flux (radial VMEC coordi
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-nparticles = 32  # number of particle
+nparticles = 64  # number of particle
 tfinal = 1e-3  # seconds
-nsamples = 1000 # number of time steps
+nsamples = 10000 # number of time steps
 wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_ARIESCS.nc"
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor
+notrace_passing = 0 # If 1 skip tracing of passing particles
 
 g_field = Simple(
     wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
@@ -43,9 +44,11 @@ g_orbits = ParticleEnsembleOrbit_Simple(
     tfinal=tfinal,
     nparticles=nparticles,
     nsamples=nsamples,
+    notrace_passing=notrace_passing,
 )
 total_time = time.time() - start_time
 print(f"  Running with {g_orbits.nparticles} particles took {total_time}s")
+print(f"  Final loss fraction = {g_orbits.total_particles_lost}")
 
 # Plot resulting loss fraction
 g_orbits.plot_loss_fraction()

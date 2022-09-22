@@ -532,6 +532,7 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         tfinal=0.0001,
         nthreads=2,
         nparticles=32,
+        notrace_passing=1,
     ) -> None:
 
         self.particles = particles
@@ -545,6 +546,7 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self.nsamples = nsamples
         self.nthreads = nthreads
         self.tfinal = tfinal
+        self.notrace_passing = notrace_passing
 
         # self.field.constant_b20 = constant_b20
 
@@ -554,6 +556,7 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
             self.nsamples,
             self.tfinal,
             self.nthreads,
+            self.notrace_passing,
         ]
 
         solution = np.array(
@@ -562,7 +565,8 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
                 *self.particles.gyronimo_parameters(),
                 self.nsamples,
                 self.tfinal,
-                self.nthreads
+                self.nthreads,
+                self.notrace_passing,
             ),
             dtype=object,
         )
