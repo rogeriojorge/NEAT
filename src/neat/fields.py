@@ -431,6 +431,7 @@ if simple_loaded:
             ntheta,
             nphi,
             nsamples,
+            nparticles,
             tfinal,
             nthreads,
             notrace_passing,
@@ -439,7 +440,7 @@ if simple_loaded:
             nper,
         ):
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
-            nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
+            # nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
 
             self.params.ntestpart = nparticles
             self.params.trace_time = tfinal
