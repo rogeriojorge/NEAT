@@ -441,6 +441,7 @@ if simple_loaded:
         ):
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
             # nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
+            # Tracy = self.params.Tracer()
 
             self.params.ntestpart = nparticles
             self.params.trace_time = tfinal
@@ -461,23 +462,28 @@ if simple_loaded:
 
             from pysimple import simple_main as simple_main_local
 
-            simple_main_local.run(Tracy)
+            self.simple_main = copy.deepcopy(simple_main_local)
+            self.simple_main.run(Tracy)
 
-            time = np.linspace(
+            self.time = np.linspace(
                 self.params.dtau / self.params.v0,
                 self.params.trace_time,
                 self.params.ntimstep,
             )
             # condi = np.logical_and(params.times_lost > 0, params.times_lost < params.trace_time)
 
-            return (
-                time,
+            return_array = copy.deepcopy((
+                self.time,
                 self.params.confpart_pass,
                 self.params.confpart_trap,
                 self.params.trace_time,
                 self.params.times_lost,
                 self.params.perp_inv,
-            )
+            ))
+
+            # self.simple_main.finalize()
+
+            return return_array
 
 
 class Vmec:
