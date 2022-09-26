@@ -506,7 +506,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
 
         return self.loss_fraction_array
 
-    def plot_loss_fraction(self, show=True):
+    def plot_loss_fraction(self, show=True, save=False):
         """Make a plot of the fraction of total particles lost over time"""
         import matplotlib.pyplot as plt
 
@@ -514,6 +514,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
+        if save: plt.savefig('plot_loss_fraction.pdf')
         if show:
             plt.show()
 
@@ -602,7 +603,7 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self.loss_fraction_array = 1 - (self.confpart_pass + self.confpart_trap)
         self.total_particles_lost = self.loss_fraction_array[-1]
 
-    def plot_loss_fraction(self, show=True):
+    def plot_loss_fraction(self, show=True, save=False):
         """Make a plot of the fraction of total particles lost over time"""
 
         import matplotlib.pyplot as plt
@@ -614,13 +615,17 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
 
+        if save: plt.savefig('plot_loss_fraction.pdf')
+
         plt.figure()
         plt.semilogx(
             self.lost_times_of_particles[self.condi], self.perp_inv[self.condi], "x"
         )
-        plt.xlim([1e-5, self.trace_time])
+        plt.xlim([1e-6, self.trace_time])
         plt.xlabel("Loss Time")
         plt.ylabel("Perpendicular Invariant")
+
+        if save: plt.savefig('plot_perpendicular_invariant.pdf')
 
         if show:
             plt.show()
