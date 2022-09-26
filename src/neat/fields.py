@@ -472,14 +472,16 @@ if simple_loaded:
             )
             # condi = np.logical_and(params.times_lost > 0, params.times_lost < params.trace_time)
 
-            return_array = copy.deepcopy((
-                self.time,
-                self.params.confpart_pass,
-                self.params.confpart_trap,
-                self.params.trace_time,
-                self.params.times_lost,
-                self.params.perp_inv,
-            ))
+            return_array = copy.deepcopy(
+                (
+                    self.time,
+                    self.params.confpart_pass,
+                    self.params.confpart_trap,
+                    self.params.trace_time,
+                    self.params.times_lost,
+                    self.params.perp_inv,
+                )
+            )
 
             # self.simple_main.finalize()
 

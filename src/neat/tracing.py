@@ -514,7 +514,8 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
-        if save: plt.savefig('plot_loss_fraction.pdf')
+        if save:
+            plt.savefig("plot_loss_fraction.pdf")
         if show:
             plt.show()
 
@@ -615,7 +616,8 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
 
-        if save: plt.savefig('plot_loss_fraction.pdf')
+        if save:
+            plt.savefig("plot_loss_fraction.pdf")
 
         plt.figure()
         plt.semilogx(
@@ -625,10 +627,15 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         plt.xlabel("Loss Time")
         plt.ylabel("Perpendicular Invariant")
 
-        if save: plt.savefig('plot_perpendicular_invariant.pdf')
+        if save:
+            plt.savefig("plot_perpendicular_invariant.pdf")
 
         if show:
             plt.show()
+
+    def save_loss_fraction(self, filename: str):
+        data = np.column_stack([self.time, self.loss_fraction_array])
+        np.savetxt(filename, data, fmt=["%s", "%s"])
 
 
 def canonical_angular_momentum(
