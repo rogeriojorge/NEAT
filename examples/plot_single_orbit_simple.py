@@ -23,7 +23,7 @@ Lambda = 0.96  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 100  # IGNORED - resolution in time
 tfinal = 2e-4  # seconds
-wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_ARIESCS.nc"
+wout_filename = os.path.join(os.path.dirname(__file__),'inputs','wout_ARIESCS.nc')
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor
 

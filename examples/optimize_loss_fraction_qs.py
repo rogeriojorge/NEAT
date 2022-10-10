@@ -27,11 +27,11 @@ constant_b20 = True
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-ntheta = 10  # resolution in theta
-nphi = 4  # resolution in phi
-nlambda_trapped = 14  # number of pitch angles for trapped particles
+ntheta = 5  # resolution in theta
+nphi = 5  # resolution in phi
+nlambda_trapped = 10  # number of pitch angles for trapped particles
 nlambda_passing = 2  # number of pitch angles for passing particles
-nthreads = 4
+nthreads = 2
 
 
 class optimize_loss_fraction:
@@ -107,7 +107,7 @@ class optimize_loss_fraction:
             least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
 
 
-g_field = StellnaQS.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
+g_field = StellnaQS.from_paper(stellarator_index, nphi=51, B2c=B2c, B0=B0)
 g_particle = ChargedParticleEnsemble(
     r_initial=r_initial,
     r_max=r_max,
@@ -154,7 +154,7 @@ if optimizer.mpi.proc0_world:
     print("        B20 = ", optimizer.field.B20_mean)
     optimizer.residual.orbits.plot_loss_fraction(show=False)
 initial_orbit = ParticleOrbit(test_particle, g_field, nsamples=nsamples, tfinal=tfinal)
-initial_field = StellnaQS.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
+initial_field = StellnaQS.from_paper(stellarator_index, nphi=51, B2c=B2c, B0=B0)
 ##################
 optimizer.run(ftol=ftol, n_iterations=n_iterations)
 ##################
