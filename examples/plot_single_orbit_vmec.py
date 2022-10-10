@@ -24,7 +24,7 @@ Lambda = 0.92  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 3000  # resolution in time
 tfinal = 2e-4  # seconds
-wout_filename = os.path.join(os.path.dirname(__file__),'inputs','wout_ARIESCS.nc')
+wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
 
 g_field = Vmec(wout_filename=wout_filename)
 g_particle = ChargedParticle(
