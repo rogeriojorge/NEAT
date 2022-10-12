@@ -172,7 +172,7 @@ class ParticleOrbit:  # pylint: disable=R0902
                 *self.field.gyronimo_parameters(),
                 *self.particle.gyronimo_parameters(),
                 self.nsamples,
-                self.tfinal
+                self.tfinal,
             )
         )
 
@@ -387,7 +387,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
                 *self.particles.gyronimo_parameters(),
                 self.nsamples,
                 self.tfinal,
-                self.nthreads
+                self.nthreads,
             )
         )
 
@@ -506,7 +506,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
 
         return self.loss_fraction_array
 
-    def plot_loss_fraction(self, show=True):
+    def plot_loss_fraction(self, show=True, save=False):
         """Make a plot of the fraction of total particles lost over time"""
         import matplotlib.pyplot as plt
 
@@ -514,6 +514,8 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
+        if save:
+            plt.savefig("plot_loss_fraction.pdf")
         if show:
             plt.show()
 
@@ -528,14 +530,18 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self,
         particles: ChargedParticleEnsemble,
         field: Union[StellnaQS, Stellna],
-        nsamples=800,
-        tfinal=0.0001,
+        nsamples=5000,
+        tfinal=0.001,
         nthreads=2,
         nparticles=32,
+        notrace_passing=0,
+        npoiper=100,
+        npoiper2=128,
+        nper=1000,
     ) -> None:
 
         self.particles = particles
-        # Change latter to a definition of a variable called nparticles
+        # Change later to a definition of a variable called nparticles
         self.nparticles = nparticles
         self.particles.ntheta = nparticles
         self.particles.nphi = 1
@@ -545,6 +551,10 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self.nsamples = nsamples
         self.nthreads = nthreads
         self.tfinal = tfinal
+        self.notrace_passing = notrace_passing
+        self.npoiper = npoiper
+        self.npoiper2 = npoiper2
+        self.nper = nper
 
         # self.field.constant_b20 = constant_b20
 
@@ -552,8 +562,13 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
             *self.field.gyronimo_parameters(),
             *self.particles.gyronimo_parameters(),
             self.nsamples,
+            self.nparticles,
             self.tfinal,
             self.nthreads,
+            self.notrace_passing,
+            self.npoiper,
+            self.npoiper2,
+            self.nper,
         ]
 
         solution = np.array(
@@ -561,8 +576,13 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
                 *self.field.gyronimo_parameters(),
                 *self.particles.gyronimo_parameters(),
                 self.nsamples,
+                self.nparticles,
                 self.tfinal,
-                self.nthreads
+                self.nthreads,
+                self.notrace_passing,
+                self.npoiper,
+                self.npoiper2,
+                self.nper,
             ),
             dtype=object,
         )
@@ -584,28 +604,38 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self.loss_fraction_array = 1 - (self.confpart_pass + self.confpart_trap)
         self.total_particles_lost = self.loss_fraction_array[-1]
 
-    def plot_loss_fraction(self, show=True):
+    def plot_loss_fraction(self, show=True, save=False):
         """Make a plot of the fraction of total particles lost over time"""
 
         import matplotlib.pyplot as plt
 
         plt.figure()
         plt.semilogx(self.time, 1 - (self.confpart_pass + self.confpart_trap))
-        plt.xlim([1e-5, self.trace_time])
+        plt.xlim([1e-6, self.trace_time])
         plt.xlabel("Time (s)")
         plt.ylabel("Loss Fraction")
         plt.tight_layout()
+
+        if save:
+            plt.savefig("plot_loss_fraction.pdf")
 
         plt.figure()
         plt.semilogx(
             self.lost_times_of_particles[self.condi], self.perp_inv[self.condi], "x"
         )
-        plt.xlim([1e-5, self.trace_time])
+        plt.xlim([1e-6, self.trace_time])
         plt.xlabel("Loss Time")
         plt.ylabel("Perpendicular Invariant")
 
+        if save:
+            plt.savefig("plot_perpendicular_invariant.pdf")
+
         if show:
             plt.show()
+
+    def save_loss_fraction(self, filename: str):
+        data = np.column_stack([self.time, self.loss_fraction_array])
+        np.savetxt(filename, data, fmt=["%s", "%s"])
 
 
 def canonical_angular_momentum(

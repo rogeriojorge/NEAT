@@ -21,7 +21,7 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 nparticles = 64  # number of particles
 tfinal = 1e-2  # seconds
-wout_filename = f"{os.path.join(os.path.dirname(__file__))}/inputs/wout_ARIESCS.nc"
+wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor
 

@@ -19,7 +19,7 @@ try:
 except ImportError as error:
     simple_loaded = False
 
-import random
+import copy
 
 import numpy as np
 from qic import Qic
@@ -265,6 +265,8 @@ if simple_loaded:
             B_scale: float = 1,
             Aminor_scale: float = 1,
             multharm: int = 3,
+            ns_s: int = 3,
+            ns_tp: int = 3,
         ) -> None:
 
             self.near_axis = False
@@ -277,20 +279,24 @@ if simple_loaded:
             self.Aminor_scale = Aminor_scale
             self.multharm = multharm
 
-            self.params = params
-            self.stuff = stuff
-            self.simple = simple
+            from pysimple import new_vmec_stuff_mod as stuff_local
+            from pysimple import params as params_local
+            from pysimple import simple as simple_local
+
+            self.params = copy.deepcopy(params_local)
+            self.stuff = copy.deepcopy(stuff_local)
+            self.simple = copy.deepcopy(simple_local)
 
             self.tracy = self.params.Tracer()
-            self.stuff.vmec_b_scale = B_scale
-            self.stuff.vmec_rz_scale = Aminor_scale
-            self.stuff.multharm = multharm  # Fast but inaccurate splines
-            self.stuff.ns_s = 3
-            self.stuff.ns_tp = 3
+            self.stuff.vmec_b_scale = self.B_scale
+            self.stuff.vmec_rz_scale = self.Aminor_scale
+            self.stuff.multharm = self.multharm
+            self.stuff.ns_s = ns_s
+            self.stuff.ns_tp = ns_tp
 
             self.simple.init_field(
                 self.tracy,
-                wout_filename,
+                self.wout_filename,
                 self.stuff.ns_s,
                 self.stuff.ns_tp,
                 self.stuff.multharm,
@@ -350,7 +356,7 @@ if simple_loaded:
 
             z0_can[1:3] = vmec_to_can(z0_vmec[0], z0_vmec[1], z0_vmec[2])
 
-            simple.init_integrator(Tracy, z0_can)
+            self.simple.init_integrator(Tracy, z0_can)
 
             # nt = nsamples
             dtaumin = 2 * np.pi * Rmajor / npoints
@@ -411,7 +417,7 @@ if simple_loaded:
 
         def simple_ensemble_particle_tracer(
             self,
-            tracy,
+            Tracy,
             Rmajor,
             simple,
             charge,
@@ -424,36 +430,59 @@ if simple_loaded:
             ntheta,
             nphi,
             nsamples,
+            nparticles,
             tfinal,
             nthreads,
+            notrace_passing,
+            npoiper,
+            npoiper2,
+            nper,
         ):
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
-            nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
 
-            params.ntestpart = nparticles
-            params.trace_time = tfinal
-            params.contr_pp = -1e10  # Trace all passing passing
-            params.startmode = 1  # Manual start conditions
-
-            tracy = params.Tracer()
-
-            params.params_init()
-
-            simple_main.run(tracy)
-
-            time = np.linspace(
-                params.dtau / params.v0, params.trace_time, params.ntimstep
+            self.params.ntestpart = nparticles
+            self.params.trace_time = tfinal
+            self.params.contr_pp = -1e10  # Trace all passing particles
+            self.params.startmode = (
+                1  # automatically select initial particle distribution
             )
+
+            self.params.ntimstep = nsamples
+            self.params.sbeg = r_initial
+            self.params.npoiper2 = npoiper2
+            self.params.npoiper = npoiper
+            self.params.nper = nper
+            self.params.n_e = charge
+            self.params.n_d = mass
+            self.params.notrace_passing = notrace_passing
+
+            self.params.params_init()
+
+            from pysimple import simple_main as simple_main_local
+
+            self.simple_main = copy.deepcopy(simple_main_local)
+            self.simple_main.run(Tracy)
+
+            self.time = np.linspace(
+                self.params.dtau / self.params.v0,
+                self.params.trace_time,
+                self.params.ntimstep,
+            )
+
             # condi = np.logical_and(params.times_lost > 0, params.times_lost < params.trace_time)
 
-            return (
-                time,
-                params.confpart_pass,
-                params.confpart_trap,
-                params.trace_time,
-                params.times_lost,
-                params.perp_inv,
+            return_array = copy.deepcopy(
+                (
+                    self.time,
+                    self.params.confpart_pass,
+                    self.params.confpart_trap,
+                    self.params.trace_time,
+                    self.params.times_lost,
+                    self.params.perp_inv,
+                )
             )
+
+            return return_array
 
 
 class Vmec:
