@@ -254,214 +254,214 @@ vector< vector<double>> gc_solver(
 
 // // Ensemble particle tracing functions
 
-// Fully quasisymmetric ensemble
-vector< vector<double>> gc_solver_qs_ensemble(
-                                   double G0, double G2, double I2, double nfp, double iota,
-                                   double iotaN, const vector<double>& phi_grid,
-                                   double B0, double B1c, double B20, double B2c,
-                                   double beta1s, double charge, double mass, double energy,
-                                   size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
-                                   size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
-                               )
-{
+// // Fully quasisymmetric ensemble
+// vector< vector<double>> gc_solver_qs_ensemble(
+//                                    double G0, double G2, double I2, double nfp, double iota,
+//                                    double iotaN, const vector<double>& phi_grid,
+//                                    double B0, double B1c, double B20, double B2c,
+//                                    double beta1s, double charge, double mass, double energy,
+//                                    size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
+//                                    size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
+//                                )
+// {
 
-    omp_set_dynamic(0);
-    omp_set_num_threads(nthreads);
+//     omp_set_dynamic(0);
+//     omp_set_num_threads(nthreads);
 
-    double Bref = B0;
-    double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
-    metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
-                        B0, B1c, B20, B2c, beta1s);
+//     double Bref = B0;
+//     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
+//     metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
+//                         B0, B1c, B20, B2c, beta1s);
 
-    equilibrium_stellna_qs qsc(&g);
+//     equilibrium_stellna_qs qsc(&g);
 
-    double B_max = abs(B0) + abs(r_max * B1c) + r_max * r_max * (abs(B20) + abs(B2c));
-    double B_min = max( 0.01, abs(B0) - abs(r_max * B1c) - r_max * r_max * (abs(B20) + abs(B2c)) );
+//     double B_max = abs(B0) + abs(r_max * B1c) + r_max * r_max * (abs(B20) + abs(B2c));
+//     double B_min = max( 0.01, abs(B0) - abs(r_max * B1c) - r_max * r_max * (abs(B20) + abs(B2c)) );
 
-    std::vector<double> theta = neat_linspace(0.0, 2*numbers::pi, ntheta);
-    std::vector<double> phi = neat_linspace(0.0, 2*numbers::pi/nfp, nphi);
-    std::vector<double> lambda_trapped = neat_linspace(Bref/B_max, Bref/B_min, nlambda_trapped);
-    std::vector<double> lambda_passing = neat_linspace(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
+//     std::vector<double> theta = neat_linspace(0.0, 2*numbers::pi, ntheta);
+//     std::vector<double> phi = neat_linspace(0.0, 2*numbers::pi/nfp, nphi);
+//     std::vector<double> lambda_trapped = neat_linspace(Bref/B_max, Bref/B_min, nlambda_trapped);
+//     std::vector<double> lambda_passing = neat_linspace(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
 
-    vector<guiding_centre> guiding_centre_vector;
-//   #pragma omp parallel for
-    for(size_t k = 0; k < nlambda_trapped; k++) {
-        guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI_over_refEnergy/Bref, &qsc));
-    }
-    for(size_t k = 0; k < nlambda_passing; k++) {
-        guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_passing[k]*energySI_over_refEnergy/Bref, &qsc));
-    }
+//     vector<guiding_centre> guiding_centre_vector;
+// //   #pragma omp parallel for
+//     for(size_t k = 0; k < nlambda_trapped; k++) {
+//         guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI_over_refEnergy/Bref, &qsc));
+//     }
+//     for(size_t k = 0; k < nlambda_passing; k++) {
+//         guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_passing[k]*energySI_over_refEnergy/Bref, &qsc));
+//     }
 
-    ensemble_type::state initial;
-//   #pragma omp parallel for
-    for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
-        for(size_t j = 0; j < ntheta; j++) {
-            for(size_t l = 0; l < nphi; l++) {
-                initial.push_back(guiding_centre_vector[k].generate_state(
-                {r0, theta[j], phi[l]}, energySI_over_refEnergy,
-                guiding_centre::vpp_sign::plus));
-                initial.push_back(guiding_centre_vector[k].generate_state(
-                {r0, theta[j], phi[l]}, energySI_over_refEnergy,
-                guiding_centre::vpp_sign::minus));
-            }
-        }
-    }
+//     ensemble_type::state initial;
+// //   #pragma omp parallel for
+//     for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
+//         for(size_t j = 0; j < ntheta; j++) {
+//             for(size_t l = 0; l < nphi; l++) {
+//                 initial.push_back(guiding_centre_vector[k].generate_state(
+//                 {r0, theta[j], phi[l]}, energySI_over_refEnergy,
+//                 guiding_centre::vpp_sign::plus));
+//                 initial.push_back(guiding_centre_vector[k].generate_state(
+//                 {r0, theta[j], phi[l]}, energySI_over_refEnergy,
+//                 guiding_centre::vpp_sign::minus));
+//             }
+//         }
+//     }
 
-    vector<vector< double >> x_vec;
-    ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
-    boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
-    boost::numeric::odeint::integrate_const(
-        ode_stepper, ensemble_object,
-        initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
-    );
+//     vector<vector< double >> x_vec;
+//     ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
+//     boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
+//     boost::numeric::odeint::integrate_const(
+//         ode_stepper, ensemble_object,
+//         initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
+//     );
 
-    return x_vec;
-}
+//     return x_vec;
+// }
 
-// Partially quasisymmetric ensemble
-vector< vector<double>> gc_solver_qs_partial_ensemble(
-                                   double G0, double G2, double I2, double nfp, double iota,
-                                   double iotaN, const vector<double>& phi_grid,
-                                   double B0, double B1c, vector<double>& B20, double B2c,
-                                   double beta1s, double charge, double mass, double energy,
-                                   size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
-                                   size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
-                               )
-{
+// // Partially quasisymmetric ensemble
+// vector< vector<double>> gc_solver_qs_partial_ensemble(
+//                                    double G0, double G2, double I2, double nfp, double iota,
+//                                    double iotaN, const vector<double>& phi_grid,
+//                                    double B0, double B1c, vector<double>& B20, double B2c,
+//                                    double beta1s, double charge, double mass, double energy,
+//                                    size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
+//                                    size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
+//                                )
+// {
 
-    omp_set_dynamic(0);
-    omp_set_num_threads(nthreads);
+//     omp_set_dynamic(0);
+//     omp_set_num_threads(nthreads);
 
-    double Bref = B0;
-    double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
-    cubic_periodic_gsl_factory ifactory;
-//   cubic_gsl_factory ifactory;
-    metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
-                                dblock_adapter(B20), B2c, beta1s, &ifactory);
-    equilibrium_stellna_qs_partial qsc(&g);
+//     double Bref = B0;
+//     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
+//     cubic_periodic_gsl_factory ifactory;
+// //   cubic_gsl_factory ifactory;
+//     metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
+//                                 dblock_adapter(B20), B2c, beta1s, &ifactory);
+//     equilibrium_stellna_qs_partial qsc(&g);
 
-    double B20_max = abs(*max_element(B20.begin(), B20.end()));
-    double B_max = abs(B0) + abs(r_max * B1c) + r_max * r_max * (B20_max + abs(B2c));
-    double B_min = max( 0.01, abs(B0) - abs(r_max * B1c) - r_max * r_max * (B20_max + abs(B2c)) );
+//     double B20_max = abs(*max_element(B20.begin(), B20.end()));
+//     double B_max = abs(B0) + abs(r_max * B1c) + r_max * r_max * (B20_max + abs(B2c));
+//     double B_min = max( 0.01, abs(B0) - abs(r_max * B1c) - r_max * r_max * (B20_max + abs(B2c)) );
 
-    std::vector<double> theta = neat_linspace(0.0, 2*numbers::pi, ntheta);
-    std::vector<double> phi = neat_linspace(0.0, 2*numbers::pi/nfp, nphi);
-    std::vector<double> lambda_trapped = neat_linspace(Bref/B_max, Bref/B_min, nlambda_trapped);
-    std::vector<double> lambda_passing = neat_linspace(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
+//     std::vector<double> theta = neat_linspace(0.0, 2*numbers::pi, ntheta);
+//     std::vector<double> phi = neat_linspace(0.0, 2*numbers::pi/nfp, nphi);
+//     std::vector<double> lambda_trapped = neat_linspace(Bref/B_max, Bref/B_min, nlambda_trapped);
+//     std::vector<double> lambda_passing = neat_linspace(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
 
-    vector<guiding_centre> guiding_centre_vector;
-//   #pragma omp parallel for
-    for(size_t k = 0; k < nlambda_trapped; k++) {
-        guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI_over_refEnergy/Bref, &qsc));
-    }
-    for(size_t k = 0; k < nlambda_passing; k++) {
-        guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_passing[k]*energySI_over_refEnergy/Bref, &qsc));
-    }
+//     vector<guiding_centre> guiding_centre_vector;
+// //   #pragma omp parallel for
+//     for(size_t k = 0; k < nlambda_trapped; k++) {
+//         guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI_over_refEnergy/Bref, &qsc));
+//     }
+//     for(size_t k = 0; k < nlambda_passing; k++) {
+//         guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_passing[k]*energySI_over_refEnergy/Bref, &qsc));
+//     }
 
-    ensemble_type::state initial;
-//   #pragma omp parallel for
-    for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
-        for(size_t j = 0; j < ntheta; j++) {
-            for(size_t l = 0; l < nphi; l++) {
-                initial.push_back(guiding_centre_vector[k].generate_state(
-                {r0, theta[j], phi[l]}, energySI_over_refEnergy,
-                guiding_centre::vpp_sign::plus));
-                initial.push_back(guiding_centre_vector[k].generate_state(
-                {r0, theta[j], phi[l]}, energySI_over_refEnergy,
-                guiding_centre::vpp_sign::minus));
-            }
-        }
-    }
+//     ensemble_type::state initial;
+// //   #pragma omp parallel for
+//     for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
+//         for(size_t j = 0; j < ntheta; j++) {
+//             for(size_t l = 0; l < nphi; l++) {
+//                 initial.push_back(guiding_centre_vector[k].generate_state(
+//                 {r0, theta[j], phi[l]}, energySI_over_refEnergy,
+//                 guiding_centre::vpp_sign::plus));
+//                 initial.push_back(guiding_centre_vector[k].generate_state(
+//                 {r0, theta[j], phi[l]}, energySI_over_refEnergy,
+//                 guiding_centre::vpp_sign::minus));
+//             }
+//         }
+//     }
 
-    vector<vector< double >> x_vec;
-    ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
-    boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
-    boost::numeric::odeint::integrate_const(
-        ode_stepper, ensemble_object,
-        initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
-    );
+//     vector<vector< double >> x_vec;
+//     ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
+//     boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
+//     boost::numeric::odeint::integrate_const(
+//         ode_stepper, ensemble_object,
+//         initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
+//     );
 
-    return x_vec;
-}
+//     return x_vec;
+// }
 
-// General field ensemble
-vector< vector<double>> gc_solver_ensemble(
-                                   int nfp, double G0, double G2, double I2, double iota,
-                                   double iotaN, double Bref, const vector<double>& phi_grid,
-                                   const vector<double>& B0,
-                                   const vector<double>& B1c,
-                                   const vector<double>& B1s,
-                                   const vector<double>& B20,
-                                   const vector<double>& B2c,
-                                   const vector<double>& B2s,
-                                   const vector<double>& beta0,
-                                   const vector<double>& beta1c,
-                                   const vector<double>& beta1s,
-                                   double charge, double mass, double energy,
-                                   size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
-                                   size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
-                               )
-{
+// // General field ensemble
+// vector< vector<double>> gc_solver_ensemble(
+//                                    int nfp, double G0, double G2, double I2, double iota,
+//                                    double iotaN, double Bref, const vector<double>& phi_grid,
+//                                    const vector<double>& B0,
+//                                    const vector<double>& B1c,
+//                                    const vector<double>& B1s,
+//                                    const vector<double>& B20,
+//                                    const vector<double>& B2c,
+//                                    const vector<double>& B2s,
+//                                    const vector<double>& beta0,
+//                                    const vector<double>& beta1c,
+//                                    const vector<double>& beta1s,
+//                                    double charge, double mass, double energy,
+//                                    size_t nlambda_trapped, size_t nlambda_passing, double r0, double r_max,
+//                                    size_t ntheta, size_t nphi, size_t nsamples, double Tfinal, size_t nthreads
+//                                )
+// {
 
-    omp_set_dynamic(0); 
-    omp_set_num_threads(nthreads);
+//     omp_set_dynamic(0); 
+//     omp_set_num_threads(nthreads);
 
-    cubic_periodic_gsl_factory ifactory;
-//   cubic_gsl_factory ifactory;
-    metric_stellna g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN,
-                     dblock_adapter(B0), dblock_adapter(B1c), dblock_adapter(B1s),
-                     dblock_adapter(B20), dblock_adapter(B2c), dblock_adapter(B2s),
-                     dblock_adapter(beta0), dblock_adapter(beta1c), dblock_adapter(beta1s),
-                     &ifactory);
+//     cubic_periodic_gsl_factory ifactory;
+// //   cubic_gsl_factory ifactory;
+//     metric_stellna g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN,
+//                      dblock_adapter(B0), dblock_adapter(B1c), dblock_adapter(B1s),
+//                      dblock_adapter(B20), dblock_adapter(B2c), dblock_adapter(B2s),
+//                      dblock_adapter(beta0), dblock_adapter(beta1c), dblock_adapter(beta1s),
+//                      &ifactory);
 
-    equilibrium_stellna qsc(&g);
+//     equilibrium_stellna qsc(&g);
 
-    double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
-    double B0_max = abs(*max_element(B0.begin(), B0.end()));
-    double B1c_max = abs(*max_element(B1c.begin(), B1c.end()));
-    double B1s_max = abs(*max_element(B1s.begin(), B1s.end()));
-    double B20_max = abs(*max_element(B20.begin(), B20.end()));
-    double B2c_max = abs(*max_element(B2c.begin(), B2c.end()));
-    double B2s_max = abs(*max_element(B2s.begin(), B2s.end()));
-    double B_max = B0_max + r_max * (B1c_max + B1s_max) + r_max * r_max * (B20_max + B2c_max + B2s_max);
-    double B_min = max( 0.01, B0_max - r_max * (B1c_max + B1s_max) - r_max * r_max * (B20_max + B2c_max + B2s_max));
+//     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
+//     double B0_max = abs(*max_element(B0.begin(), B0.end()));
+//     double B1c_max = abs(*max_element(B1c.begin(), B1c.end()));
+//     double B1s_max = abs(*max_element(B1s.begin(), B1s.end()));
+//     double B20_max = abs(*max_element(B20.begin(), B20.end()));
+//     double B2c_max = abs(*max_element(B2c.begin(), B2c.end()));
+//     double B2s_max = abs(*max_element(B2s.begin(), B2s.end()));
+//     double B_max = B0_max + r_max * (B1c_max + B1s_max) + r_max * r_max * (B20_max + B2c_max + B2s_max);
+//     double B_min = max( 0.01, B0_max - r_max * (B1c_max + B1s_max) - r_max * r_max * (B20_max + B2c_max + B2s_max));
 
-    std::vector<double> theta = neat_linspace(0.0, 2*numbers::pi, ntheta);
-    std::vector<double> phi = neat_linspace(0.0, 2*numbers::pi/nfp, nphi);
-    std::vector<double> lambda_trapped = neat_linspace(Bref/B_max, Bref/B_min, nlambda_trapped);
-    std::vector<double> lambda_passing = neat_linspace(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
+//     std::vector<double> theta = neat_linspace(0.0, 2*numbers::pi, ntheta);
+//     std::vector<double> phi = neat_linspace(0.0, 2*numbers::pi/nfp, nphi);
+//     std::vector<double> lambda_trapped = neat_linspace(Bref/B_max, Bref/B_min, nlambda_trapped);
+//     std::vector<double> lambda_passing = neat_linspace(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
 
-    vector<guiding_centre> guiding_centre_vector;
-//   #pragma omp parallel for
-    for(size_t k = 0; k < nlambda_trapped; k++) {
-        guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI_over_refEnergy/Bref, &qsc));
-    }
-    for(size_t k = 0; k < nlambda_passing; k++) {
-        guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_passing[k]*energySI_over_refEnergy/Bref, &qsc));
-    }
+//     vector<guiding_centre> guiding_centre_vector;
+// //   #pragma omp parallel for
+//     for(size_t k = 0; k < nlambda_trapped; k++) {
+//         guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_trapped[k]*energySI_over_refEnergy/Bref, &qsc));
+//     }
+//     for(size_t k = 0; k < nlambda_passing; k++) {
+//         guiding_centre_vector.push_back(guiding_centre(Lref, Vref, charge/mass, lambda_passing[k]*energySI_over_refEnergy/Bref, &qsc));
+//     }
 
-    ensemble_type::state initial;
-//   #pragma omp parallel for
-    for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
-        for(size_t j = 0; j < ntheta; j++) {
-            for(size_t l = 0; l < nphi; l++) {
-                initial.push_back(guiding_centre_vector[k].generate_state(
-                {r0, theta[j], phi[l]}, energySI_over_refEnergy,
-                guiding_centre::vpp_sign::plus));
-                initial.push_back(guiding_centre_vector[k].generate_state(
-                {r0, theta[j], phi[l]}, energySI_over_refEnergy,
-                guiding_centre::vpp_sign::minus));
-            }
-        }
-    }
+//     ensemble_type::state initial;
+// //   #pragma omp parallel for
+//     for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
+//         for(size_t j = 0; j < ntheta; j++) {
+//             for(size_t l = 0; l < nphi; l++) {
+//                 initial.push_back(guiding_centre_vector[k].generate_state(
+//                 {r0, theta[j], phi[l]}, energySI_over_refEnergy,
+//                 guiding_centre::vpp_sign::plus));
+//                 initial.push_back(guiding_centre_vector[k].generate_state(
+//                 {r0, theta[j], phi[l]}, energySI_over_refEnergy,
+//                 guiding_centre::vpp_sign::minus));
+//             }
+//         }
+//     }
 
-    vector<vector< double >> x_vec;
-    ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
-    boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
-    boost::numeric::odeint::integrate_const(
-        ode_stepper, ensemble_object,
-        initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
-    );
+//     vector<vector< double >> x_vec;
+//     ensemble_type ensemble_object(guiding_centre_vector, 2 * ntheta * nphi);
+//     boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
+//     boost::numeric::odeint::integrate_const(
+//         ode_stepper, ensemble_object,
+//         initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
+//     );
 
-    return x_vec;
-}
+//     return x_vec;
+// }
