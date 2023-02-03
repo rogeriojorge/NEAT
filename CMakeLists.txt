@@ -15,6 +15,7 @@ find_package(Python 3 COMPONENTS Interpreter Development NumPy)
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_LIBDIR lib)
+add_compile_options(-Wfatal-errors -Wpedantic)
 # detect virtualenv and set Pip args accordingly
 # if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
 #   set(_pip_args)
