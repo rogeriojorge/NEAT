@@ -405,14 +405,14 @@ if simple_loaded:
                         [Lambda * np.sqrt(2 * energy / mass)] * len(z_vmec[:, 2])
                     ),  # perpendicular energy
                     np.array([0] * len(z_vmec[:, 2])),  # magnetic_field_strength,
-                    z_vmec[:, 4],  # parallel velocity
+                    z_vmec[:, 4]*v_th,  # parallel velocity
                     np.array([0] * len(z_vmec[:, 2])),  # rdot,
                     np.array([0] * len(z_vmec[:, 2])),  # thetadot,
                     np.array([0] * len(z_vmec[:, 2])),  # varphidot,
                     np.array([0] * len(z_vmec[:, 2])),  # vparalleldot,
-                    z_cyl[:, 0],
+                    z_cyl[:, 0]/100,
                     z_cyl[:, 2],
-                    z_cyl[:, 1],
+                    z_cyl[:, 1]/100,
                 ]
             ).T
 
@@ -497,16 +497,18 @@ class Vmec:
 
     """
 
-    def __init__(self, wout_filename: str) -> None:
+    def __init__(self, wout_filename: str, maximum_s=0.95, Bref=1) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
         net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp"][()]
+        self.maximum_s = maximum_s
+        self.Bref = Bref
         net_file.close()
 
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
-        return [self.wout_filename]
+        return [self.wout_filename, self.maximum_s, self.Bref]
 
     def neatpp_solver(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as single particle tracer"""

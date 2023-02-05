@@ -176,6 +176,10 @@ class ParticleOrbit:  # pylint: disable=R0902
             )
         )
 
+        if solution.shape[0] < self.nsamples:
+            rows_to_add = self.nsamples - solution.shape[0] + 1
+            zero_rows = np.zeros((rows_to_add, solution.shape[1]))
+            solution = np.concatenate((solution, zero_rows), axis=0)
         self.solution = solution
 
         self.time = solution[:, 0]
@@ -212,7 +216,7 @@ class ParticleOrbit:  # pylint: disable=R0902
 
             self.rpos_cylindrical = np.array(
                 self.field.to_RZ(
-                    np.array([self.r_pos, self.theta_pos, self.varphi_pos]).transpose()
+                    np.array([self.r_pos, self.theta_pos, self.phi_pos]).transpose()
                 )
             )
 

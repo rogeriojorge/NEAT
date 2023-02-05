@@ -17,15 +17,17 @@
 #include <boost/math/tools/roots.hpp>
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
+#include <gsl/gsl_errno.h>
 using namespace gyronimo;
 using namespace std;
 
 class push_back_state_and_time_vmec {
 public:
   vector< vector< double > >& m_states;
+  double& maximum_s_;
   push_back_state_and_time_vmec(vector< vector< double > > &states,
-                     const IR3field_c1* e, const guiding_centre* g)
-    : m_states(states), eq_pointer_(e), gc_pointer_(g) {};
+                     const IR3field_c1* e, const guiding_centre* g, double& maximum_s)
+    : m_states(states), eq_pointer_(e), gc_pointer_(g), maximum_s_(maximum_s) {};
   void operator()(const guiding_centre::state& s, double t) {
     IR3 x = gc_pointer_->get_position(s);
     double B = eq_pointer_->magnitude(x, t);
@@ -33,6 +35,14 @@ public:
     IR3 y = gc_pointer_->get_position(dots);
     IR3 X = eq_pointer_->metric()->transform2cylindrical(x);
     double v_parallel = gc_pointer_->get_vpp(s);
+    // Check if the result has reached the stop value
+    if (x[IR3::u] >= maximum_s_) {
+        throw 1;
+    }
+    double minimum_s_ = 0.05;
+    if (x[IR3::u] <= minimum_s_) {
+        x[IR3::u] += 0.01;
+    }
     m_states.push_back({
         t,
         x[IR3::u], x[IR3::w], x[IR3::v],
@@ -50,7 +60,7 @@ private:
 };
 
 vector< vector<double>>  vmectrace(
-        string vmec_file,
+        string vmec_file, double maximum_s, double Bref,
         double charge, double mass, double Lambda,
         double vpp_sign, double energy, double s0,
         double theta0, double phi0,
@@ -66,12 +76,13 @@ vector< vector<double>>  vmectrace(
   double refEnergy = 0.5*codata::m_proton*mass*Vref*Vref;
   double energySI = energy*codata::e;
   double energySI_over_refEnergy = energySI/refEnergy;
-  double Bref = vmap.B_0();
+//   double Bref = vmap.B_0();
+//   std::cout << "Bref" << Bref << endl;
 
   // Lambda*energySI_over_refEnergy = energy*Bref/(2*Binicial*Uref)*(1-vparallel_over_v^2)
 
   guiding_centre gc(
-      Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy, &veq);
+      Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy/Bref, &veq);
   guiding_centre::state initial_state = gc.generate_state(
       {s0, phi0, theta0}, energySI_over_refEnergy,
       (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
@@ -79,12 +90,24 @@ vector< vector<double>>  vmectrace(
   cout.precision(16);
   cout.setf(ios::scientific);
   vector<vector< double >> x_vec;
-  push_back_state_and_time_vmec observer(x_vec, &veq, &gc);
-  boost::numeric::odeint::runge_kutta4<guiding_centre::state>
-      integration_algorithm;
-  boost::numeric::odeint::integrate_const(
-      integration_algorithm, odeint_adapter(&gc),
-      initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
+  push_back_state_and_time_vmec observer(x_vec, &veq, &gc, maximum_s);
+  boost::numeric::odeint::runge_kutta4<guiding_centre::state> integration_algorithm;
+  gsl_set_error_handler_off();
+  try
+  {
+    boost::numeric::odeint::integrate_const(
+            integration_algorithm, odeint_adapter(&gc),
+            initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
+  }
+  catch (int e)
+  {
+    // if (e==1){
+    //     cout << "Particle lost." << e << '\n';
+    // }
+    // else(){
+    //     cout << "Unknown exception " << e
+    // }
+  }
 
   return x_vec;
 
