@@ -22,7 +22,7 @@ PYBIND11_MODULE(neatpp, m) {
           "Trace a particle ensemble in a partially quasisymmetric near-axis magnetic field");
     m.def("vmectrace",&vmectrace,
           "Trace a single particle in a VMEC equilibrium magnetic field",
-           py::arg("vmec_file"), py::arg("maximum_s"), py::arg("Bref"), py::arg("charge"), py::arg("mass"),
+           py::arg("vmec_file"), py::arg("maximum_s"), py::arg("charge"), py::arg("mass"),
            py::arg("Lambda"), py::arg("vpp_sign"), py::arg("energy"),
            py::arg("s0"), py::arg("theta0"), py::arg("phi0"),
            py::arg("Tfinal"), py::arg("nsamples"));

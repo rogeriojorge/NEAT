@@ -181,7 +181,7 @@ class ParticleOrbit:  # pylint: disable=R0902
             zero_rows = np.zeros((rows_to_add, solution.shape[1]))
             solution = np.concatenate((solution, zero_rows), axis=0)
         self.solution = solution
-
+        
         self.time = solution[:, 0]
         self.r_pos = solution[:, 1]
         self.theta_pos = solution[:, 2]
