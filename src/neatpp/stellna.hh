@@ -162,7 +162,8 @@ vector< vector<double>> gc_solver_qs(
     metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
                         B0, B1c, B20, B2c, beta1s);
     equilibrium_stellna_qs qsc(&g);
-    guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bref, &qsc);
+    double Bi = qsc.magnitude({r0, theta0, phi0}, 0);
+    guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc);
     guiding_centre::state initial_state = gc.generate_state(
     {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
@@ -195,7 +196,8 @@ vector< vector<double>> gc_solver_qs_partial(
     metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
                                 dblock_adapter(B20), B2c, beta1s, &ifactory);
     equilibrium_stellna_qs_partial qsc(&g);
-    guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bref, &qsc);
+    double Bi = qsc.magnitude({r0, theta0, phi0}, 0);
+    guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc);
     guiding_centre::state initial_state = gc.generate_state(
     {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
@@ -239,7 +241,8 @@ vector< vector<double>> gc_solver(
 
     equilibrium_stellna qsc(&g);
 
-    guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bref, &qsc);
+    double Bi = qsc.magnitude({r0, theta0, phi0}, 0);
+    guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc);
     guiding_centre::state initial_state = gc.generate_state(
     {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 

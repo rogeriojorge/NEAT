@@ -77,12 +77,16 @@ vector< vector<double>>  vmectrace(
   double energySI = energy*codata::e;
   double energySI_over_refEnergy = energySI/refEnergy;
 //   double Bref = vmap.B_0();
-//   std::cout << "Bref" << Bref << endl;
+  double Bi = veq.magnitude({s0, phi0, theta0}, 0);
+  double Bi_VMEC = veq.magnitude_vmec({s0, phi0, theta0}, 0);
+  std::cout << "Bref" << Bref << endl;
+  std::cout << "Bi" << Bi << endl;
+  std::cout << "Bi_VMEC" << Bi_VMEC << endl;
 
   // Lambda*energySI_over_refEnergy = energy*Bref/(2*Binicial*Uref)*(1-vparallel_over_v^2)
 
   guiding_centre gc(
-      Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy/Bref, &veq);
+      Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy/Bi, &veq);
   guiding_centre::state initial_state = gc.generate_state(
       {s0, phi0, theta0}, energySI_over_refEnergy,
       (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
