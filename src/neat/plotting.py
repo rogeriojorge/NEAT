@@ -43,7 +43,7 @@ def set_axes_equal(ax):
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
-def plot_orbit2d(x_position, y_position, show=True):
+def plot_orbit2d(x_position, y_position, show=True, savefig=None):
     """
     Make a plot of a single particle orbit in
     (r,theta) coordinates where r is the square
@@ -58,9 +58,10 @@ def plot_orbit2d(x_position, y_position, show=True):
     plt.tight_layout()
     if show:
         plt.show()
+    if savefig is not None: plt.savefig(savefig)
 
 
-def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
+def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True, savefig=None):
     """
     Make a three-dimensional plot of a single particle orbit
     together with the corresponding stellarator toroidal flux
@@ -94,9 +95,10 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
     plt.tight_layout()
     if show:
         plt.show()
+    if savefig is not None: plt.savefig(savefig)
 
 
-def plot_parameters(self, show=True):
+def plot_parameters(self, show=True, savefig=None):
     """
     Make a single plot with relevant physics parameters
     of a single particle orbit on a magnetic field.
@@ -150,6 +152,7 @@ def plot_parameters(self, show=True):
     plt.tight_layout()
     if show:
         plt.show()
+    if savefig is not None: plt.savefig(savefig)
 
 
 def plot_animation3d(

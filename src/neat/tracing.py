@@ -235,17 +235,17 @@ class ParticleOrbit:  # pylint: disable=R0902
             ]
         )
 
-    def plot_orbit(self, show=True):
+    def plot_orbit(self, show=True, savefig=None):
         """Plot particle orbit in 2D flux coordinates"""
         from .plotting import plot_orbit2d
 
         plot_orbit2d(
             x_position=self.r_pos * np.cos(self.theta_pos),
             y_position=self.r_pos * np.sin(self.theta_pos),
-            show=show,
+            show=show, savefig=savefig,
         )
 
-    def plot_orbit_3d(self, r_surface=0.1, distance=6, show=True):
+    def plot_orbit_3d(self, r_surface=0.1, distance=6, show=True, savefig=None):
         """Plot particle orbit in 3D cartesian coordinates"""
         from .plotting import get_vmec_boundary, plot_orbit3d
 
@@ -270,13 +270,14 @@ class ParticleOrbit:  # pylint: disable=R0902
             rpos_cartesian=self.rpos_cartesian,
             distance=distance,
             show=show,
+            savefig=savefig,
         )
 
-    def plot(self, show=True):
+    def plot(self, show=True, savefig=None):
         """Plot relevant physics parameters of the particle orbit"""
         from .plotting import plot_parameters
 
-        plot_parameters(self=self, show=show)
+        plot_parameters(self=self, show=show, savefig=savefig)
 
     def plot_animation(self, r_surface=0.1, distance=7, show=True, save_movie=False):
         """Plot three-dimensional animation of the particle orbit"""
@@ -307,7 +308,7 @@ class ParticleOrbit:  # pylint: disable=R0902
             save_movie=save_movie,
         )
 
-    def plot_orbit_contourB(self, ntheta=100, nphi=120, ncontours=20, show=True):
+    def plot_orbit_contourB(self, ntheta=100, nphi=120, ncontours=20, show=True, savefig=None):
         """Plot particle orbit superimposed in B contours"""
         import matplotlib.pyplot as plt
 
@@ -351,6 +352,7 @@ class ParticleOrbit:  # pylint: disable=R0902
         plt.ylim([0, 2 * np.pi])
         if show:
             plt.show()
+        if savefig is not None: plt.savefig(savefig)
 
 
 class ParticleEnsembleOrbit:  # pylint: disable=R0902
