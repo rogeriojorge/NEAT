@@ -151,6 +151,7 @@ class ParticleOrbit:  # pylint: disable=R0902
         nsamples=1000,
         tfinal=0.0001,
         constant_b20=False,
+        add_zeros=True
     ) -> None:
 
         self.particle = particle
@@ -176,7 +177,7 @@ class ParticleOrbit:  # pylint: disable=R0902
             )
         )
 
-        if solution.shape[0] < self.nsamples:
+        if add_zeros and solution.shape[0] < self.nsamples:
             rows_to_add = self.nsamples - solution.shape[0] + 1
             zero_rows = np.zeros((rows_to_add, solution.shape[1]))
             solution = np.concatenate((solution, zero_rows), axis=0)
