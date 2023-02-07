@@ -392,7 +392,7 @@ if simple_loaded:
                     z_vmec[kt + 1, 0], z_vmec[kt + 1, 1], z_vmec[kt + 1, 2]
                 )
                 z_cyl[kt + 1, 2] = z_vmec[kt + 1, 2]
-
+            ## PARALLEL VELOCITY OUTPUTED WITH A MINUS SIGN
             return np.array(
                 [
                     time,
@@ -406,7 +406,7 @@ if simple_loaded:
                         [Lambda * np.sqrt(2 * energy / mass)] * len(z_vmec[:, 2])
                     ),  # perpendicular energy
                     np.array([0] * len(z_vmec[:, 2])),  # magnetic_field_strength,
-                    z_vmec[:, 4]*v_th,  # parallel velocity
+                    -z_vmec[:, 4]*v_th,  # parallel velocity
                     np.array([0] * len(z_vmec[:, 2])),  # rdot,
                     np.array([0] * len(z_vmec[:, 2])),  # thetadot,
                     np.array([0] * len(z_vmec[:, 2])),  # varphidot,
