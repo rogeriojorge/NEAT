@@ -151,7 +151,8 @@ class ParticleOrbit:  # pylint: disable=R0902
         nsamples=1000,
         tfinal=0.0001,
         constant_b20=False,
-        add_zeros=False
+        add_zeros=False,
+        zeros_to_nan=True,
     ) -> None:
 
         self.particle = particle
@@ -181,6 +182,8 @@ class ParticleOrbit:  # pylint: disable=R0902
             rows_to_add = self.nsamples - solution.shape[0] + 1
             zero_rows = np.zeros((rows_to_add, solution.shape[1]))
             solution = np.concatenate((solution, zero_rows), axis=0)
+        if zeros_to_nan:
+            solution[solution[:,1] == 0] = np.nan
         self.solution = solution
         
         self.time = solution[:, 0]

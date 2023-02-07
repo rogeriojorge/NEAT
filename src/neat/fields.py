@@ -363,6 +363,7 @@ if simple_loaded:
             dtaumin = 2 * np.pi * Rmajor / npoints
             v_th = np.sqrt(2 * energy * ELEMENTARY_CHARGE / (mass * PROTON_MASS))
             nt = int(tfinal * v_th / dtaumin)
+            if nsamples<nt: print(f'Warning: nsamples={nsamples} smaller than nt={nt}')
             time = np.linspace(dtaumin / v_th, nt * dtaumin / v_th, nt)
             # dtaumin (time step of the integrator) = 2*pi*Rmajor/npoiper2
             # actual time step dt = dtaumin/v_th
