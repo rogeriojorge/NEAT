@@ -151,7 +151,7 @@ class ParticleOrbit:  # pylint: disable=R0902
         nsamples=1000,
         tfinal=0.0001,
         constant_b20=False,
-        add_zeros=True
+        add_zeros=False
     ) -> None:
 
         self.particle = particle
