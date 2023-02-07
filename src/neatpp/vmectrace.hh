@@ -30,7 +30,7 @@ public:
     : m_states(states), eq_pointer_(e), gc_pointer_(g), maximum_s_(maximum_s) {};
   void operator()(const guiding_centre::state& s, double t) {
     IR3 x = gc_pointer_->get_position(s);
-    double B = eq_pointer_->magnitude(x, t);
+    double B = (eq_pointer_->magnitude(x, t))*eq_pointer_->m_factor();
     guiding_centre::state dots = (*gc_pointer_)(s, t);
     IR3 y = gc_pointer_->get_position(dots);
     IR3 X = eq_pointer_->metric()->transform2cylindrical(x);
