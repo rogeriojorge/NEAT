@@ -2,6 +2,7 @@
 #include <pybind11/pybind11.h>
 #include "stellna.hh"
 #include "vmectrace.hh"
+#include "vmectrace_interp3D.hh"
 namespace py = pybind11;
 
 // Python wrapper functions
@@ -22,6 +23,12 @@ PYBIND11_MODULE(neatpp, m) {
           "Trace a particle ensemble in a partially quasisymmetric near-axis magnetic field");
     m.def("vmectrace",&vmectrace,
           "Trace a single particle in a VMEC equilibrium magnetic field",
+           py::arg("vmec_file"), py::arg("charge"), py::arg("mass"),
+           py::arg("Lambda"), py::arg("vpp_sign"), py::arg("energy"),
+           py::arg("s0"), py::arg("theta0"), py::arg("phi0"),
+           py::arg("Tfinal"), py::arg("nsamples"));
+    m.def("vmectrace_interp3D",&vmectrace_interp3D,
+          "Trace a single particle in an interpolated VMEC equilibrium magnetic field",
            py::arg("vmec_file"), py::arg("charge"), py::arg("mass"),
            py::arg("Lambda"), py::arg("vpp_sign"), py::arg("energy"),
            py::arg("s0"), py::arg("theta0"), py::arg("phi0"),

@@ -34,6 +34,7 @@ from neatpp import (
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
     vmectrace,
+    vmectrace_interp3D
 )
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
@@ -493,9 +494,10 @@ class Vmec:
 
     """
 
-    def __init__(self, wout_filename: str) -> None:
+    def __init__(self, wout_filename: str, interp3D: bool = False) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
+        self.interp3D = interp3D
         net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp"][()]
         net_file.close()
@@ -506,7 +508,10 @@ class Vmec:
 
     def neatpp_solver(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
-        return vmectrace(*args, *kwargs)
+        if self.interp3D:
+            return vmectrace_interp3D(*args, *kwargs)
+        else:
+            return vmectrace(*args, *kwargs)
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""

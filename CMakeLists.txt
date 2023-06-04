@@ -125,6 +125,9 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/stellna.hh
     src/neatpp/vmectrace.hh
     src/neatpp/neatpp.cpp
+    src/neatpp/fields_NEAT/equilibrium_vmec_interp3D.cc
+    src/neatpp/metrics_NEAT/metric_vmec_interp3D.cc
+    src/neatpp/vmectrace_interp3D.hh
     # src/neatpp/NEAT_Mercier.cc
 )
 
@@ -153,6 +156,9 @@ add_library(profiling_lib
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
     src/neatpp/stellna.hh
     src/neatpp/vmectrace.hh
+    src/neatpp/fields_NEAT/equilibrium_vmec_interp3D.cc
+    src/neatpp/metrics_NEAT/metric_vmec_interp3D.cc
+    src/neatpp/vmectrace_interp3D.hh
 )
 target_link_libraries(profiling_lib PRIVATE gyronimo)
 target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
