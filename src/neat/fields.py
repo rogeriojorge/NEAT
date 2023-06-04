@@ -34,7 +34,7 @@ from neatpp import (
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
     vmectrace,
-    vmectrace_interp3D
+    vmectrace_interp3D,
 )
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
