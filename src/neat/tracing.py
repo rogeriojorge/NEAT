@@ -53,7 +53,6 @@ class ChargedParticle:
         theta_initial=np.pi,
         phi_initial=0,
     ) -> None:
-
         self.charge = charge
         self.mass = mass
         self.energy = energy
@@ -104,7 +103,6 @@ class ChargedParticleEnsemble:
         ntheta=10,
         nphi=10,
     ) -> None:
-
         self.charge = charge
         self.mass = mass
         self.energy = energy
@@ -152,7 +150,6 @@ class ParticleOrbit:  # pylint: disable=R0902
         tfinal=0.0001,
         constant_b20=False,
     ) -> None:
-
         self.particle = particle
         self.field = field
         self.nsamples = nsamples
@@ -364,7 +361,6 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         nthreads=2,
         constant_b20=True,
     ) -> None:
-
         self.particles = particles
         self.field = field
         self.nsamples = nsamples
@@ -539,7 +535,6 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         npoiper2=128,
         nper=1000,
     ) -> None:
-
         self.particles = particles
         # Change later to a definition of a variable called nparticles
         self.nparticles = nparticles
