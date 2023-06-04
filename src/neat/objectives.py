@@ -9,7 +9,6 @@ script makes heavy use of SIMSOPT's Optimizable class.
 
 """
 
-from ast import Import
 from typing import Union
 
 import numpy as np
