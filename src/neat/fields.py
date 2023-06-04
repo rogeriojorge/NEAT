@@ -268,7 +268,6 @@ if simple_loaded:
             ns_s: int = 3,
             ns_tp: int = 3,
         ) -> None:
-
             self.near_axis = False
             self.wout_filename = wout_filename
             net_file = netcdf.netcdf_file(self.wout_filename, "r", mmap=False)

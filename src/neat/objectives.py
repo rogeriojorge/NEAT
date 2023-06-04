@@ -9,7 +9,6 @@ script makes heavy use of SIMSOPT's Optimizable class.
 
 """
 
-from ast import Import
 from typing import Union
 
 import numpy as np
@@ -43,7 +42,6 @@ class LossFractionResidual(Optimizable):
         nthreads=2,
         r_max=0.12,
     ) -> None:
-
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
@@ -91,7 +89,6 @@ class EffectiveVelocityResidual(Optimizable):
         r_max=0.12,
         constant_b20=True,
     ) -> None:
-
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
@@ -163,7 +160,6 @@ class OptimizeLossFractionSkeleton:
         tfinal=0.0001,
         nthreads=2,
     ) -> None:
-
         # log(level=logging.DEBUG)
 
         self.field = field
