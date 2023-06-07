@@ -20,6 +20,10 @@ try:
     from .fields import StellnaQS
 except ImportError as error:
     pass
+try:
+    from .fields import Dommaschk
+except ImportError as error:
+    pass
 
 import logging
 from typing import Union

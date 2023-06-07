@@ -119,11 +119,14 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/fields_NEAT/equilibrium_stellna.cc
     src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
     src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
+    src/neatpp/fields_NEAT/equilibrium_dommaschk.cc
     src/neatpp/metrics_NEAT/metric_stellna.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+    src/neatpp/metrics_NEAT/metric_cylindrical.cc
     src/neatpp/stellna.hh
     src/neatpp/vmectrace.hh
+    src/neatpp/dommaschktrace.hh
     src/neatpp/neatpp.cpp
     # src/neatpp/NEAT_Mercier.cc
 )
@@ -148,11 +151,14 @@ add_library(profiling_lib
     src/neatpp/fields_NEAT/equilibrium_stellna.cc
     src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
     src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
+    src/neatpp/fields_NEAT/equilibrium_dommaschk.cc
     src/neatpp/metrics_NEAT/metric_stellna.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+    src/neatpp/metrics_NEAT/metric_cylindrical.cc
     src/neatpp/stellna.hh
     src/neatpp/vmectrace.hh
+    src/neatpp/dommaschktrace.hh
 )
 target_link_libraries(profiling_lib PRIVATE gyronimo)
 target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})

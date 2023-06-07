@@ -20,6 +20,7 @@ except ImportError as error:
     simple_loaded = False
 
 import copy
+from typing import List
 
 import numpy as np
 from qic import Qic
@@ -34,6 +35,8 @@ from neatpp import (
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
     vmectrace,
+    dommaschktrace
+
 )
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
@@ -513,5 +516,39 @@ class Vmec:
         """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
         print(
             "Please use a Simple field for particle ensemble calculations with VMEC fields"
+        )
+        raise NotImplementedError
+    
+class Dommaschk:
+    """Dommaschk class
+
+    This class initializes a Dommaschk field to be
+    ready to be used in the gyronimo-based
+    particle tracer.
+
+    """
+
+    def __init__(self, m:List[int], l:List[int], coeff1:List[float], coeff2:List[float], B0:List[float]) -> None:
+        self.near_axis = False
+        self.l=l
+        self.m=m
+        self.coeff1=coeff1
+        self.coeff2=coeff2
+        self.B0=B0
+
+        
+
+    def gyronimo_parameters(self):
+        """Return list of parameters to feed gyronimo-based functions"""
+        return [self.m, self.l, self.coeff1, self.coeff2, self.B0]
+
+    def neatpp_solver(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
+        return dommaschktrace(*args, *kwargs)
+
+    def neatpp_solver_ensemble(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
+        print(
+            "Sample Text" # NEEDS TO BE CHANGED
         )
         raise NotImplementedError

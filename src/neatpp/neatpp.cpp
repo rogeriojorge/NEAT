@@ -2,6 +2,8 @@
 #include <pybind11/pybind11.h>
 #include "stellna.hh"
 #include "vmectrace.hh"
+#include "dommaschktrace.hh"
+
 namespace py = pybind11;
 
 // Python wrapper functions
@@ -26,4 +28,8 @@ PYBIND11_MODULE(neatpp, m) {
            py::arg("Lambda"), py::arg("vpp_sign"), py::arg("energy"),
            py::arg("s0"), py::arg("theta0"), py::arg("phi0"),
            py::arg("Tfinal"), py::arg("nsamples"));
+    m.def("dommaschktrace",&dommaschktrace,
+          "Trace a single particle in a Dommaschk equilibrium magnetic field");
+
+                      
 }
