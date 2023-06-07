@@ -14,19 +14,19 @@ vmec equilibrium
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.2  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
+r_initial = 0.9  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
 theta_initial = np.pi / 2  # initial poloidal angle
 phi_initial = 1.2  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.92  # = mu * B0 / energy
+Lambda = 0.7  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 3000  # resolution in time
-tfinal = 2e-4  # seconds
-wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
+nsamples = 100  # resolution in time
+tfinal = 1e-6  # seconds
+wout_filename = "wout_nearaxis_sboundary18.187045294531803_000_000000.nc"
 
-g_field = Vmec(wout_filename=wout_filename)
+g_field = Vmec(wout_filename=wout_filename, maximum_s=1)
 g_particle = ChargedParticle(
     r_initial=r_initial,
     theta_initial=theta_initial,
