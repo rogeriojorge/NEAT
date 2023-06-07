@@ -14,21 +14,21 @@ from neat.fields import StellnaQS
 from neat.objectives import EffectiveVelocityResidual, LossFractionResidual
 from neat.tracing import ChargedParticle, ChargedParticleEnsemble, ParticleOrbit
 
-r_initial = 0.05
-r_max = 0.1
+r_initial = 0.7
+r_max = 1.4
 n_iterations = 20
 ftol = 1e-5
 B0 = 5
 B2c = B0 / 7
 nsamples = 600
 tfinal = 4e-5
-stellarator_index = 2
+stellarator_index = 'precise QA'
 constant_b20 = True
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-ntheta = 5  # resolution in theta
-nphi = 5  # resolution in phi
+ntheta = 10  # resolution in theta
+nphi = 10  # resolution in phi
 nlambda_trapped = 10  # number of pitch angles for trapped particles
 nlambda_passing = 2  # number of pitch angles for passing particles
 nthreads = 2
@@ -106,8 +106,11 @@ class optimize_loss_fraction:
         else:
             least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
 
-
-g_field = StellnaQS.from_paper(stellarator_index, nphi=51, B2c=B2c, B0=B0)
+Rmajor_ARIES = 7.7495/2
+g_field_basis = StellnaQS.from_paper(stellarator_index, nphi=51, B2c=B2c, B0=B0)
+g_field = StellnaQS(rc=g_field_basis.rc*Rmajor_ARIES, zs=g_field_basis.zs*Rmajor_ARIES, \
+                        etabar=g_field_basis.etabar/Rmajor_ARIES, B2c=g_field_basis.B2c*(B0/Rmajor_ARIES/Rmajor_ARIES),\
+                            B0=B0, nfp=g_field_basis.nfp, order='r3', nphi=111)
 g_particle = ChargedParticleEnsemble(
     r_initial=r_initial,
     r_max=r_max,
