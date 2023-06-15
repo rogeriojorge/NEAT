@@ -7,3 +7,6 @@
 [submodule "external/splinterp"]
 	path = external/splinterp
 	url = https://github.com/apryor6/splinterp.git
+[submodule "external/splinter"]
+	path = external/splinter
+	url = https://github.com/bgrimstad/splinter.git
