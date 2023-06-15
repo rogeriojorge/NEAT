@@ -4,3 +4,6 @@
 [submodule "external/simple"]
 	path = external/simple
 	url = https://github.com/itpplasma/SIMPLE.git
+[submodule "external/splinterp"]
+	path = external/splinterp
+	url = https://github.com/apryor6/splinterp.git
