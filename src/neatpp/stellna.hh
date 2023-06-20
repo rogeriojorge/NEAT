@@ -309,7 +309,7 @@ vector< vector<double>> gc_solver_qs_partial(
 
     vector<vector< double >> x_vec;
     // runge_kutta4<guiding_centre::state> integration_algorithm;
-    runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm2;
+    runge_kutta_dopri5<guiding_centre::state> integration_algorithm2;
     // typedef guiding_centre::state state_type;
     // typedef runge_kutta_cash_karp54<state_type> error_stepper_type;
     // double abs_err = 1.0e-10 , rel_err = 1.0e-6 , a_x = 1.0 , a_dxdt = 1.0;
@@ -520,10 +520,8 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_qs_partial_ensemble(
     ensemble_type ensemble_object(move(guiding_centre_vector));
     runge_kutta_cash_karp54<ensemble_type::state> ode_stepper;
     
-    boost::numeric::odeint::integrate_const(
-        ode_stepper, ensemble_object,
-        initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
-    );
+    boost::numeric::odeint::integrate_const( ode_stepper, ensemble_object,
+        initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object));
 
     return make_tuple(lambdas,x_vec);
 }
@@ -611,10 +609,8 @@ tuple<vector<double>,vector<double>,vector<double>,vector<vector<double>>> gc_so
     vector<vector< double >> x_vec;
     ensemble_type ensemble_object(move(guiding_centre_vector));
     boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
-    boost::numeric::odeint::integrate_const(
-        ode_stepper, ensemble_object,
-        initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
-    );
+    boost::numeric::odeint::integrate_const( ode_stepper, ensemble_object,
+        initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object));
 
     return make_tuple(theta,phi,lambdas,x_vec);
 }

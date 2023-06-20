@@ -20,6 +20,10 @@ try:
     from .fields import StellnaQS
 except ImportError as error:
     pass
+try:
+    from .fields import Vmec
+except ImportError as error:
+    pass
 
 import logging
 from typing import Union
@@ -114,6 +118,7 @@ class ChargedParticleEnsemble:
         self.r_max = r_max
         self.ntheta = ntheta
         self.nphi = nphi
+ 
 
     def is_alpha_particle(self) -> bool:
         """Return true if particles are a collection of alpha particles"""
@@ -208,6 +213,7 @@ class ParticleOrbit:  # pylint: disable=R0902
         self.thetadot = solution[:, 9]
         self.varphidot = solution[:, 10]
         self.vparalleldot = solution[:, 11]
+ 
 
         if self.field.near_axis:
             self.p_phi = canonical_angular_momentum(
@@ -217,20 +223,27 @@ class ParticleOrbit:  # pylint: disable=R0902
                 self.v_parallel,
                 self.magnetic_field_strength,
             )
-
+            # self.p_phi = np.array([1e-16] * len(self.time))
+            # print(self.r_pos)
+            # print(self.theta_pos)
+            # print(self.field.iota)
+            # print(self.field.iotaN)
+            # print(self.varphi_pos)
+            # print(self.phi_pos)
             self.rpos_cylindrical = np.array(
                 self.field.to_RZ(
-                    np.array([self.r_pos, self.theta_pos, self.phi_pos]).transpose()
+                    np.array([self.r_pos, self.theta_pos + (self.field.iota-self.field.iotaN)*self.varphi_pos, self.phi_pos]).transpose()
                 )
             )
-
+            self.B_s = solution[:, 12]
+            self.B_theta = solution[:, 13]
+            self.B_varphi = solution[:, 14]
         else:
             # Canonical angular momentum still not calculated for VMEC fields yet
             self.p_phi = np.array([1e-16] * len(self.time))
             self.rpos_cylindrical = np.array(
                 [solution[:, 12], solution[:, 14], solution[:, 13]]
             )
-
         self.rpos_cartesian = np.array(
             [
                 self.rpos_cylindrical[0] * np.cos(self.rpos_cylindrical[2]),
@@ -332,6 +345,7 @@ class ParticleOrbit:  # pylint: disable=R0902
                 ntheta=ntheta,
                 nzeta=nphi,
             )
+
         fig, ax = plt.subplots()
         plt.contourf(phi_2D, theta_2D, b_on_surface, ncontours)
         # plt.title(titles[i]+'\n1-based index='+str(iradius+1))
@@ -354,15 +368,27 @@ class ParticleOrbit:  # pylint: disable=R0902
         plt.colorbar()
         plt.xlim([0, 2 * np.pi])
         plt.ylim([0, 2 * np.pi])
+        if savefig is not None: plt.savefig(savefig)
         if show:
             plt.show()
-        if savefig is not None: plt.savefig(savefig)
+        
 
+    def plot_diff_cyl(self, self2, show=True, savefig=None):
+        """Plot relevant physics parameters of the particle orbit"""
+        from .plotting import plot_diff_cyl
+
+        plot_diff_cyl(self=self,self2=self2, show=show, savefig=savefig)
+    
+    def plot_diff_boozer(self, self2, r_minor, show=True, savefig=None):
+        """Plot relevant physics parameters of the particle orbit"""
+        from .plotting import plot_diff_boozer
+
+        plot_diff_boozer(self=self, self2=self2, r_minor=r_minor, show=show, savefig=savefig)
 
 class ParticleEnsembleOrbit:  # pylint: disable=R0902
     r"""
-    Interface function with the C++ executable NEAT. Receives a
-    particle and field instance from neat.
+    Interface function with the C++ executable NEAT. Receives an
+    ensemble of particles and a vmec field instance from neat.
     """
 
     def __init__(
@@ -373,6 +399,9 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         tfinal=0.0001,
         nthreads=2,
         constant_b20=True,
+        dist=0,
+        thetas=[np.linspace(0,2*np.pi,10)],
+        phis=[np.linspace(0,2*np.pi,10)]
     ) -> None:
 
         self.particles = particles
@@ -380,6 +409,9 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         self.nsamples = nsamples
         self.nthreads = nthreads
         self.tfinal = tfinal
+        self.dist = dist
+        self.theta = thetas
+        self.phi= phis
 
         self.field.constant_b20 = constant_b20
 
@@ -389,81 +421,90 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
             self.nsamples,
             self.tfinal,
             self.nthreads,
+            self.dist,
+            self.theta,
+            self.phi,
         ]
+        
+        result=self.field.neatpp_solver_ensemble(*self.gyronimo_parameters)
 
-        solution = np.array(
-            self.field.neatpp_solver_ensemble(
-                *self.field.gyronimo_parameters(),
-                *self.particles.gyronimo_parameters(),
-                self.nsamples,
-                self.tfinal,
-                self.nthreads,
-            )
-        )
 
+        self.lambda_all = np.array(result[0])
+        self.lambda_trapped=self.lambda_all[:int(particles.nlambda_trapped)]
+        self.lambda_passing=self.lambda_all[ int(particles.nlambda_trapped):]
+        
+        solution = np.array(result[1])
         self.solution = solution
-
         self.time = solution[:, 0]
         self.nparticles = solution.shape[1] - 1
         self.r_pos = solution[:, 1:].transpose()
-
+        
         # Save the values of theta, phi and lambda used
-        r_max = self.particles.r_max
-        self.B_max = (
-            abs(np.max(field.B0))
-            + r_max * (abs(np.max(field.B1c)) + abs(np.max(field.B1s)))
-            + r_max
-            * r_max
-            * (
-                abs(np.max(field.B20))
-                + abs(np.max(field.B2c_array))
-                + abs(np.max(field.B2s_array))
-            )
-        )
-        self.B_min = max(
-            0.01,
-            abs(np.max(field.B0))
-            - r_max * (abs(np.max(field.B1c)) + abs(np.max(field.B1s)))
-            - r_max
-            * r_max
-            * (
-                abs(np.max(field.B20))
-                + abs(np.max(field.B2c_array))
-                + abs(np.max(field.B2s_array))
-            ),
-        )
-        self.theta = np.linspace(0.0, 2 * np.pi, particles.ntheta)
-        self.phi = np.linspace(0.0, 2 * np.pi / field.nfp, particles.nphi)
-        self.lambda_trapped = np.linspace(
-            field.Bbar / self.B_max, field.Bbar / self.B_min, particles.nlambda_trapped
-        )
-        self.lambda_passing = np.linspace(
-            0.0,
-            field.Bbar / self.B_max * (1.0 - 1.0 / particles.nlambda_passing),
-            particles.nlambda_passing,
-        )
-        self.lambda_all = np.concatenate([self.lambda_trapped, self.lambda_passing])
+        # Pass Bmax and Bmin to the solver, lambda min and lambda max
+        # self.B_max = (
+        #     abs(np.max(field.B0))
+        #     + r_max * (abs(np.max(field.B1c)) + abs(np.max(field.B1s)))
+        #     + r_max
+        #     * r_max
+        #     * (
+        #         abs(np.max(field.B20))
+        #         + abs(np.max(field.B2c_array))
+        #         + abs(np.max(field.B2s_array))
+        #     )
+        # )
+        # self.B_min = max(
+        #     0.01,
+        #     abs(np.max(field.B0))
+        #     - r_max * (abs(np.max(field.B1c)) + abs(np.max(field.B1s)))
+        #     - r_max
+        #     * r_max
+        #     * (
+        #         abs(np.max(field.B20))
+        #         + abs(np.max(field.B2c_array))
+        #         + abs(np.max(field.B2s_array))
+        #     ),
+        # )
+        # self.theta = np.linspace(0.0, 2 * np.pi, particles.ntheta)
+        # self.phi = np.linspace(0.0, 2 * np.pi / field.nfp, particles.nphi)
+        # self.lambda_trapped = np.linspace(
+        #     field.Bbar / self.B_max, field.Bbar / self.B_min, particles.nlambda_trapped
+        # )
+        # self.lambda_passing = np.linspace(
+        #     0.0,
+        #     field.Bbar / self.B_max * (1.0 - 1.0 / particles.nlambda_passing),
+        #     particles.nlambda_passing,
+        # )
+        # self.lambda_all = np.concatenate([self.lambda_trapped, self.lambda_passing])
 
         # Store the initial values for each particle in a single ordered array
-        self.initial_lambda_theta_phi_vppsign = []
-        for Lambda in self.lambda_all:
-            for theta in self.theta:
-                for phi in self.phi:
-                    self.initial_lambda_theta_phi_vppsign.append(
-                        [Lambda, theta, phi, +1]
-                    )
-                    self.initial_lambda_theta_phi_vppsign.append(
-                        [Lambda, theta, phi, -1]
-                    )
+        # self.initial_lambda_theta_phi_vppsign = []
+        # for Lambda in self.lambda_all:
+        #     for theta in self.theta:
+        #         for phi in self.phi:
+        #             self.initial_lambda_theta_phi_vppsign.append(
+        #                 [Lambda, theta, phi, +1]
+        #             )
+        #             self.initial_lambda_theta_phi_vppsign.append(
+        #                 [Lambda, theta, phi, -1]
+        #             )
+
+        self.initial_lambda_theta_phi_vppsign = [
+            [theta, phi, Lambda, vppsign]
+            for theta in self.theta
+            for phi in self.phi
+            for Lambda in self.lambda_all
+            for vppsign in [+1, -1]
+        ]
 
         # Compute the Jacobian for each particle at time t=0
         ## Jacobian in (r, vartheta, varphi) coordinates is given by J = (G+iota*I)*r*Bbar/B^2
         self.initial_jacobian = []
+        radius = particles.r_initial
         for initial_lambda_theta_phi_vppsign in self.initial_lambda_theta_phi_vppsign:
-            Lambda = initial_lambda_theta_phi_vppsign[0]
-            theta = initial_lambda_theta_phi_vppsign[1]
-            phi = initial_lambda_theta_phi_vppsign[2]
-            radius = particles.r_initial
+            
+            theta = initial_lambda_theta_phi_vppsign[0]
+            phi = initial_lambda_theta_phi_vppsign[1]
+
             field_magnitude = field.B_mag(radius, theta, phi, Boozer_toroidal=True)
             self.initial_jacobian.append(
                 (field.G0 + radius * radius * field.G2 + field.iota * field.I2)
@@ -529,6 +570,133 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
         if show:
             plt.show()
 
+    def plot_orbits(self, show=True, save=False):
+        """Make a plot of the particles orbits"""
+        import matplotlib.pyplot as plt
+
+        plt.plot(self.r_pos)
+        plt.xlabel("Time (s)")
+        plt.ylabel("s")
+        plt.tight_layout()
+        if save:
+            plt.savefig("plot_orbits.pdf")
+        if show:
+            plt.show()
+
+class ParticleEnsembleOrbit_Vmec:  # pylint: disable=R0902
+    r"""
+    Interface function with the C++ executable NEAT. Receives an
+    ensemble of particles and a vmec field instance from neat.
+    """
+
+    def __init__(
+        self,
+        particles: ChargedParticleEnsemble,
+        field: Vmec,
+        nsamples=5000,
+        tfinal=0.001,
+        nthreads=2,
+        dist=0,
+    ) -> None: 
+        
+        self.particles = particles
+        self.field = field
+        self.nsamples = nsamples
+        self.tfinal = tfinal
+        self.nthreads = nthreads
+        self.dist = dist
+
+        self.gyronimo_parameters = [
+                *self.field.gyronimo_parameters(),
+                *self.particles.gyronimo_parameters(),
+                self.nsamples,
+                self.tfinal,
+                self.nthreads,
+                self.dist,
+        ]
+
+        self.gyronimo_parameters = [
+            *self.field.gyronimo_parameters(),
+            *self.particles.gyronimo_parameters(),
+            self.nsamples,
+            self.tfinal,
+            self.nthreads,
+            self.dist,
+        ]
+
+        solution = np.array(self.field.neatpp_solver_ensemble(*self.gyronimo_parameters))
+
+        self.solution = solution
+        self.time = solution[:, 0]
+        self.nparticles = solution.shape[1] - 1
+        self.r_pos = solution[:, 1:].transpose()
+
+        self.lost_times_of_particles = []
+        self.loss_fraction_array = []
+        self.total_particles_lost = 0
+
+    def loss_fraction(self, r_max=0.15, jacobian_weight=True):
+        r"""
+        Weight each particle by its Jacobian in order to attribute to each particle
+        a marker representing a set of particles. The higher the value of the Jacobian
+        at the initial time, the higher the number of particles should be there. For
+        this reason, the loss_fraction is weighted by the Jacobian at initial time if
+        the flag jacobian_weight is set to True.
+        """
+        self.lost_times_of_particles = [
+            self.time[np.argmax(particle_pos > r_max)] for particle_pos in self.r_pos
+        ]
+        self.loss_fraction_array = [0.0]
+        self.total_particles_lost = 0
+        # if jacobian_weight:
+        #     for time in self.time[1:]:
+        #         index_particles_lost = [
+        #             i for i, x in enumerate(self.lost_times_of_particles) if x == time
+        #         ]
+        #         initial_jacobian_particles_lost_at_this_time = (
+        #             [0]
+        #             if not index_particles_lost
+        #             else [self.initial_jacobian[i] for i in index_particles_lost]
+        #         )
+        #         self.total_particles_lost += np.sum(
+        #             initial_jacobian_particles_lost_at_this_time
+        #         )
+        #         self.loss_fraction_array.append(
+        #             self.total_particles_lost / np.sum(self.initial_jacobian)
+        #         )
+        # else:
+        for time in self.time[1:]:
+            particles_lost_at_this_time = self.lost_times_of_particles.count(time)
+            self.total_particles_lost += particles_lost_at_this_time
+            self.loss_fraction_array.append(self.total_particles_lost / self.nparticles)
+
+        return self.loss_fraction_array
+    
+    def plot_loss_fraction(self, show=True, save=False):
+        """Make a plot of the fraction of total particles lost over time"""
+        import matplotlib.pyplot as plt
+
+        plt.semilogx(self.time, self.loss_fraction_array)
+        plt.xlabel("Time (s)")
+        plt.ylabel("Loss Fraction")
+        plt.tight_layout()
+        if save:
+            plt.savefig("plot_loss_fraction.pdf")
+        if show:
+            plt.show()
+
+    def plot_orbits(self, show=True, save=False):
+        """Make a plot of the particles orbits"""
+        import matplotlib.pyplot as plt
+
+        plt.plot(self.r_pos)
+        plt.xlabel("Time (s)")
+        plt.ylabel("s")
+        plt.tight_layout()
+        if save:
+            plt.savefig("plot_orbits.pdf")
+        if show:
+            plt.show()
 
 class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
     r"""
@@ -539,7 +707,7 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
     def __init__(
         self,
         particles: ChargedParticleEnsemble,
-        field: Union[StellnaQS, Stellna],
+        field: Simple,
         nsamples=5000,
         tfinal=0.001,
         nthreads=2,
@@ -565,8 +733,6 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self.npoiper = npoiper
         self.npoiper2 = npoiper2
         self.nper = nper
-
-        # self.field.constant_b20 = constant_b20
 
         self.gyronimo_parameters = [
             *self.field.gyronimo_parameters(),

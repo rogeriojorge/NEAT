@@ -167,7 +167,6 @@ vector<vector<double>> vmectrace(
   // Lambda*energySI_over_refEnergy = energy*Bref/(2*Binicial*Uref)*(1-vparallel_over_v^2)
 
   guiding_centre gc(Lref, Vref, charge / mass, Lambda * energySI_over_refEnergy / Bi , &veq); // -> Version with Bi
-  // guiding_centre gc(Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy/Bref, &veq); // // -> Version with Bref as B0
   guiding_centre::state initial_state = gc.generate_state(
       {s0, phi0, theta0}, energySI_over_refEnergy,
       (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
@@ -177,6 +176,10 @@ vector<vector<double>> vmectrace(
   vector<vector<double>> x_vec;
   push_back_state_and_time_vmec observer(x_vec, integrator, &veq, &gc, maximum_s);
   // runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm;
+
+  gsl_set_error_handler_off();
+
+// Uncomment for const integration comparisons
   switch (integrator) {
     case 1:
       { 
@@ -191,7 +194,7 @@ vector<vector<double>> vmectrace(
       break;}
     case 2:
       {   
-      runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm;
+      runge_kutta_dopri5<guiding_centre::state> integration_algorithm; //runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm;
       try
       {
         integrate_const(integration_algorithm, odeint_adapter(&gc),
@@ -280,14 +283,108 @@ vector<vector<double>> vmectrace(
     default:
       cout << "Error: invalid stepper choice." << endl;
       break;
-
   }
 
-  gsl_set_error_handler_off();
-
+  // switch (integrator) {
+  //   case 1:
+  //     {   
+  //     runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm;
+  //     try
+  //     {
+  //       integrate_const(integration_algorithm, odeint_adapter(&gc),
+  //           initial_state, 0.0, Tfinal, Tfinal / nsamples, observer);
+  //     }
+  //     catch (int e)
+  //     { } 
+  //     break;}
+  //   case 2:
+  //     {   
+  //     runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm;
+  //     typedef runge_kutta_cash_karp54<guiding_centre::state> error_stepper_type;
+  //     try
+  //     {
+  //       integrate_adaptive(make_controlled( (1.0e-14)*(100/nsamples) , (1.0e-16) , error_stepper_type() ), odeint_adapter(&gc),
+  //         initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
+  //     }
+  //     catch (int e)
+  //     { } 
+  //     break;}
+  //   case 3:
+  //     {   
+  //     runge_kutta_fehlberg78<guiding_centre::state> integration_algorithm;
+  //     try
+  //     {
+  //       integrate_const(integration_algorithm, odeint_adapter(&gc),
+  //           initial_state, 0.0, Tfinal, Tfinal / nsamples, observer);
+  //     }
+  //     catch (int e)
+  //     { } 
+  //     break;}
+  //   case 4:
+  //     {   
+  //     runge_kutta_fehlberg78<guiding_centre::state> integration_algorithm;
+  //     typedef runge_kutta_fehlberg78<guiding_centre::state> error_stepper_type;
+  //     try
+  //     {
+  //       integrate_adaptive(make_controlled( (1.0e-14)*(100/nsamples) , (1.0e-16) , error_stepper_type() ), odeint_adapter(&gc),
+  //         initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
+  //     }
+  //     catch (int e)
+  //     { } 
+  //     break;}
+  //   case 5:
+  //     {   
+  //     runge_kutta_dopri5<guiding_centre::state> integration_algorithm;
+  //     try
+  //     {
+  //       integrate_const(integration_algorithm, odeint_adapter(&gc),
+  //           initial_state, 0.0, Tfinal, Tfinal / nsamples, observer);
+  //     }
+  //     catch (int e)
+  //     { } 
+  //     break;}
+  //   case 6:
+  //     {   
+  //     runge_kutta_dopri5<guiding_centre::state> integration_algorithm;
+  //     typedef runge_kutta_dopri5<guiding_centre::state> error_stepper_type;
+  //     try
+  //     {
+  //       integrate_adaptive(make_controlled( (1.0e-14)*(100/nsamples) , (1.0e-16) , error_stepper_type() ), odeint_adapter(&gc),
+  //         initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
+  //     }
+  //     catch (int e)
+  //     { } 
+  //     break;}
+  //   case 7:
+  //     {   
+  //     bulirsch_stoer<guiding_centre::state> integration_algorithm;
+  //     try
+  //     {
+  //       integrate_const(integration_algorithm, odeint_adapter(&gc),
+  //           initial_state, 0.0, Tfinal, Tfinal / nsamples, observer);
+  //     }
+  //     catch (int e)
+  //     { } 
+  //     break;}
+  //   // case 8:
+  //   //   {   
+  //   //   bulirsch_stoer<guiding_centre::state> integration_algorithm;
+  //   //   typedef bulirsch_stoer<guiding_centre::state> error_stepper_type;
+  //   //   try
+  //   //   {
+  //   //     integrate_adaptive(make_controlled( (1.0e-14)*(100/nsamples) , (1.0e-16) , error_stepper_type() ), odeint_adapter(&gc),
+  //   //       initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
+  //   //   }
+  //   //   catch (int e)
+  //   //   { } 
+  //   //   break;}
+  //   default:
+  //     cout << "Error: invalid stepper choice." << endl;
+  //     break;
+  // }
   
-      // boost::numeric::odeint::integrate_adaptive(
-      //   integration_algorithm, odeint_adapter(&gc),
-      //   initial_state, t, Tfinal, Tfinal/nsamples, observer);
+  // boost::numeric::odeint::integrate_adaptive(
+  //   integration_algorithm, odeint_adapter(&gc),
+  //   initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
   return x_vec;
 }

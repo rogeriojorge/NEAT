@@ -35,6 +35,7 @@ from neatpp import (
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
     vmectrace,
+    vmecloss,
 )
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
@@ -268,6 +269,8 @@ if simple_loaded:
             multharm: int = 3,
             ns_s: int = 3,
             ns_tp: int = 3,
+            nsamples: int = 1000,
+            integmode: int = 1,
         ) -> None:
 
             self.near_axis = False
@@ -285,15 +288,17 @@ if simple_loaded:
             from pysimple import simple as simple_local
 
             self.params = copy.deepcopy(params_local)
+            self.params.ntimstep = nsamples
+            self.params.integmode = integmode
             self.stuff = copy.deepcopy(stuff_local)
             self.simple = copy.deepcopy(simple_local)
-
             self.tracy = self.params.Tracer()
             self.stuff.vmec_b_scale = self.B_scale
             self.stuff.vmec_rz_scale = self.Aminor_scale
             self.stuff.multharm = self.multharm
             self.stuff.ns_s = ns_s
             self.stuff.ns_tp = ns_tp
+            
 
             self.simple.init_field(
                 self.tracy,
@@ -340,7 +345,7 @@ if simple_loaded:
 
             relative_error = 1e-13
             npoints = 256
-            Simple.init_params(Tracy, charge, mass, energy, npoints, 1, relative_error)
+            Simple.init_params(Tracy, charge, mass, energy, npoints,  1, relative_error)
 
             # s, th, ph, v/v_th, v_par/v
             abs_v_parallel_over_v = np.sqrt(1 - Lambda)
@@ -498,17 +503,18 @@ class Vmec:
 
     """
 
-    def __init__(self, wout_filename: str, maximum_s=0.95) -> None:
+    def __init__(self, wout_filename: str, maximum_s=0.95, integrator=2) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
         net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp"][()]
         self.maximum_s = maximum_s
+        self.integrator=integrator
         net_file.close()
 
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
-        return [self.wout_filename, self.maximum_s]
+        return [self.wout_filename, self.maximum_s, self.integrator]
 
     def neatpp_solver(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
@@ -516,7 +522,4 @@ class Vmec:
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
-        print(
-            "Please use a Simple field for particle ensemble calculations with VMEC fields"
-        )
-        raise NotImplementedError
+        return vmecloss(*args, *kwargs)
