@@ -20,6 +20,7 @@ class metric_vmec_interp3D : public metric_covariant {
   virtual dSM3 del(const IR3& position) const override;
   virtual IR3 transform2cylindrical(const IR3& position) const override;
   double jacobian_vmec(const IR3& position) const;
+  double jacobian_vmec_interp3d(const IR3& position) const;
   const parser_vmec* parser() const {return parser_;};
   const double signgs() const {return signsgs_;};
 

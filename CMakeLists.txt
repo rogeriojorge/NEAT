@@ -103,6 +103,9 @@ endif()
 set(BUILD_VMEC_SUPPORT "ON")
 add_subdirectory(external/gyronimo)
 
+# Add splinter
+include_directories(${PROJECT_SOURCE_DIR}/external/splinterp)
+
 # Add pybind11 include directories
 execute_process(
     COMMAND "${PYTHON}" -c

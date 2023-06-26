@@ -164,4 +164,50 @@ double metric_vmec_interp3D::jacobian_vmec(const IR3& position) const {
   };
   return -J;
 }
+
+double metric_vmec_interp3D::jacobian_vmec_interp3d(const IR3& position) const {
+    double s = position[IR3::u];
+    double zeta = position[IR3::v];
+    double theta = position[IR3::w];
+    return 0;
+}
+
+// // Not able to get CMakeLists SPLINTER to share library with NEAT
+// #include <datatable.h>
+// #include <bspline.h>
+// #include <bsplinebuilder.h>
+// using namespace SPLINTER;
+
+// double metric_vmec_interp3D::jacobian_vmec_interp3d(const IR3& position) const {
+//     double s = position[IR3::u];
+//     double zeta = position[IR3::v];
+//     double theta = position[IR3::w];
+
+//     // Create new DataTable to manage samples
+//     DataTable samples;
+    
+//     // Sample the function
+//     DenseVector x(3);  // Initialize DenseVector with size 3
+//     for (size_t i = 0; i < xm_nyq_.size(); i++)
+//     {
+//         x(0) = s;       // Use parentheses for element access
+//         x(1) = theta;   // Use parentheses for element access
+//         x(2) = zeta;    // Use parentheses for element access
+//         double y = (*gmnc_[i])(s) * std::cos( xm_nyq_[i]*theta - xn_nyq_[i]*zeta );
+//         samples.addSample(x, y);
+//     }
+
+//     // Build B-splines that interpolate the samples
+//     BSpline bspline = BSpline::Builder(samples).degree(3).build();
+
+//     // Evaluate the approximant at (s, theta, zeta)
+//     x(0) = s;        // Use parentheses for element access
+//     x(1) = theta;    // Use parentheses for element access
+//     x(2) = zeta;     // Use parentheses for element access
+
+//     // Return the interpolated value
+//     return -bspline.eval(x);
+// }
+
+
 }
