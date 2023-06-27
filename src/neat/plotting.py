@@ -284,6 +284,9 @@ def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
 def get_vmec_magB(
     wout_filename, spos=None, ntheta=50, nzeta=100
 ):  # pylint: disable=R0914
+    if (spos<=0 or spos>=1):
+        print("Value spos must be higher than 0 and lower than 1")
+        exit()
     """Obtain contours of B on a magnetic flux surface from a vmec equilibrium"""
     net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
     nsurfaces = net_file.variables["ns"][()]
