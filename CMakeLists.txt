@@ -103,6 +103,9 @@ endif()
 set(BUILD_VMEC_SUPPORT "ON")
 add_subdirectory(external/gyronimo)
 
+# Add SPLINTER
+add_subdirectory(external/splinter)
+
 # Add splinter
 include_directories(${PROJECT_SOURCE_DIR}/external/splinterp)
 
@@ -145,6 +148,23 @@ endif()
 
 # Create C++ library
 target_link_libraries(${PROJECT_NAME} PRIVATE gyronimo)
+target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
+
+# ExternalProject_Add(splinter )
+
+# # Find the library
+# find_library(LIBRARY_NAME_LIBRARY SPLINTER)
+# if(LIBRARY_NAME_LIBRARY)
+#     # Library found
+#     message(STATUS "Library found: ${LIBRARY_NAME_LIBRARY}")
+#     # Add the library to your target
+#     target_link_libraries(SPLINTER ${LIBRARY_NAME_LIBRARY})
+# else()
+#     # Library not found
+#     message(FATAL_ERROR "Library not found: SPLINTER")
+# endif()
+
+
 target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)

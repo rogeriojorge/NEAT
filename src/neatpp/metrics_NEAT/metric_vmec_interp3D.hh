@@ -1,3 +1,7 @@
+#include <datatable.h>
+#include <bspline.h>
+#include <bsplinebuilder.h>
+
 #include <vector>
 #include "splinterp.h"
 
