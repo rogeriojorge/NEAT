@@ -106,9 +106,6 @@ add_subdirectory(external/gyronimo EXCLUDE_FROM_ALL)
 # Add SPLINTER
 add_subdirectory(external/splinter EXCLUDE_FROM_ALL)
 
-# Add splinter
-include_directories(${PROJECT_SOURCE_DIR}/external/splinterp)
-
 # Add pybind11 include directories
 execute_process(
     COMMAND "${PYTHON}" -c
