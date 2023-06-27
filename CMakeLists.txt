@@ -101,10 +101,12 @@ endif()
 
 # Add gyronimo with VMEC support
 set(BUILD_VMEC_SUPPORT "ON")
-add_subdirectory(external/gyronimo EXCLUDE_FROM_ALL)
+add_subdirectory(external/gyronimo)
 
 # Add SPLINTER
-add_subdirectory(external/splinter EXCLUDE_FROM_ALL)
+add_subdirectory(external/splinter)
+include_directories(external/splinter/include)
+include_directories(external/splinter/thirdparty/Eigen)
 
 # Add pybind11 include directories
 execute_process(
@@ -146,19 +148,6 @@ endif()
 # Create C++ library
 target_link_libraries(${PROJECT_NAME} PRIVATE gyronimo)
 target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
-
-# # Find the library
-# find_library(LIBRARY_NAME_LIBRARY splinter-3-0)
-# if(LIBRARY_NAME_LIBRARY)
-#     # Library found
-#     message(STATUS "Library found: ${LIBRARY_NAME_LIBRARY}")
-#     # Add the library to your target
-#     target_link_libraries(splinter-3-0 ${LIBRARY_NAME_LIBRARY})
-# else()
-#     # Library not found
-#     message(FATAL_ERROR "Library not found: splinter-3-0")
-# endif()
-
 target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
@@ -178,12 +167,14 @@ add_library(profiling_lib
     src/neatpp/vmectrace_interp3D.hh
 )
 target_link_libraries(profiling_lib PRIVATE gyronimo)
+target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
 target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
 target_compile_features(profiling_lib PRIVATE cxx_std_20)
 
 add_executable(profiling src/neatpp/neatpp_profiling.cpp)
 target_link_libraries(profiling PRIVATE profiling_lib)
 target_link_libraries(profiling PRIVATE gyronimo)
+target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
 target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
 target_compile_features(profiling PRIVATE cxx_std_20)
 install(TARGETS profiling DESTINATION .)

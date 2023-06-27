@@ -19,7 +19,7 @@ class metric_vmec_interp3D : public metric_covariant {
   virtual SM3 operator()(const IR3& position) const override;
   virtual dSM3 del(const IR3& position) const override;
   virtual IR3 transform2cylindrical(const IR3& position) const override;
-  void precompute_jacobian_grid(double *grid, size_t ns, size_t ntheta, size_t nzeta) const;
+  virtual double precompute_jacobian_grid(double *grid, size_t ns, size_t ntheta, size_t nzeta) const;
   virtual double jacobian_vmec(const IR3& position) const;
   virtual IR3 del_jacobian_vmec(const IR3& position) const;
 //   double jacobian_vmec_interp3d(const IR3& position) const;
