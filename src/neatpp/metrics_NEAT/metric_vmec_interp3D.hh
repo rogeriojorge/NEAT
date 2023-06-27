@@ -1,10 +1,3 @@
-#include <datatable.h>
-#include <bspline.h>
-#include <bsplinebuilder.h>
-
-#include <vector>
-#include "splinterp.h"
-
 #ifndef GYRONIMO_METRIC_VMEC_INTERP3D
 #define GYRONIMO_METRIC_VMEC_INTERP3D
 

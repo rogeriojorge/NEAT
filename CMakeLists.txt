@@ -101,10 +101,10 @@ endif()
 
 # Add gyronimo with VMEC support
 set(BUILD_VMEC_SUPPORT "ON")
-add_subdirectory(external/gyronimo)
+add_subdirectory(external/gyronimo EXCLUDE_FROM_ALL)
 
 # Add SPLINTER
-add_subdirectory(external/splinter)
+add_subdirectory(external/splinter EXCLUDE_FROM_ALL)
 
 # Add splinter
 include_directories(${PROJECT_SOURCE_DIR}/external/splinterp)
@@ -150,20 +150,17 @@ endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE gyronimo)
 target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
 
-# ExternalProject_Add(splinter )
-
 # # Find the library
-# find_library(LIBRARY_NAME_LIBRARY SPLINTER)
+# find_library(LIBRARY_NAME_LIBRARY splinter-3-0)
 # if(LIBRARY_NAME_LIBRARY)
 #     # Library found
 #     message(STATUS "Library found: ${LIBRARY_NAME_LIBRARY}")
 #     # Add the library to your target
-#     target_link_libraries(SPLINTER ${LIBRARY_NAME_LIBRARY})
+#     target_link_libraries(splinter-3-0 ${LIBRARY_NAME_LIBRARY})
 # else()
 #     # Library not found
-#     message(FATAL_ERROR "Library not found: SPLINTER")
+#     message(FATAL_ERROR "Library not found: splinter-3-0")
 # endif()
-
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
@@ -193,13 +190,3 @@ target_link_libraries(profiling PRIVATE gyronimo)
 target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
 target_compile_features(profiling PRIVATE cxx_std_20)
 install(TARGETS profiling DESTINATION .)
-
-## Attempt at making an executable from neatpp.cpp directly
-# add_executable(profiling src/neatpp/neatpp.cpp)
-# target_include_directories(profiling PRIVATE ${pybind11_INCLUDE_DIRS})
-# target_link_libraries(profiling PRIVATE profiling_lib)
-# target_link_libraries(profiling PRIVATE gyronimo)
-# target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
-# target_link_libraries(profiling PRIVATE pybind11::module)
-# target_compile_features(profiling PRIVATE cxx_std_20)
-# install(TARGETS profiling DESTINATION .)
