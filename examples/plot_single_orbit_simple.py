@@ -2,6 +2,7 @@
 
 from neat.fields import Simple  # isort:skip
 from neat.tracing import ChargedParticle, ParticleOrbit  # isort:skip
+from neat.plotting import get_vmec_boundary
 import os
 import time
 
@@ -31,34 +32,40 @@ g_field = Simple(
     wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
 )
 # g_field.params.integmode=0 # mode for integrator: -1 = RK VMEC, 0 = RK, 1 = Euler1, 2 = Euler2, 3 = Verlet
-g_particle = ChargedParticle(
-    r_initial=r_initial,
-    theta_initial=theta_initial,
-    phi_initial=phi_initial,
-    energy=energy,
-    Lambda=Lambda,
-    charge=charge,
-    mass=mass,
-    vpp_sign=vpp_sign,
-)
-print("Starting particle tracer")
-start_time = time.time()
-g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
+# g_particle = ChargedParticle(
+#     r_initial=r_initial,
+#     theta_initial=theta_initial,
+#     phi_initial=phi_initial,
+#     energy=energy,
+#     Lambda=Lambda,
+#     charge=charge,
+#     mass=mass,
+#     vpp_sign=vpp_sign,
+# )
+# print("Starting particle tracer")
+# start_time = time.time()
+# g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
 
-total_time = time.time() - start_time
-print(f"Finished in {total_time}s")
+# total_time = time.time() - start_time
+# print(f"Finished in {total_time}s")
 
-print("Creating B contour plot")
-g_orbit.plot_orbit_contourB(show=False)
+# print("Creating B contour plot")
+# g_orbit.plot_orbit_contourB(show=False)
 
-print("Creating parameter plot")
-g_orbit.plot(show=True)
+# print("Creating parameter plot")
+# g_orbit.plot(show=True)
 
-# print("Creating 2D plot")
-g_orbit.plot_orbit(show=False)
+# # print("Creating 2D plot")
+# g_orbit.plot_orbit(show=False)
 
-print("Creating 3D plot")
-g_orbit.plot_orbit_3d(show=True)
+# print("Creating 3D plot")
+# g_orbit.plot_orbit_3d(show=True)
 
 # print("Creating animation plot")
 # g_orbit.plot_animation(show=True)
+
+*coordinates,bfield=get_vmec_boundary(wout_filename=wout_filename)
+print(coordinates[0][0][0][0], coordinates[0][1][0][0],coordinates[0][2][0][0])
+print(bfield[0][0])
+
+

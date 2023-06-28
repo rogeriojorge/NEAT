@@ -305,7 +305,6 @@ vector< vector<double>> gc_solver_qs_partial(
     guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc); 
     guiding_centre::state initial_state = gc.generate_state(
     {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
-    // cout << initial_state[2] << ' ' << Bi << ' ' << B0 << endl;
 
     vector<vector< double >> x_vec;
     // runge_kutta4<guiding_centre::state> integration_algorithm;
@@ -375,7 +374,7 @@ vector< vector<double>> gc_solver(
 *****************************************/
 
 // Fully quasisymmetric ensemble
-tuple<vector<double>,vector<double>,vector<double>,vector<vector<double>>> gc_solver_qs_ensemble(
+tuple<vector<double>,vector<vector<double>>> gc_solver_qs_ensemble(
                                    double G0, double G2, double I2, double nfp, double iota,
                                    double iotaN, const vector<double>& phi_grid,
                                    double B0, double B1c, double B20, double B2c,
@@ -402,7 +401,7 @@ tuple<vector<double>,vector<double>,vector<double>,vector<vector<double>>> gc_so
     vector<double> lambda_trapped(nlambda_trapped);
     vector<double> lambda_passing(nlambda_passing);
 
-    double threshold=0.7;
+    double threshold=0.75;
 
     if (dist==0) {
 
@@ -428,7 +427,7 @@ tuple<vector<double>,vector<double>,vector<double>,vector<vector<double>>> gc_so
     for(size_t j = 0; j < ntheta; j++) {
         for(size_t l = 0; l < nphi; l++) {
             double Bi=qsc.magnitude({r0, theta[j], phi[l]}, 0);
-            cout << Bi << ' ' << r0 << ' ' << theta[j] << ' ' << phi[l] << ' ' << endl;
+            // cout << Bi << ' ' << r0 << ' ' << theta[j] << ' ' << phi[l] << ' ' << endl;
             for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
                 auto GC=guiding_centre(Lref, Vref, charge/mass, lambdas[k]*energySI_over_refEnergy/Bi, &qsc);
                 initial.push_back(GC.generate_state(
@@ -446,7 +445,7 @@ tuple<vector<double>,vector<double>,vector<double>,vector<vector<double>>> gc_so
         ode_stepper, ensemble_object,
         initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
     );
-    return make_tuple(theta,phi,lambdas,x_vec);
+    return make_tuple(lambdas,x_vec);
 }
 
 // Partially quasisymmetric ensemble
@@ -527,7 +526,7 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_qs_partial_ensemble(
 }
 
 // General field ensemble
-tuple<vector<double>,vector<double>,vector<double>,vector<vector<double>>> gc_solver_ensemble(
+tuple<vector<double>,vector<vector<double>>> gc_solver_ensemble(
                                    int nfp, double G0, double G2, double I2, double iota,
                                    double iotaN, double Bref, const vector<double>& phi_grid,
                                    const vector<double>& B0,
@@ -612,5 +611,5 @@ tuple<vector<double>,vector<double>,vector<double>,vector<vector<double>>> gc_so
     boost::numeric::odeint::integrate_const( ode_stepper, ensemble_object,
         initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object));
 
-    return make_tuple(theta,phi,lambdas,x_vec);
+    return make_tuple(lambdas,x_vec);
 }

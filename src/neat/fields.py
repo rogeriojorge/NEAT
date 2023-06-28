@@ -269,8 +269,11 @@ if simple_loaded:
             multharm: int = 3,
             ns_s: int = 3,
             ns_tp: int = 3,
-            nsamples: int = 1000,
+            nsamples: int = 20000,
             integmode: int = 1,
+            npoiper: int = 100,
+            npoiper2: int = 128,
+            nper: int =1000,
         ) -> None:
 
             self.near_axis = False
@@ -288,17 +291,21 @@ if simple_loaded:
             from pysimple import simple as simple_local
 
             self.params = copy.deepcopy(params_local)
-            self.params.ntimstep = nsamples
+            # self.params.ntimstep = nsamples
             self.params.integmode = integmode
+            # self.params.npoiper2 = npoiper2
+            # self.params.npoiper = npoiper
+            # self.params.npoi = npoiper * nper
+            # self.params.nper = nper
             self.stuff = copy.deepcopy(stuff_local)
             self.simple = copy.deepcopy(simple_local)
+            
             self.tracy = self.params.Tracer()
             self.stuff.vmec_b_scale = self.B_scale
             self.stuff.vmec_rz_scale = self.Aminor_scale
             self.stuff.multharm = self.multharm
             self.stuff.ns_s = ns_s
             self.stuff.ns_tp = ns_tp
-            
 
             self.simple.init_field(
                 self.tracy,
@@ -344,8 +351,24 @@ if simple_loaded:
             """Single particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
 
             relative_error = 1e-13
-            npoints = 256
+            # npoints=3000
+            npoints=256
+            # Simple.init_params(Tracy, charge, mass, energy, npoints, 1, relative_error)
+            # self.params.nper=npoints
             Simple.init_params(Tracy, charge, mass, energy, npoints,  1, relative_error)
+            # self.params.n_e = charge
+            # self.params.n_d = mass
+            # self.params.trace_time = tfinal
+            # self.params.sbeg = r_initial
+            # self.params.params_init()
+
+            # self.tracy.dtau= 1 * (2 * np.pi * Rmajor / npoints)
+            # self.tracy.dtaumin= 2 * np.pi * Rmajor / npoints
+            # self.tracy.v0 = self.params.v0
+            # self.tracy.n_e = charge
+            # self.tracy.n_d = mass
+            # self.tracy.relerr = relative_error
+            
 
             # s, th, ph, v/v_th, v_par/v
             abs_v_parallel_over_v = np.sqrt(1 - Lambda)

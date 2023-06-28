@@ -99,7 +99,7 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True, savefig=None):
     plt.close()
 
 
-def plot_parameters(self, show=True, savefig=None):
+def plot_parameters(self, r_minor=1, show=True, savefig=None):
     """
     Make a single plot with relevant physics parameters
     of a single particle orbit on a magnetic field.
@@ -160,7 +160,11 @@ def plot_parameters(self, show=True, savefig=None):
     # plt.xlabel(r"$R$")
     # plt.ylabel(r"$Z$")
     plt.plot(phases[v_valleys], self.r_pos[v_valleys], color='blue', marker='.', linestyle='None')
-    plt.plot(phases[v_valleys_0], self.r_pos[v_valleys_0], color='red', marker='.', linestyle='None')
+    if r_minor!=1:
+        norm_r_pos_v=(self.r_pos[v_valleys_0]/r_minor)**2
+        plt.plot(phases[v_valleys_0], norm_r_pos_v, color='red', marker='.', linestyle='None')
+    else:
+        plt.plot(phases[v_valleys_0], self.r_pos[v_valleys_0], color='red', marker='.', linestyle='None')
     plt.xlabel(r"$\varphi$")
     plt.ylabel(r"$r$")
     plt.ylim(0,np.max([1,np.nanmax(self.r_pos)]))
@@ -426,6 +430,7 @@ def butter_lowpass_filter(data, cutoff, fs, half_order=5, axis=-1):
 
 def plot_diff_boozer(self, self2, r_minor, show=True, savefig=None):
     from scipy import signal
+    from matplotlib import patches
     """
     Make a single plot with particle orbits on a magnetic field and their
     differences in cylindrical coordinates.
@@ -479,8 +484,13 @@ def plot_diff_boozer(self, self2, r_minor, show=True, savefig=None):
     plt.plot(self.time*1e6, self.varphi_pos)
     plt.xlabel(r't ($\mu$s)')
     plt.ylabel(r"$\varphi$")
-    plt.subplot(3, 4, 4)
+    ax=plt.subplot(3, 4, 4)
     plt.plot(norm_r_pos*np.cos(self_theta_pos), norm_r_pos*np.sin(self_theta_pos))
+    circle=patches.Circle((0,0), radius=1,color='black',fill=False,linestyle='dotted',linewidth=1)
+    circle2=patches.Circle((0,0), radius=norm_r_pos[0],color='black',fill=False,linestyle='dotted',linewidth=1)
+    ax.add_patch(circle)
+    ax.add_patch(circle2)
+    ax.set(xlim=(-1.2,1.2),ylim=(-1.2,1.2))
     plt.xlabel(r'$X$')
     plt.ylabel(r'$Y$')
     plt.subplot(3, 4, 5)
@@ -498,8 +508,13 @@ def plot_diff_boozer(self, self2, r_minor, show=True, savefig=None):
     plt.plot(self2.time*1e6, self2.varphi_pos)
     plt.xlabel(r't ($\mu$s)')
     plt.ylabel(r"$\varphi$")
-    plt.subplot(3, 4, 8)
+    ax1=plt.subplot(3, 4, 8)
     plt.plot(self2.r_pos*np.cos(self2.theta_pos), self2.r_pos*np.sin(self2.theta_pos))
+    circle=patches.Circle((0,0), radius=1,color='black',fill=False,linestyle='dotted',linewidth=1)
+    circle2=patches.Circle((0,0), radius=self2.r_pos[0],color='black',fill=False,linestyle='dotted',linewidth=1)
+    ax1.add_patch(circle)
+    ax1.add_patch(circle2)
+    ax1.set(xlim=(-1.2,1.2),ylim=(-1.2,1.2))
     plt.xlabel(r'$X$')
     plt.ylabel(r'$Y$')
     plt.subplot(3, 4, 9)
