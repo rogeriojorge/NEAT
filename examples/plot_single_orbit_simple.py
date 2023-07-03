@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from neat.fields import Simple  # isort:skip
+#from neat.fields import Simple  # isort:skip
 from neat.tracing import ChargedParticle, ParticleOrbit  # isort:skip
 import os
 import time
-
+from neat.plotting import get_vmec_magB
 import numpy as np
 
 """                                                                           
@@ -27,36 +27,39 @@ wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor
 
-g_field = Simple(
-    wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
-)
-g_particle = ChargedParticle(
-    r_initial=r_initial,
-    theta_initial=theta_initial,
-    phi_initial=phi_initial,
-    energy=energy,
-    Lambda=Lambda,
-    charge=charge,
-    mass=mass,
-    vpp_sign=vpp_sign,
-)
-print("Starting particle tracer")
-start_time = time.time()
-g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
-total_time = time.time() - start_time
-print(f"Finished in {total_time}s")
+# g_field = Simple(
+#     wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
+# )
+# g_particle = ChargedParticle(
+#     r_initial=r_initial,
+#     theta_initial=theta_initial,
+#     phi_initial=phi_initial,
+#     energy=energy,
+#     Lambda=Lambda,
+#     charge=charge,
+#     mass=mass,
+#     vpp_sign=vpp_sign,
+# )
+# print("Starting particle tracer")
+# start_time = time.time()
+# g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
+# total_time = time.time() - start_time
+# print(f"Finished in {total_time}s")
 
-print("Creating B contour plot")
-g_orbit.plot_orbit_contourB(show=False)
+# print("Creating B contour plot")
+# g_orbit.plot_orbit_contourB(show=False)
 
-print("Creating parameter plot")
-g_orbit.plot(show=False)
+# print("Creating parameter plot")
+# g_orbit.plot(show=False)
 
-# print("Creating 2D plot")
-# g_orbit.plot_orbit(show=False)
+# # print("Creating 2D plot")
+# # g_orbit.plot_orbit(show=False)
 
-print("Creating 3D plot")
-g_orbit.plot_orbit_3d(show=True)
+# print("Creating 3D plot")
+# g_orbit.plot_orbit_3d(show=True)
 
-# print("Creating animation plot")
-# g_orbit.plot_animation(show=True)
+# # print("Creating animation plot")
+# # g_orbit.plot_animation(show=True)
+
+b=get_vmec_magB(wout_filename=wout_filename, spos=0.9, ntheta=50, nzeta=100)
+print(b[0][0])
