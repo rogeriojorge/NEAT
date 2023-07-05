@@ -2,7 +2,7 @@ import unittest
 from neat.tracing import ChargedParticle, ChargedParticleEnsemble, ParticleOrbit, ParticleEnsembleOrbit_Simple
 import numpy as np
 import matplotlib.pyplot as plt
-
+from pysimple import orbit_symplectic  # isort:skip
 
 
 
