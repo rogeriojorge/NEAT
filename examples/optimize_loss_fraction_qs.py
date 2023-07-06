@@ -46,7 +46,6 @@ class optimize_loss_fraction:
         parallel=False,
         constant_b20=constant_b20,
     ) -> None:
-
         self.field = field
         self.particles = particles
         self.nsamples = nsamples

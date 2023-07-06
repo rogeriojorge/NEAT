@@ -934,7 +934,6 @@ def verifyMetric(count):
 
 
 if __name__ == "__main__":
-
     # fig = plt.figure()
     # fig.patch.set_facecolor('white')
     # ax = fig.gca(projection='3d')

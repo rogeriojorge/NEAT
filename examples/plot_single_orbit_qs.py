@@ -73,5 +73,5 @@ g_particle = ChargedParticle(
 
 print("Test ChargedParticle")
 # g_particle.is_alpha_particle()
-result=g_particle.is_alpha_particle()
+result = g_particle.is_alpha_particle()
 print(result)

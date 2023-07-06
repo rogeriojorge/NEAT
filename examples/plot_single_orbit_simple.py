@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-#from neat.fields import Simple  # isort:skip
+# from neat.fields import Simple  # isort:skip
 from neat.tracing import ChargedParticle, ParticleOrbit  # isort:skip
 import os
 import time
-from neat.plotting import get_vmec_magB
+
 import numpy as np
+
+from neat.plotting import get_vmec_magB
 
 """                                                                           
 Trace the orbit of a single particle in a
@@ -61,5 +63,5 @@ Aminor_scale = 1  # Scale the machine size by a factor
 # # print("Creating animation plot")
 # # g_orbit.plot_animation(show=True)
 
-b=get_vmec_magB(wout_filename=wout_filename, spos=0.9, ntheta=50, nzeta=100)
+b = get_vmec_magB(wout_filename=wout_filename, spos=0.9, ntheta=50, nzeta=100)
 print(b[0][0])

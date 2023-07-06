@@ -1,12 +1,15 @@
-import unittest
-import numpy as np
-import matplotlib.pyplot as plt
 import sys
-sys.path.append('~/NEAT/src/neat/')
-from plotting import get_vmec_boundary
-from plotting import get_vmec_magB
-import netCDF4 as netcdf
+import unittest
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+sys.path.append("~/NEAT/src/neat/")
 from unittest.mock import MagicMock
+
+import netCDF4 as netcdf
+from neat.plotting import get_vmec_boundary, get_vmec_magB, plot_animation3d
+
 
 class MyTestCase(unittest.TestCase):
     # def test_update(self):
@@ -44,7 +47,6 @@ class MyTestCase(unittest.TestCase):
     #     wout_filename = "example.wout"
     #     net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
 
-    #     # Assert statements
     #     self.assertEqual(netcdf.netcdf_file.call_args[0][0], wout_filename)
     #     self.assertEqual(netcdf.netcdf_file.call_args[0][1], "r")
     #     self.assertFalse(netcdf.netcdf_file.call_args[1]["mmap"])
@@ -68,15 +70,12 @@ class MyTestCase(unittest.TestCase):
 
     #     net_file.close()
 
+    def test_read_netcdf_array(self):
+        wout_filename = "/home/rodrigo/NEAT/examples/inputs/wout_ARIESCS.nc"
 
-    # def test_read_netcdf_array(self):
-    #     wout_filename = "/home/rodrigo/NEAT/examples/inputs/wout_ARIESCS.nc"
+        result = get_vmec_boundary(wout_filename)
 
-
-    #     result = get_vmec_boundary(wout_filename)
-
-    #     self.assertEqual(result[0][0][0][0], 9.564622227455484)
-    #     
+        self.assertEqual(result[0][0][0][0], 9.564622227455484)
 
     def test_get_vmec_magB(self):
         wout_filename = "/home/rodrigo/NEAT/examples/inputs/wout_ARIESCS.nc"
@@ -84,6 +83,7 @@ class MyTestCase(unittest.TestCase):
         result = get_vmec_magB(wout_filename)
 
         self.assertEqual(result[0][0], 5.179016053586765)
+
 
 if __name__ == "__main__":
     unittest.main()
