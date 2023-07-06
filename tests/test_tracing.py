@@ -184,7 +184,7 @@ class testtracing(unittest.TestCase):
             mass=mass,
         )
         particles = ChargedParticleEnsemble()
-        field = StellnaQS.from_paper(1, B0=B0)
+        field = StellnaQS.from_paper(1, B0=1)
         nsamples = 800
         tfinal = 0.0001
         nthreads = 2
