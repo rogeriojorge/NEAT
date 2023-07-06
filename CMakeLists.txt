@@ -126,8 +126,11 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/stellna.hh
     src/neatpp/vmectrace.hh
     src/neatpp/vmec_loss.hh
+    src/neatpp/booztrace.hh
     src/neatpp/neatpp.cpp
     # src/neatpp/NEAT_Mercier.cc
+    src/neatpp/fields_NEAT/equilibrium_boozxform.cc
+    src/neatpp/metrics_NEAT/metric_boozxform.cc
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
@@ -159,6 +162,9 @@ if(PROFILING)
         src/neatpp/stellna.hh
         src/neatpp/vmectrace.hh
         src/neatpp/vmec_loss.hh
+        src/neatpp/booztrace.hh
+        src/neatpp/fields_NEAT/equilibrium_boozxform.cc
+        src/neatpp/metrics_NEAT/metric_boozxform.cc
     )
     target_link_libraries(profiling_lib PRIVATE gyronimo)
     target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})

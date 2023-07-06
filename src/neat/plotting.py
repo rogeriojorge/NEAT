@@ -96,7 +96,7 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True, savefig=None):
     if show:
         plt.show()
     if savefig is not None: plt.savefig(savefig)
-    plt.close()
+    # plt.close()
 
 
 def plot_parameters(self, r_minor=1, show=True, savefig=None):
@@ -140,10 +140,18 @@ def plot_parameters(self, r_minor=1, show=True, savefig=None):
     plt.xlabel(r"$t (s)$")
     plt.ylabel(r"$(p_\phi-p_{\phi_initial})/p_{\phi_initial}$")
     plt.subplot(3, 3, 7)
-    plt.plot(self.time*1e6, self.rdot, label=r"$\dot r$")
-    plt.plot(self.time*1e6, self.thetadot, label=r"$\dot \theta$")
-    plt.plot(self.time*1e6, self.varphidot, label=r"$\dot \varphi$")
-    plt.plot(self.time*1e6, self.vparalleldot, label=r"$\dot v_\parallel$")
+    # plt.plot(self.time*1e6, self.rdot, label=r"$\dot r$")
+    # plt.plot(self.time*1e6, self.thetadot, label=r"$\dot \theta$")
+    # plt.plot(self.time*1e6, self.varphidot, label=r"$\dot \varphi$")
+    # plt.plot(self.time*1e6, self.vparalleldot, label=r"$\dot v_\parallel$")
+    plt.plot(self.time*1e6, self.B_s, label="s")
+    plt.plot(self.time*1e6, self.B_theta, label="theta")
+    plt.plot(self.time*1e6, self.B_varphi, label="varphi")
+    plt.plot(self.time*1e6, self.B_s_contr, label="s_contr")
+    plt.plot(self.time*1e6, self.B_theta_contr, label="theta_contr")
+    plt.plot(self.time*1e6, self.B_varphi_contr, label="varphi_contra")
+    plt.xlabel(r"$t$")
+    plt.ylabel(r"$|B|$")
     plt.xlabel(r"$t (s)$")
     plt.legend()
     plt.subplot(3, 3, 8)
@@ -173,7 +181,7 @@ def plot_parameters(self, r_minor=1, show=True, savefig=None):
     plt.tight_layout()
     if savefig is not None: plt.savefig(savefig)
     if show: plt.show()
-    plt.close()
+    # plt.close()
 
 
 def plot_animation3d(
@@ -246,15 +254,28 @@ def plot_animation3d(
 def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
     """Obtain (X, Y, Z) of a magnetic flux surface from a vmec equilibrium"""
     net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
-    nsurfaces = net_file.variables["ns"][()]
-    nfp = net_file.variables["nfp"][()]
-    xn = net_file.variables["xn"][()]  # pylint: disable=C0103
-    xm = net_file.variables["xm"][()]  # pylint: disable=C0103
-    xn_nyq = net_file.variables["xn_nyq"][()]
-    xm_nyq = net_file.variables["xm_nyq"][()]
-    rmnc = net_file.variables["rmnc"][()]
-    zmns = net_file.variables["zmns"][()]
-    bmnc = net_file.variables["bmnc"][()]
+    try:
+        nsurfaces = net_file.variables["ns"][()]
+        nfp = net_file.variables["nfp"][()]
+        xn = net_file.variables["xn"][()]  # pylint: disable=C0103
+        xm = net_file.variables["xm"][()]  # pylint: disable=C0103
+        xn_nyq = net_file.variables["xn_nyq"][()]
+        xm_nyq = net_file.variables["xm_nyq"][()]
+        rmnc = net_file.variables["rmnc"][()]
+        zmns = net_file.variables["zmns"][()]
+        bmnc = net_file.variables["bmnc"][()]
+    except:
+        nsurfaces = net_file.variables["ns_b"][()]
+        nsurfaces-=1
+        nfp = net_file.variables["nfp_b"][()]
+        xn = net_file.variables["ixn_b"][()]  # pylint: disable=C0103
+        xm = net_file.variables["ixm_b"][()]  # pylint: disable=C0103
+        xn_nyq = xn
+        xm_nyq = xm
+        rmnc = net_file.variables["rmnc_b"][()]
+        zmns = net_file.variables["zmns_b"][()]
+        bmnc = net_file.variables["bmnc_b"][()]
+        print(len(bmnc))
     lasym = net_file.variables["lasym__logical__"][()]
     if lasym == 1:
         rmns = net_file.variables["rmns"][()]
@@ -310,11 +331,18 @@ def get_vmec_magB(
 ):  # pylint: disable=R0914
     """Obtain contours of B on a magnetic flux surface from a vmec equilibrium"""
     net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
-    nsurfaces = net_file.variables["ns"][()]
-    xn_nyq = net_file.variables["xn_nyq"][()]
-    xm_nyq = net_file.variables["xm_nyq"][()]
-    bmnc = net_file.variables["bmnc"][()]
-    lasym = net_file.variables["lasym__logical__"][()]
+    try:
+        nsurfaces = net_file.variables["ns"][()]
+        xn_nyq = net_file.variables["xn_nyq"][()]
+        xm_nyq = net_file.variables["xm_nyq"][()]
+        bmnc = net_file.variables["bmnc"][()]
+        lasym = net_file.variables["lasym__logical__"][()]
+    except:
+        nsurfaces = net_file.variables["ns_b"][()]
+        xn_nyq = net_file.variables["ixn_b"][()]
+        xm_nyq = net_file.variables["ixm_b"][()]
+        bmnc = net_file.variables["bmnc_b"][()]
+        lasym = net_file.variables["lasym__logical__"][()]
     if lasym == 1:
         bmns = net_file.variables["bmns"][()]
     else:

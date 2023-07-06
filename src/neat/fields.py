@@ -36,6 +36,7 @@ from neatpp import (
     gc_solver_qs_partial_ensemble,
     vmectrace,
     vmecloss,
+    booztrace,
 )
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
@@ -546,3 +547,35 @@ class Vmec:
     def neatpp_solver_ensemble(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
         return vmecloss(*args, *kwargs)
+
+
+
+class Boozxform:
+    """Boozxform class
+
+    This class initializes a Boozxform field to be
+    ready to be used in the gyronimo-based
+    particle tracer.
+
+    """
+
+    def __init__(self, wout_filename: str, maximum_s=0.95, integrator=2) -> None:
+        self.near_axis = False
+        self.wout_filename = wout_filename
+        net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+        self.nfp = net_file.variables["nfp_b"][()]
+        self.maximum_s = maximum_s
+        self.integrator=integrator
+        net_file.close()
+
+    def gyronimo_parameters(self):
+        """Return list of parameters to feed gyronimo-based functions"""
+        return [self.wout_filename, self.maximum_s, self.integrator]
+
+    def neatpp_solver(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
+        return booztrace(*args, *kwargs)
+
+    def neatpp_solver_ensemble(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
+        return KeyError("Ensembles for Boozxform ot implemented yet! Soon!")

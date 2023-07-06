@@ -162,6 +162,7 @@ vector<vector<double>> vmectrace(
   double energySI_over_refEnergy = energySI / refEnergy;
   // double Bref = vmap.B_0();
   double Bi = veq.magnitude({s0, phi0, theta0}, 0);
+  cout << "VMEC: " << Bi << endl;
   // double Bi_VMEC = veq.magnitude_vmec({s0, phi0, theta0}, 0);
 
   // Lambda*energySI_over_refEnergy = energy*Bref/(2*Binicial*Uref)*(1-vparallel_over_v^2)

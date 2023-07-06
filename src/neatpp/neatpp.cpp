@@ -3,6 +3,7 @@
 #include "stellna.hh"
 #include "vmectrace.hh"
 #include "vmec_loss.hh"
+#include "booztrace.hh"
 
 namespace py = pybind11;
 
@@ -34,4 +35,10 @@ PYBIND11_MODULE(neatpp, m) {
             py::arg("energy"), py::arg("nlambda_trapped"), py::arg("nlambda_passing"),
             py::arg("r0"), py::arg("r_max"), py::arg("ntheta"),
             py::arg("nphi"), py::arg("nsamples"),py::arg("Tfinal"), py::arg("nthreads"), py::arg("dist"));
+      m.def("booztrace",&booztrace,
+            "Trace a single particle in a Boozxform equilibrium magnetic field",
+            py::arg("vmec_file"), py::arg("integrator"), py::arg("maximum_s"), py::arg("charge"), py::arg("mass"),
+            py::arg("Lambda"), py::arg("vpp_sign"), py::arg("energy"),
+            py::arg("s0"), py::arg("theta0"), py::arg("phi0"),
+            py::arg("Tfinal"), py::arg("nsamples"));
 }
