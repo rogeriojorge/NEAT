@@ -21,9 +21,9 @@ except ImportError as error:
 
 import copy
 
-from qsc import Qsc
 import numpy as np
 from qic import Qic
+from qsc import Qsc
 from scipy.io import netcdf
 
 from neatpp import (
@@ -494,8 +494,14 @@ class Vmec:
 
     """
 
-    def __init__(self, wout_filename: str, interp3D: bool = False,
-                 ns: float = 10, ntheta: float = 10, nzeta: float = 10) -> None:
+    def __init__(
+        self,
+        wout_filename: str,
+        interp3D: bool = False,
+        ns: float = 10,
+        ntheta: float = 10,
+        nzeta: float = 10,
+    ) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
         self.interp3D = interp3D
@@ -512,7 +518,7 @@ class Vmec:
             return [self.wout_filename, self.ns, self.ntheta, self.nzeta]
         else:
             return [self.wout_filename]
-        
+
     def neatpp_solver(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
         if self.interp3D:
