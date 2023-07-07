@@ -22,7 +22,7 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.1  # = mu * B0 / energy
 vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
-nsamples_array = [100,300,1000,3000]  # resolution in time
+nsamples_array = [100, 300, 1000, 3000]  # resolution in time
 tfinal = 1e-6  # seconds
 wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
 ns = 12  # radial interpolation resolution
@@ -48,7 +48,7 @@ g_particle = ChargedParticle(
 time_interp = []
 time_noninterp = []
 for nsamples in nsamples_array:
-    print('='*80)
+    print("=" * 80)
     print(f"nsamples = {nsamples}")
     print("  Starting particle tracer noninterp")
     start_time = time.time()
