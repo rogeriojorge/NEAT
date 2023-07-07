@@ -58,8 +58,8 @@ vector< vector<double>>  vmectrace_interp3D(
 {
   parser_vmec vmap(vmec_file);
   cubic_gsl_factory ifactory;
-  metric_vmec g(&vmap, &ifactory);
-  equilibrium_vmec veq(&g, &ifactory);
+  metric_vmec_interp3D g(&vmap, &ifactory);
+  equilibrium_vmec_interp3D veq(&g, &ifactory);
 
   double Lref = 1.0;
   double Vref = 1.0;

@@ -1,11 +1,15 @@
-#ifndef GYRONIMO_METRIC_VMEC_INTERP3D
-#define GYRONIMO_METRIC_VMEC_INTERP3D
-
 #include <gyronimo/parsers/parser_vmec.hh>
 #include <gyronimo/metrics/metric_covariant.hh>
 #include <gyronimo/interpolators/interpolator1d.hh>
+#include <datatable.h>
+#include <bspline.h>
+#include <bsplinebuilder.h>
 
-namespace gyronimo{
+#ifndef GYRONIMO_METRIC_VMEC_INTERP3D
+#define GYRONIMO_METRIC_VMEC_INTERP3D
+
+using namespace gyronimo;
+using namespace SPLINTER;
 
 //! Covariant metric in `VMEC` curvilinear coordinates.
 class metric_vmec_interp3D : public metric_covariant {
@@ -19,12 +23,11 @@ class metric_vmec_interp3D : public metric_covariant {
   virtual SM3 operator()(const IR3& position) const override;
   virtual dSM3 del(const IR3& position) const override;
   virtual IR3 transform2cylindrical(const IR3& position) const override;
-  virtual double precompute_jacobian_grid(double *grid, size_t ns, size_t ntheta, size_t nzeta) const;
+//   virtual double precompute_jacobian_grid(size_t ns, size_t ntheta, size_t nzeta) const;
   virtual double jacobian_vmec(const IR3& position) const;
   virtual IR3 del_jacobian_vmec(const IR3& position) const;
-//   double jacobian_vmec_interp3d(const IR3& position) const;
   virtual double jacobian(const IR3& position) const override;
-  virtual IR3 del_jacobian(const IR3& position) const override;
+//   virtual IR3 del_jacobian(const IR3& position) const override;
   const parser_vmec* parser() const {return parser_;};
   const double signgs() const {return signsgs_;};
 
@@ -36,8 +39,7 @@ class metric_vmec_interp3D : public metric_covariant {
   interpolator1d **Rmnc_;
   interpolator1d **Zmns_;
   interpolator1d **gmnc_;
+  BSpline jacobian_spline_;
 };
-
-} // end namespace gyronimo
 
 #endif // GYRONIMO_METRIC_VMEC

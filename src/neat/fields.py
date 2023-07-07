@@ -21,9 +21,9 @@ except ImportError as error:
 
 import copy
 
+from qsc import Qsc
 import numpy as np
 from qic import Qic
-from qsc import Qsc
 from scipy.io import netcdf
 
 from neatpp import (

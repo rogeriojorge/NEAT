@@ -1,12 +1,8 @@
 #include "metric_vmec_interp3D.hh"
-#include <datatable.h>
-#include <bspline.h>
-#include <bsplinebuilder.h>
+#include <iostream>
 
 using namespace gyronimo;
 using namespace SPLINTER;
-using std::cout;
-using std::endl;
 
 metric_vmec_interp3D::metric_vmec_interp3D(
     const parser_vmec *p, const interpolator1d_factory *ifactory) 
@@ -36,6 +32,34 @@ metric_vmec_interp3D::metric_vmec_interp3D(
       std::valarray<double> gmnc_i = (p->gmnc())[s_h_cut];
       gmnc_[i] = ifactory->interpolate_data( s_half_range, dblock_adapter(gmnc_i));
     };
+
+    // Create new DataTable to manage samples
+    DataTable J_samples;
+    DenseVector x(3);
+    double ns=10, ntheta=10, nzeta=10;
+    double y;//, s, theta, zeta;
+    dblock_adapter s_radius = (parser_->radius_half());
+    double s_min = s_radius[0];
+    double s_max = s_radius[s_radius.size()-1];
+    double ds = (s_max-s_min) / (ns - 1);
+    double dtheta = 2 * M_PI / ntheta;
+    double dzeta = 2 * M_PI / nzeta;
+    for (size_t i = 0; i < ns; i++) {
+        for (size_t j = 0; j < ntheta; j++) {
+            for (size_t k = 0; k < nzeta; k++) {
+                x(0) = s_min + i * ds;
+                x(1) = j * dtheta;
+                x(2) = k * dzeta;
+                y = 0.0;
+                #pragma omp parallel for reduction(+: y)
+                for (size_t i = 0; i < xm_nyq_.size(); i++) {  
+                    y += (-1)*((*gmnc_[i])(x(0)) * std::cos( xm_nyq_[i]*x(1) - xn_nyq_[i]*x(2)));
+                };
+                J_samples.addSample(x, y);
+            }
+        }
+    }
+    BSpline jacobian_spline_ = BSpline::Builder(J_samples).degree(3).build();
 }
 metric_vmec_interp3D::~metric_vmec_interp3D() {
   if(Rmnc_) delete Rmnc_;
@@ -193,59 +217,10 @@ IR3 metric_vmec_interp3D::del_jacobian_vmec(const IR3& position) const {
   return {-dJds, -dJdtheta, -dJdzeta};
 }
 
-// Six-hump camelback function
-double f(DenseVector x)
-{
-    assert(x.rows() == 2);
-    return (4 - 2.1*x(0)*x(0)
-            + (1/3.)*x(0)*x(0)*x(0)*x(0))*x(0)*x(0)
-          + x(0)*x(1)
-          + (-4 + 4*x(1)*x(1))*x(1)*x(1);
-}
-
-double metric_vmec_interp3D::precompute_jacobian_grid(double *grid, size_t ns, size_t ntheta, size_t nzeta) const {
-    // Create new DataTable to manage samples
-    DataTable samples;
-
-    // Sample the function
-    DenseVector x(2);
-    double y;
-    for(int i = 0; i < 20; i++)
-    {
-        for(int j = 0; j < 20; j++)
-        {
-            // Sample function at x
-            x(0) = i*0.1;
-            x(1) = j*0.1;
-            y = f(x);
-
-            // Store sample
-            samples.addSample(x,y);
-        }
-    }
-
-    // Build B-splines that interpolate the samples
-    BSpline bspline1 = BSpline::Builder(samples).degree(1).build();
-    BSpline bspline3 = BSpline::Builder(samples).degree(3).build();
-
-    // Build penalized B-spline (P-spline) that smooths the samples
-    BSpline pspline = BSpline::Builder(samples)
-            .degree(3)
-            .smoothing(BSpline::Smoothing::PSPLINE)
-            .alpha(0.03)
-            .build();
-
-    /* Evaluate the approximants at x = (1,1)
-     * Note that the error will be 0 at that point (except for the P-spline, which may introduce an error
-     * in favor of a smooth approximation) because it is a point we sampled at.
-     */
-    x(0) = 1; x(1) = 1;
-    cout << "-----------------------------------------------------" << endl;
-    cout << "Function at x:                 " << f(x)               << endl;
-    cout << "Linear B-spline at x:          " << bspline1.eval(x)   << endl;
-    cout << "Cubic B-spline at x:           " << bspline3.eval(x)   << endl;
-    cout << "P-spline at x:                 " << pspline.eval(x)    << endl;
-    cout << "-----------------------------------------------------" << endl;
-
-    return 0;
+double metric_vmec_interp3D::jacobian(const IR3& position) const {
+  DenseVector x(3);
+  x(0) = position[IR3::u];
+  x(1) = position[IR3::v];
+  x(2) = position[IR3::w];
+  return jacobian_spline_.eval(x);
 }
