@@ -21,18 +21,19 @@ energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.1  # = mu * B0 / energy
-vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 20  # resolution in time
+vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
+nsamples_array = [100,300,1000,3000]  # resolution in time
 tfinal = 1e-6  # seconds
 wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
-ns = 10  # radial interpolation resolution
-ntheta = 10  # poloidal interpolation resolution
-nzeta = 10  # toroidal interpolation resolution
+ns = 12  # radial interpolation resolution
+ntheta = 9  # poloidal interpolation resolution
+nzeta = 6  # toroidal interpolation resolution
 
 g_field_interp = Vmec(
     wout_filename=wout_filename, interp3D=True, ns=ns, ntheta=ntheta, nzeta=nzeta
 )
 g_field_noninterp = Vmec(wout_filename=wout_filename, interp3D=False)
+
 g_particle = ChargedParticle(
     r_initial=r_initial,
     theta_initial=theta_initial,
@@ -43,21 +44,29 @@ g_particle = ChargedParticle(
     mass=mass,
     vpp_sign=vpp_sign,
 )
-print("Starting particle tracer interp")
-start_time = time.time()
-g_orbit_interp = ParticleOrbit(
-    g_particle, g_field_interp, nsamples=nsamples, tfinal=tfinal
-)
-total_time = time.time() - start_time
-print(f"Finished interp in {total_time}s")
 
-print("Starting particle tracer noninterp")
-start_time = time.time()
-g_orbit_noninterp = ParticleOrbit(
-    g_particle, g_field_noninterp, nsamples=nsamples, tfinal=tfinal
-)
-total_time = time.time() - start_time
-print(f"Finished noninterp in {total_time}s")
+time_interp = []
+time_noninterp = []
+for nsamples in nsamples_array:
+    print('='*80)
+    print(f"nsamples = {nsamples}")
+    print("  Starting particle tracer noninterp")
+    start_time = time.time()
+    g_orbit_noninterp = ParticleOrbit(
+        g_particle, g_field_noninterp, nsamples=nsamples, tfinal=tfinal
+    )
+    total_time = time.time() - start_time
+    print(f"  Finished noninterp in {total_time}s")
+    time_noninterp.append(total_time)
+
+    print("  Starting particle tracer interp")
+    start_time = time.time()
+    g_orbit_interp = ParticleOrbit(
+        g_particle, g_field_interp, nsamples=nsamples, tfinal=tfinal
+    )
+    total_time = time.time() - start_time
+    print(f"  Finished interp in {total_time}s")
+    time_interp.append(total_time)
 
 
 # print("Creating B contour plot")
@@ -77,6 +86,15 @@ print(f"Finished noninterp in {total_time}s")
 # g_orbit.plot_animation(show=True)
 
 import matplotlib.pyplot as plt
+
+if len(nsamples_array) > 1:
+    plt.figure(figsize=(10, 6))
+    plt.plot(nsamples_array, time_interp, label="interp")
+    plt.plot(nsamples_array, time_noninterp, label="noninterp")
+    plt.legend()
+    plt.xlabel("nsamples")
+    plt.ylabel("time (s)")
+    plt.show()
 
 plt.figure(figsize=(10, 6))
 plt.subplot(3, 3, 1)

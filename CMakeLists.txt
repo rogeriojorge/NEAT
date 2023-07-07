@@ -22,6 +22,16 @@ set(CMAKE_INSTALL_LIBDIR lib)
 #   set(_pip_args "--user")
 # endif()
 
+# Add compiler optimization flags
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-O3)
+    add_compile_options(-march=native)
+    # add_compile_options(-flto)
+elseif(MSVC)
+    add_compile_options(/O2)
+endif()
+add_compile_options(-fcommon)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 

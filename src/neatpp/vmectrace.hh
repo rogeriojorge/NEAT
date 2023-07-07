@@ -4,6 +4,8 @@
 #include <cmath>
 #include <argh.h>
 #include <iostream>
+#include <vector>
+#include <chrono>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <gyronimo/version.hh>
@@ -31,7 +33,13 @@ public:
     double B = eq_pointer_->magnitude(x, t);
     guiding_centre::state dots = (*gc_pointer_)(s, t);
     IR3 y = gc_pointer_->get_position(dots);
-    IR3 X = eq_pointer_->metric()->transform2cylindrical(x);
+
+//   auto start_time = std::chrono::steady_clock::now();
+  IR3 X = eq_pointer_->metric()->transform2cylindrical(x);
+//   auto end_time = std::chrono::steady_clock::now();
+//   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+//   std::cout << "Time taken for transform2cylindrical: " << duration << " microseconds" << std::endl;
+
     double v_parallel = gc_pointer_->get_vpp(s);
     m_states.push_back({
         t,

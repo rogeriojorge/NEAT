@@ -1,0 +1,124 @@
+cmake_minimum_required(VERSION 3.5)
+
+# Project definition and languages
+project(neatpp LANGUAGES C CXX Fortran)
+
+# Set global properties
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_LIBDIR lib)
+
+# Set Release build type by default for performance
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Find Python and set relative paths
+find_package(Python 3 COMPONENTS Interpreter Development NumPy REQUIRED)
+
+# Compiler optimization flags
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-O3 -march=native -fcommon -DOPENMP) # -flto not working with SIMPLE
+elseif(MSVC)
+    add_compile_options(/O2 /GL)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
+endif()
+
+# Find dependencies
+find_package(Git REQUIRED)
+find_package(GSL REQUIRED)
+find_package(OpenMP REQUIRED)
+find_package(Boost 1.71.0 REQUIRED)
+
+# Git submodules update
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+    option(GIT_SUBMODULE "Check submodules during build" ON)
+    if(GIT_SUBMODULE)
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    endif()
+endif()
+
+# Add subdirectories
+if(INSTALL_SIMPLE)
+    add_subdirectory(external/simple)
+endif()
+add_subdirectory(external/gyronimo)
+add_subdirectory(external/splinter)
+
+# Find pybind11
+execute_process(COMMAND "${Python_EXECUTABLE}" -c "import pybind11; print(pybind11.get_cmake_dir())"
+                OUTPUT_VARIABLE _tmp_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
+list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+find_package(pybind11 CONFIG REQUIRED)
+
+# Build NEAT
+pybind11_add_module(${PROJECT_NAME}
+    src/neatpp/fields_NEAT/equilibrium_stellna.cc
+    src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
+    src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
+    src/neatpp/metrics_NEAT/metric_stellna.cc
+    src/neatpp/metrics_NEAT/metric_stellna_qs.cc
+    src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+    src/neatpp/stellna.hh
+    src/neatpp/vmectrace.hh
+    src/neatpp/neatpp.cpp
+    src/neatpp/fields_NEAT/equilibrium_vmec_interp3D.cc
+    src/neatpp/metrics_NEAT/metric_vmec_interp3D.cc
+    src/neatpp/vmectrace_interp3D.hh
+    # src/neatpp/NEAT_Mercier.cc
+)
+
+# Set properties
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    ${Boost_INCLUDE_DIRS}
+    ${GSL_INCLUDE_DIRS}
+    external/splinter/include
+    external/splinter/thirdparty/Eigen
+    external/gyronimo/misc/apps/include
+    ${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT
+    ${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT
+)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    gyronimo
+    splinter-3-0
+    ${GSL_LIBRARIES}
+    ${Boost_LIBRARIES}
+)
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+
+# Add the profiling executable
+if(PROFILING)
+    add_library(profiling_lib
+        src/neatpp/fields_NEAT/equilibrium_stellna.cc
+        src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
+        src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
+        src/neatpp/metrics_NEAT/metric_stellna.cc
+        src/neatpp/metrics_NEAT/metric_stellna_qs.cc
+        src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+        src/neatpp/stellna.hh
+        src/neatpp/vmectrace.hh
+        src/neatpp/fields_NEAT/equilibrium_vmec_interp3D.cc
+        src/neatpp/metrics_NEAT/metric_vmec_interp3D.cc
+        src/neatpp/vmectrace_interp3D.hh
+    )
+    target_link_libraries(profiling_lib PRIVATE gyronimo)
+    target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
+    target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
+    target_compile_features(profiling_lib PRIVATE cxx_std_20)
+
+    add_executable(profiling src/neatpp/neatpp_profiling.cpp)
+    target_link_libraries(profiling PRIVATE profiling_lib)
+    target_link_libraries(profiling PRIVATE gyronimo)
+    target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
+    target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
+    target_compile_features(profiling PRIVATE cxx_std_20)
+    install(TARGETS profiling DESTINATION .)
+endif()
+
+# Install
+install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
