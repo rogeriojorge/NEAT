@@ -64,7 +64,7 @@ class equilibrium_boozxform : public IR3field_c1{
   const metric_boozxform* metric() const {return metric_;};
  private:
   const metric_boozxform *metric_;
-  narray_type ixm_b_, ixn_b_;// iota_b_; 
+  narray_type ixm_b_, ixn_b_;
   interpolator1d **bmnc_b_;
   interpolator1d *iota_b_, *G_, *I_;
 };

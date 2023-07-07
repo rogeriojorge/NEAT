@@ -84,7 +84,7 @@ IR3 equilibrium_boozxform::covariant(const IR3& position, double time) const {
   double s = position[IR3::u];
   double jac   = metric_->jacobian(position);
   double Bv = (1/jac);
-  return {0, Bv*(*I_)(s),  Bv*(*G_)(s)};
+  return {0, (*I_)(s)/this->m_factor(),  (*G_)(s)/this->m_factor()};
 }
 dIR3 equilibrium_boozxform::del_covariant(
     const IR3& position, double time) const {
@@ -105,10 +105,10 @@ dIR3 equilibrium_boozxform::del_covariant(
 
   return {
       0.0, 0.0, 0.0, 
-      (*I_).derivative(s)*Bv + (*I_)(s)*d_u_Bv, 
-      (*I_)(s)*d_v_Bv, (*I_)(s)*d_w_Bv,
-	    (*G_).derivative(s)*Bv + (*G_)(s)*d_u_Bv, 
-      (*G_)(s)*d_v_Bv, (*G_)(s)*d_w_Bv,
+      (*I_).derivative(s)/this->m_factor(), 
+      0.0, 0.0,
+	    (*G_).derivative(s)/this->m_factor(), 
+      0.0, 0.0
   };
 }
 //@todo we can actually override the methods to calculate the covariant components of the field

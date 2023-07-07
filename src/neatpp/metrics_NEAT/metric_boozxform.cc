@@ -30,7 +30,6 @@ metric_boozxform::metric_boozxform(
     {
     // set radial grid block
     dblock_adapter s_range(p->radius());
-    // dblock_adapter s_half_range(p->radius_half());
     // set spectral components 
     Rmnc_b_ = new interpolator1d* [ixm_b_.size()];
     Zmns_b_ = new interpolator1d* [ixm_b_.size()];
@@ -43,9 +42,6 @@ metric_boozxform::metric_boozxform(
       Rmnc_b_[i] = ifactory->interpolate_data( s_range, dblock_adapter(rmnc_i));
       std::valarray<double> zmnc_i = (p->zmns_b())[s_cut];
       Zmns_b_[i] = ifactory->interpolate_data( s_range, dblock_adapter(zmnc_i));
-      // note that gmnc is defined at half mesh
-      // std::slice s_h_cut (i+xm_nyq_.size(), s_half_range.size(), xm_nyq_.size());
-      // std::valarray<double> gmnc_i = (p->gmnc_b())[s_h_cut];
       std::valarray<double> gmnc_i = (p->gmnc_b())[s_cut];
       gmnc_b_[i] = ifactory->interpolate_data( s_range, dblock_adapter(gmnc_i));
     };
@@ -81,7 +77,7 @@ IR3 metric_boozxform::transform2cylindrical(const IR3& position) const {
       R+= (*Rmnc_b_[i])(u) * std::cos( m*v - n*w ); 
       Z+= (*Zmns_b_[i])(u) * std::sin( m*v - n*w );
     }
-    return  {R, v, -Z};
+    return  {R, w, Z};
 }
 
 //@todo move this to jacobian and think about testing this by calling the parent
@@ -104,14 +100,14 @@ double metric_boozxform::jacobian(const IR3& position) const {
 }
 IR3 metric_boozxform::del_jacobian(const IR3& position) const {
   double s = position[IR3::u];
-  double zeta = position[IR3::w];
   double theta = position[IR3::v];
+  double zeta = position[IR3::w];
   double J_ds = 0.0, J_dzeta = 0.0, J_dtheta = 0.0;
   #pragma omp parallel for reduction(+: J_ds, J_dzeta, J_dtheta )
   for (size_t i = 0; i < ixm_b_.size(); i++) {  
     J_ds += (*gmnc_b_[i]).derivative(s) * std::cos( ixm_b_[i]*theta - ixn_b_[i]*zeta );
-    J_dzeta += ixn_b_[i] * (*gmnc_b_[i])(s) * std::sin( ixm_b_[i]*theta - ixn_b_[i]*zeta );
     J_dtheta -= ixm_b_[i] * (*gmnc_b_[i])(s) * std::sin( ixm_b_[i]*theta - ixn_b_[i]*zeta );
+    J_dzeta += ixn_b_[i] * (*gmnc_b_[i])(s) * std::sin( ixm_b_[i]*theta - ixn_b_[i]*zeta );
   };
   // left-handed VMEC coordinate system is re-oriented 
   // to u = Phi/Phi_bnd, v = zeta, w = theta for J>0

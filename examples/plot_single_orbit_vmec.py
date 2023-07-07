@@ -118,7 +118,7 @@ g_particle_booz = ChargedParticle(
     Lambda=Lambda,
     charge=charge,
     mass=mass,
-    vpp_sign=vpp_sign,
+    vpp_sign=-vpp_sign,
 )
 
 print("Starting particle tracer")
@@ -157,7 +157,7 @@ g_orbit_booz.plot(show=False)
 
 # # g_orbit_booz.plot_diff_boozer(g_orbit,r_minor=r_avg,show=True)
 
-# g_orbit_booz.plot_diff_cyl(g_orbit, show=True)
+g_orbit_booz.plot_diff_cyl(g_orbit, show=True)
 
 # # print("Creating 2D plot")
 # # g_orbit.plot_orbit(show=False)
