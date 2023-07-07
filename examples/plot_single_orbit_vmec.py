@@ -6,6 +6,8 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.interpolate import interp1d, CubicSpline as spline
+
 from neat.fields import Vmec as VMEC_NEAT, Boozxform, StellnaQS
 from neat.tracing import ChargedParticle, ParticleOrbit
 from simsopt.mhd import Vmec
@@ -20,23 +22,22 @@ vmec equilibrium
 r_initial = 0.5  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
 theta_initial = 0#;np.pi / 2  # initial poloidal angle
 phi_initial = 0  # initial poloidal angle
-energy = 3.52e6  # electron-volt
+energy = 3.52e5  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.2  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
-tfinal = 3e-5  # seconds
-
+tfinal = 1e-4  # seconds
 
 B0 = 5.3267
 # Scaling values
-Rmajor_ARIES = 7.7495*4
+Rmajor_ARIES = 7.7495*2
 Rminor_ARIES = 1.7044
 r_avg=Rminor_ARIES
 
-filename = f"nearaxis_sboundary{Rmajor_ARIES/r_avg}_QA_000_000000.nc"
-filename_vmec = f"input.nearaxis_sboundary{Rmajor_ARIES/r_avg}_QA"
+filename = f"nearaxis_sboundary{Rmajor_ARIES/r_avg}_TRY_000_000000.nc"
+filename_vmec = f"input.nearaxis_sboundary{Rmajor_ARIES/r_avg}_TRY"
 wout_filename = "wout_" + filename
 boozmn_filename = 'boozmn_new_' + filename
 
@@ -46,24 +47,34 @@ g_field_qsc = StellnaQS(rc=g_field_basis.rc*Rmajor_ARIES, zs=g_field_basis.zs*Rm
                     etabar=g_field_basis.etabar/Rmajor_ARIES, B2c=g_field_basis.B2c*(B0/Rmajor_ARIES/Rmajor_ARIES),\
                         B0=B0, nfp=g_field_basis.nfp, order='r3', nphi=401)
 
+nu_array = g_field_qsc.varphi - g_field_qsc.phi
+nu_spline_of_varphi = spline(
+    np.append(g_field_qsc.varphi, 2 * np.pi / g_field_qsc.nfp),
+    np.append(nu_array, nu_array[0]),
+    bc_type="periodic",
+)
+
+phi0 = phi_initial - nu_spline_of_varphi(phi_initial)
+phi_VMEC=g_field_qsc.to_RZ([[r_avg*np.sqrt(r_initial),theta_initial,phi0]])[2][0]
+
 
 # # Creating wout of VMEC
-# g_field_qsc.to_vmec(filename=filename_vmec,r=r_avg, params={"ntor":8, "mpol":8, \
-#     "niter_array":[10000,10000,20000],'ftol_array':[1e-13,1e-15,1e-17],'ns_array':[16,49,101]},
-#         ntheta=30, ntorMax=30) #standard ntheta=20, ntorMax=14
+# g_field_qsc.to_vmec(filename=filename_vmec, r=r_avg, params={"ntor":8, "mpol":8, \
+#     "niter_array":[10000,10000,20000],'ftol_array':[1e-13,1e-15,1e-16],'ns_array':[16,49,101]},
+#         ntheta=20, ntorMax=14) #standard ntheta=20, ntorMax=14
 # vmec=Vmec(filename=filename_vmec, verbose=True)
 # vmec.run()
 
 g_field = VMEC_NEAT(wout_filename=wout_filename, maximum_s=1)
-b = Booz_xform()
+# b = Booz_xform()
 
 # b.read_wout(wout_filename)
 # # b.comput_surfs=100
 
-b.mboz = 100
-b.nboz = 100
-b.run()
-b.write_boozmn(boozmn_filename)
+# b.mboz = 15
+# b.nboz = 15
+# b.run()
+# b.write_boozmn(boozmn_filename)
 
 g_field_booz= Boozxform(wout_filename=boozmn_filename)
 
@@ -90,8 +101,8 @@ g_particle_qsc = ChargedParticle(
 
 g_particle = ChargedParticle(
     r_initial=r_initial,
-    theta_initial=theta_initial,
-    phi_initial=phi_initial,
+    theta_initial=np.pi-(theta_initial),
+    phi_initial=phi_VMEC,
     energy=energy,
     Lambda=Lambda,
     charge=charge,
@@ -101,8 +112,8 @@ g_particle = ChargedParticle(
 
 g_particle_booz = ChargedParticle(
     r_initial=r_initial,
-    theta_initial=theta_initial,
-    phi_initial=phi_initial,
+    theta_initial=np.pi-(theta_initial),
+    phi_initial=phi_VMEC,
     energy=energy,
     Lambda=Lambda,
     charge=charge,
@@ -112,7 +123,7 @@ g_particle_booz = ChargedParticle(
 
 print("Starting particle tracer")
 start_time = time.time()
-g_orbit_qsc = ParticleOrbit(g_particle_qsc, g_field_qsc, nsamples=nsamples, tfinal=tfinal)
+g_orbit_qsc = ParticleOrbit(g_particle_qsc, g_field_qsc, nsamples=nsamples, tfinal=tfinal,constant_b20 = False)
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
@@ -128,27 +139,23 @@ g_orbit_booz = ParticleOrbit(g_particle_booz, g_field_booz, nsamples=nsamples, t
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
-
-plt.plot(g_orbit_booz.r_pos)
-# plt.plot(g_orbit_booz.theta_pos)
-# plt.plot(np.cos(g_orbit_booz.theta_pos))
-# plt.plot(np.sin(g_orbit_booz.theta_pos))
+norm_r_pos = (g_orbit_qsc.r_pos/(r_avg))**2
+plt.plot(norm_r_pos, label='qsc')
+plt.plot(g_orbit.r_pos, label='vmec')
+plt.plot(g_orbit_booz.r_pos, label='booz')
+plt.legend()
 # plt.show()
 
 
-# print("Creating B contour plot")
-# g_orbit_booz.plot_orbit_contourB(show=False)
+g_orbit_qsc.plot(show=False)
 
-# print("Creating B contour plot")
-# g_orbit.plot_orbit_contourB(show=False)
-
-# # print("Creating parameter plot")
+# # # print("Creating parameter plot")
 g_orbit.plot(show=False)
 
-# # print("Creating parameter plot")
+# # # print("Creating parameter plot")
 g_orbit_booz.plot(show=False)
 
-# g_orbit_booz.plot_diff_boozer(g_orbit,r_minor=1,show=True)
+# # g_orbit_booz.plot_diff_boozer(g_orbit,r_minor=r_avg,show=True)
 
 # g_orbit_booz.plot_diff_cyl(g_orbit, show=True)
 
@@ -158,15 +165,15 @@ g_orbit_booz.plot(show=False)
 # print("Creating 2D plot")
 # g_orbit_booz.plot_orbit(show=False)
 
-plt.show()
+# plt.show()
 
-# # print("Creating 3D plot")
-# # g_orbit_booz.plot_orbit_3d(show=False)
+# print("Creating 3D plot")
+# g_orbit_booz.plot_orbit_3d(show=False)
 
-# # print("Creating 3D plot")
-# # g_orbit.plot_orbit_3d(show=False)
+# print("Creating 3D plot")
+# g_orbit.plot_orbit_3d(show=False)
 
 # # print("Creating animation plot")
 # # g_orbit.plot_animation(show=True)
 
-# plt.show()
+plt.show()

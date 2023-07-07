@@ -52,21 +52,27 @@ class equilibrium_boozxform : public IR3field_c1{
       const IR3& position, double time) const override;
   virtual IR3 partial_t_contravariant(
       const IR3& position, double time) const override {return {0.0,0.0,0.0};};
-  virtual IR3 covariant(const IR3& position, double time) const override;
-  virtual dIR3 del_covariant(
-      const IR3& position, double time) const override;
-  virtual IR3 partial_t_covariant(
-      const IR3& position, double time) const override {return {0.0,0.0,0.0};};
-  virtual double magnitude(const IR3& position, double time) const override;
-  virtual IR3 del_magnitude(const IR3& position, double time) const override;
+//   virtual IR3 covariant(const IR3& position, double time) const override;
+//   virtual dIR3 del_covariant(
+//       const IR3& position, double time) const override;
+//   virtual IR3 partial_t_covariant(
+//       const IR3& position, double time) const override {return {0.0,0.0,0.0};};
+//   virtual double magnitude(const IR3& position, double time) const override;
+//   virtual IR3 del_magnitude(const IR3& position, double time) const override;
 
+  // double R_0() const {return metric_->parser()->R_0();};
   double B_0() const {return metric_->parser()->B_0();};
   const metric_boozxform* metric() const {return metric_;};
  private:
   const metric_boozxform *metric_;
-  narray_type ixm_b_, ixn_b_;// iota_b_; 
-  interpolator1d **bmnc_b_;
-  interpolator1d *iota_b_, *G_, *I_;
+  // narray_type ixm_b_, ixn_b_;// iota_b_; 
+  // interpolator1d **bmnc_b_;
+  interpolator1d *iota_b_;
+//   interpolator1d **bsupumnc_;
+//   interpolator1d **bsupvmnc_;
+  // interpolator1d **bsubumnc_ ;
+  // interpolator1d **bsubvmnc_ ;
+  // interpolator1d **bsubsmns_ ;
 };
 
 }// end namespace gyronimo.

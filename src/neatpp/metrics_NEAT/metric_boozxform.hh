@@ -38,8 +38,8 @@ class metric_boozxform : public metric_covariant {
   virtual SM3 operator()(const IR3& position) const override;
   virtual dSM3 del(const IR3& position) const override;
   virtual IR3 transform2cylindrical(const IR3& position) const override;
-  // virtual double jacobian(const IR3& position) const override;
-  // virtual IR3 del_jacobian(const IR3& position) const override;
+  virtual double jacobian(const IR3& position) const override;
+  virtual IR3 del_jacobian(const IR3& position) const override;
   const parser_boozxform* parser() const {return parser_;};
   // const double signgs() const {return signsgs_;};
 
