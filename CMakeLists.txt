@@ -153,28 +153,30 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 # Add the profiling executable
-add_library(profiling_lib
-    src/neatpp/fields_NEAT/equilibrium_stellna.cc
-    src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
-    src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
-    src/neatpp/metrics_NEAT/metric_stellna.cc
-    src/neatpp/metrics_NEAT/metric_stellna_qs.cc
-    src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
-    src/neatpp/stellna.hh
-    src/neatpp/vmectrace.hh
-    src/neatpp/fields_NEAT/equilibrium_vmec_interp3D.cc
-    src/neatpp/metrics_NEAT/metric_vmec_interp3D.cc
-    src/neatpp/vmectrace_interp3D.hh
-)
-target_link_libraries(profiling_lib PRIVATE gyronimo)
-target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
-target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
-target_compile_features(profiling_lib PRIVATE cxx_std_20)
+if(PROFILING)
+    add_library(profiling_lib
+        src/neatpp/fields_NEAT/equilibrium_stellna.cc
+        src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
+        src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
+        src/neatpp/metrics_NEAT/metric_stellna.cc
+        src/neatpp/metrics_NEAT/metric_stellna_qs.cc
+        src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+        src/neatpp/stellna.hh
+        src/neatpp/vmectrace.hh
+        src/neatpp/fields_NEAT/equilibrium_vmec_interp3D.cc
+        src/neatpp/metrics_NEAT/metric_vmec_interp3D.cc
+        src/neatpp/vmectrace_interp3D.hh
+    )
+    target_link_libraries(profiling_lib PRIVATE gyronimo)
+    target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
+    target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
+    target_compile_features(profiling_lib PRIVATE cxx_std_20)
 
-add_executable(profiling src/neatpp/neatpp_profiling.cpp)
-target_link_libraries(profiling PRIVATE profiling_lib)
-target_link_libraries(profiling PRIVATE gyronimo)
-target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
-target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
-target_compile_features(profiling PRIVATE cxx_std_20)
-install(TARGETS profiling DESTINATION .)
+    add_executable(profiling src/neatpp/neatpp_profiling.cpp)
+    target_link_libraries(profiling PRIVATE profiling_lib)
+    target_link_libraries(profiling PRIVATE gyronimo)
+    target_link_libraries(${PROJECT_NAME} PRIVATE splinter-3-0)
+    target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
+    target_compile_features(profiling PRIVATE cxx_std_20)
+    install(TARGETS profiling DESTINATION .)
+endif()

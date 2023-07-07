@@ -51,6 +51,7 @@ private:
 
 vector< vector<double>>  vmectrace_interp3D(
         string vmec_file,
+        double ns, double ntheta, double nzeta,
         double charge, double mass, double Lambda,
         double vpp_sign, double energy, double s0,
         double theta0, double phi0,
@@ -58,7 +59,7 @@ vector< vector<double>>  vmectrace_interp3D(
 {
   parser_vmec vmap(vmec_file);
   cubic_gsl_factory ifactory;
-  metric_vmec_interp3D g(&vmap, &ifactory);
+  metric_vmec_interp3D g(&vmap, &ifactory, &ns, &ntheta, &nzeta);
   equilibrium_vmec_interp3D veq(&g, &ifactory);
 
   double Lref = 1.0;

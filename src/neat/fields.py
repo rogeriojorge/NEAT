@@ -494,18 +494,25 @@ class Vmec:
 
     """
 
-    def __init__(self, wout_filename: str, interp3D: bool = False) -> None:
+    def __init__(self, wout_filename: str, interp3D: bool = False,
+                 ns: float = 10, ntheta: float = 10, nzeta: float = 10) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
         self.interp3D = interp3D
         net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp"][()]
         net_file.close()
+        self.ns = ns
+        self.ntheta = ntheta
+        self.nzeta = nzeta
 
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
-        return [self.wout_filename]
-
+        if self.interp3D:
+            return [self.wout_filename, self.ns, self.ntheta, self.nzeta]
+        else:
+            return [self.wout_filename]
+        
     def neatpp_solver(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
         if self.interp3D:

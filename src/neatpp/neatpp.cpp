@@ -29,7 +29,8 @@ PYBIND11_MODULE(neatpp, m) {
            py::arg("Tfinal"), py::arg("nsamples"));
     m.def("vmectrace_interp3D",&vmectrace_interp3D,
           "Trace a single particle in an interpolated VMEC equilibrium magnetic field",
-           py::arg("vmec_file"), py::arg("charge"), py::arg("mass"),
+           py::arg("vmec_file"), py::arg("ns"), py::arg("ntheta"), py::arg("nzeta"),
+           py::arg("charge"), py::arg("mass"),
            py::arg("Lambda"), py::arg("vpp_sign"), py::arg("energy"),
            py::arg("s0"), py::arg("theta0"), py::arg("phi0"),
            py::arg("Tfinal"), py::arg("nsamples"));
