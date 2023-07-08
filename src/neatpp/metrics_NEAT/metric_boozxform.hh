@@ -20,7 +20,7 @@
 #ifndef GYRONIMO_METRIC_BOOZXFORM
 #define GYRONIMO_METRIC_BOOZXFORM
 
-#include <gyronimo/parsers/parser_boozxform.hh>
+#include "parser_boozxform.hh"
 #include <gyronimo/metrics/metric_covariant.hh>
 #include <gyronimo/interpolators/interpolator1d.hh>
 

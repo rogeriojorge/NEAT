@@ -136,6 +136,7 @@ pybind11_add_module(${PROJECT_NAME}
 
 include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
 include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
+include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/parsers_NEAT)
 
 if(PROFILING)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -lprofiler")

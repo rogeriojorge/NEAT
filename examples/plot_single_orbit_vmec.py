@@ -58,7 +58,7 @@ phi0 = phi_initial - nu_spline_of_varphi(phi_initial)
 phi_VMEC=g_field_qsc.to_RZ([[r_avg*np.sqrt(r_initial),theta_initial,phi0]])[2][0]
 
 
-# # Creating wout of VMEC
+# Creating wout of VMEC
 # g_field_qsc.to_vmec(filename=filename_vmec, r=r_avg, params={"ntor":8, "mpol":8, \
 #     "niter_array":[10000,10000,20000],'ftol_array':[1e-13,1e-15,1e-16],'ns_array':[16,49,101]},
 #         ntheta=20, ntorMax=14) #standard ntheta=20, ntorMax=14
@@ -71,8 +71,8 @@ g_field = VMEC_NEAT(wout_filename=wout_filename, maximum_s=1)
 # b.read_wout(wout_filename)
 # # b.comput_surfs=100
 
-# b.mboz = 15
-# b.nboz = 15
+# b.mboz = 30
+# b.nboz = 30
 # b.run()
 # b.write_boozmn(boozmn_filename)
 

@@ -10,7 +10,7 @@
 #include <gyronimo/version.hh>
 #include <gyronimo/core/codata.hh>
 #include <gyronimo/core/linspace.hh>
-#include <gyronimo/parsers/parser_boozxform.hh>
+#include "parser_boozxform.hh"
 #include "equilibrium_boozxform.hh"
 #include "metric_boozxform.hh"
 #include <gyronimo/interpolators/cubic_gsl.hh>
@@ -153,9 +153,9 @@ vector<vector<double>> booztrace(
   double refEnergy = 0.5 * codata::m_proton * mass * Vref * Vref;
   double energySI = energy * codata::e;
   double energySI_over_refEnergy = energySI / refEnergy;
-  double Bi = veq.magnitude({s0, theta0, phi0}, 0);
+  double Bi = veq.magnitude({s0, phi0, theta0}, 0);
   // double Bi = veq.B_0();
-  cout << "Booz: " << Bi << endl;
+//   cout << "Booz: " << Bi << endl;
 
   guiding_centre gc(Lref, Vref, charge / mass, Lambda * energySI_over_refEnergy / Bi , &veq); // -> Version with Bi
   guiding_centre::state initial_state = gc.generate_state(
