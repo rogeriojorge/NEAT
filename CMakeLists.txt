@@ -123,6 +123,7 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/metrics_NEAT/metric_stellna.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+    src/neatpp/parsers_NEAT/parser_boozxform.cc
     src/neatpp/stellna.hh
     src/neatpp/vmectrace.hh
     src/neatpp/vmec_loss.hh

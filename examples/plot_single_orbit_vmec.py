@@ -25,7 +25,7 @@ phi_initial = 0  # initial poloidal angle
 energy = 3.52e5  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.2  # = mu * B0 / energy
+Lambda = 0.5  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = 1000  # resolution in time
 tfinal = 1e-4  # seconds
@@ -113,12 +113,12 @@ g_particle = ChargedParticle(
 g_particle_booz = ChargedParticle(
     r_initial=r_initial,
     theta_initial=np.pi-(theta_initial),
-    phi_initial=phi_VMEC,
+    phi_initial=phi_initial,
     energy=energy,
     Lambda=Lambda,
     charge=charge,
     mass=mass,
-    vpp_sign=-vpp_sign,
+    vpp_sign=vpp_sign,
 )
 
 print("Starting particle tracer")
@@ -146,6 +146,8 @@ plt.plot(g_orbit_booz.r_pos, label='booz')
 plt.legend()
 # plt.show()
 
+g_orbit.plot_orbit_contourB(show=False)
+g_orbit_booz.plot_orbit_contourB(show=True)
 
 g_orbit_qsc.plot(show=False)
 

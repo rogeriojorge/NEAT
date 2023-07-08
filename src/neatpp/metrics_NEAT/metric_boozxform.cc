@@ -96,7 +96,7 @@ double metric_boozxform::jacobian(const IR3& position) const {
   // left-handed boozxform coordinate system is re-oriented 
   // to u = Phi/Phi_bnd, v = zeta, w = theta for J>0
   // should we check/assume that signgs is always negative?
-  return -J;
+  return J;
 }
 IR3 metric_boozxform::del_jacobian(const IR3& position) const {
   double s = position[IR3::u];
@@ -112,6 +112,6 @@ IR3 metric_boozxform::del_jacobian(const IR3& position) const {
   // left-handed VMEC coordinate system is re-oriented 
   // to u = Phi/Phi_bnd, v = zeta, w = theta for J>0
   // should we check/assume that signgs of derivatives is also negative?
-  return {-J_ds, -J_dtheta, -J_dzeta};
+  return {J_ds, J_dtheta, J_dzeta};
 }
 } // end namespace gyronimo
