@@ -19,8 +19,8 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.1  # = mu * B0 / energy
 vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
-nsamples_array = [10]  # resolution in time
-tfinal = 1e-6  # seconds
+nsamples_array = [1]  # resolution in time
+tfinal = 5e-7  # seconds
 
 B0 = 5.3267
 Rmajor_ARIES = 7.7495*2
