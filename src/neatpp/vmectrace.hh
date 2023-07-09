@@ -58,6 +58,17 @@ public:
     double v_parallel = gc_pointer_->get_vpp(s);
     IR3 B_cov = (eq_pointer_->covariant(x, t)) * eq_pointer_->m_factor();
     IR3 B_contrav = (eq_pointer_->contravariant(x, t)) * eq_pointer_->m_factor();
+    double jac = eq_pointer_->metric()->jacobian(x);
+    std::cout << "VMECTRACE" << std::endl;
+    std::cout << "jac: " << jac << std::endl;
+    std::cout << "B: " << B << std::endl;
+    std::cout << "B_cov[IR3::u]:" << B_cov[IR3::u] << std::endl;
+    std::cout << "B_cov[IR3::v]:" << B_cov[IR3::v] << std::endl;
+    std::cout << "B_cov[IR3::w]:" << B_cov[IR3::w] << std::endl;
+    std::cout << "B_contrav[IR3::u]:" << B_contrav[IR3::u] << std::endl;
+    std::cout << "B_contrav[IR3::v]:" << B_contrav[IR3::v] << std::endl;
+    std::cout << "B_contrav[IR3::w]:" << B_contrav[IR3::w] << std::endl;
+    // exit(0);
     // Check if the result has reached the stop value
     if (x[IR3::u] >= maximum_s_)
     {

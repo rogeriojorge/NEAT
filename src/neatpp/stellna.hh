@@ -140,6 +140,17 @@ public:
         IR3 B_contrav = (eq_pointer_->contravariant(x,t))* eq_pointer_->m_factor();
         guiding_centre::state dots = (*gc_pointer_)(s, t);
         IR3 y = gc_pointer_->get_position(dots);
+        double jac = eq_pointer_->metric()->jacobian(x);
+        std::cout << "STELLNA" << std::endl;
+        std::cout << "jac: " << jac << std::endl;
+        std::cout << "B: " << B << std::endl;
+        std::cout << "B_cov[IR3::u]:" << B_cov[IR3::u] << std::endl;
+        std::cout << "B_cov[IR3::v]:" << B_cov[IR3::v] << std::endl;
+        std::cout << "B_cov[IR3::w]:" << B_cov[IR3::w] << std::endl;
+        std::cout << "B_contrav[IR3::u]:" << B_contrav[IR3::u] << std::endl;
+        std::cout << "B_contrav[IR3::v]:" << B_contrav[IR3::v] << std::endl;
+        std::cout << "B_contrav[IR3::w]:" << B_contrav[IR3::w] << std::endl;
+        // exit(0);
         m_states.push_back({
             t,x[0],x[1],x[2],
             gc_pointer_->energy_parallel(s),

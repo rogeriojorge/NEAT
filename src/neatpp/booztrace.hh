@@ -58,12 +58,16 @@ public:
     double v_parallel = gc_pointer_->get_vpp(s);
     IR3 B_cov = (eq_pointer_->covariant(x, t)) * eq_pointer_->m_factor();
     IR3 B_contrav = (eq_pointer_->contravariant(x, t)) * eq_pointer_->m_factor();
-
     double jac = eq_pointer_->metric()->jacobian(x);
-    // std::cout << "jac: " << jac << std::endl;
-    // std::cout << "B: " << B << std::endl;
-    // std::cout << "G:" << B_cov[IR3::w] << std::endl;
-    // std::cout << "G/B^2:" << B_cov[IR3::w]/B/B << std::endl;
+    std::cout << "BOOZTRACE" << std::endl;
+    std::cout << "jac: " << jac << std::endl;
+    std::cout << "B: " << B << std::endl;
+    std::cout << "B_cov[IR3::u]:" << B_cov[IR3::u] << std::endl;
+    std::cout << "B_cov[IR3::v]:" << B_cov[IR3::v] << std::endl;
+    std::cout << "B_cov[IR3::w]:" << B_cov[IR3::w] << std::endl;
+    std::cout << "B_contrav[IR3::u]:" << B_contrav[IR3::u] << std::endl;
+    std::cout << "B_contrav[IR3::v]:" << B_contrav[IR3::v] << std::endl;
+    std::cout << "B_contrav[IR3::w]:" << B_contrav[IR3::w] << std::endl;
     // exit(0);
     double minimum_s_ = 0.1;
 
