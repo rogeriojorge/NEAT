@@ -42,6 +42,7 @@ class metric_boozxform : public metric_covariant {
   virtual IR3 del_jacobian(const IR3& position) const override;
   const parser_boozxform* parser() const {return parser_;};
   // const double signgs() const {return signsgs_;};
+  double psi_boundary() const {return psi_boundary_;};
 
  private:
   const parser_boozxform* parser_;
@@ -51,6 +52,7 @@ class metric_boozxform : public metric_covariant {
   interpolator1d **Rmnc_b_;
   interpolator1d **Zmns_b_;
   interpolator1d **gmnc_b_;
+  double psi_boundary_;
 };
 
 } // end namespace gyronimo

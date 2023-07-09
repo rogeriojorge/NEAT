@@ -19,8 +19,8 @@ IR3 equilibrium_stellna_qs_partial::contravariant(const IR3& position, double ti
   double jac   = metric_->jacobian(position);
 //   double Bu    = 0;
 //   double Bv    = r*metric_->Bref()*metric_->iotaN()/jac;
-  double Bw    = r*metric_->Bref()/jac;
-  return {0, metric_->iotaN()*Bw/ this->m_factor(), Bw/ this->m_factor()};
+  double Bw    = r*metric_->Bref()/jac/this->m_factor();
+  return {0, metric_->iotaN()*Bw, Bw};
 }
 
 dIR3 equilibrium_stellna_qs_partial::del_contravariant(const IR3& position, double time) const {

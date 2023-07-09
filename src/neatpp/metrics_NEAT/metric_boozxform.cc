@@ -26,7 +26,8 @@ metric_boozxform::metric_boozxform(
     const parser_boozxform *p, const interpolator1d_factory *ifactory) 
     : parser_(p), b0_(p->B_0()), mnboz_b_(p->mnboz_b()),
       ns_b_(p->ns_b()), ixm_b_(p->ixm_b()), ixn_b_(p->ixn_b()), 
-      Rmnc_b_(nullptr), Zmns_b_(nullptr), gmnc_b_(nullptr)
+      Rmnc_b_(nullptr), Zmns_b_(nullptr), gmnc_b_(nullptr),
+      psi_boundary_(-p->phi_b()[p->phi_b().size()-1])
     {
     // set radial grid block
     dblock_adapter s_range(p->radius());
