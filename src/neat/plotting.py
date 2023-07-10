@@ -11,8 +11,7 @@ import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 from matplotlib import animation
 from mpl_toolkits.mplot3d import Axes3D
-from scipy.io import netcdf
-
+from scipy.io import netcdf_file
 
 def set_axes_equal(ax):
     """
@@ -96,15 +95,20 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True, savefig=None):
     if show:
         plt.show()
     if savefig is not None: plt.savefig(savefig)
-    # plt.close()
+    plt.close()
 
 
-def plot_parameters(self, r_minor=1, show=True, savefig=None):
+def plot_parameters(self, r_minor=1.0, show=True, savefig=None):
     """
     Make a single plot with relevant physics parameters
     of a single particle orbit on a magnetic field.
     """
     from scipy import signal
+    from matplotlib import patches
+
+    if r_minor!=1:
+        norm_r_pos=(self.r_pos/r_minor)**2
+    else: norm_r_pos=self.r_pos
 
     v_valleys,_=signal.find_peaks(-np.abs(self.v_parallel),distance=(1/100)*self.time.size)
     v_valleys_0=v_valleys[(np.abs(self.v_parallel[v_valleys])<1e5)]
@@ -112,19 +116,32 @@ def plot_parameters(self, r_minor=1, show=True, savefig=None):
     phases=self.varphi_pos
     phases = (phases + np.pi) % (2 * np.pi) - np.pi
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 10))
     plt.subplot(3, 3, 1)
-    plt.plot(self.time*1e6, self.r_pos)
+    plt.plot(self.time*1e6, norm_r_pos)
     plt.xlabel(r"$t (s)$")
     plt.ylabel(r"$r$")
     plt.subplot(3, 3, 2)
-    plt.plot(self.time*1e6, self.theta_pos)
-    plt.xlabel(r"$t (s)$")
-    plt.ylabel(r"$\theta$")
-    plt.subplot(3, 3, 3)
-    plt.plot(self.time*1e6, self.varphi_pos)
-    plt.xlabel(r"$t (s)$")
-    plt.ylabel(r"$\varphi$")
+    # plt.plot(self.time*1e6, self.theta_pos)
+    # plt.xlabel(r"$t (s)$")
+    # plt.ylabel(r"$\theta$")
+    plt.plot(self.rpos_cylindrical[0]*np.cos(self.rpos_cylindrical[2]),
+            self.rpos_cylindrical[0]*np.sin(self.rpos_cylindrical[2]))
+    plt.xlabel(r'$X$')
+    plt.ylabel(r'$Y$')
+    ax1=plt.subplot(3, 3, 3)
+    plt.plot(norm_r_pos*np.cos(self.theta_pos), norm_r_pos*np.sin(self.theta_pos))
+    circle=patches.Circle((0,0), radius=1,color='black',fill=False,linestyle='dotted',linewidth=1)
+    circle2=patches.Circle((0,0), radius=norm_r_pos[0],color='black',fill=False,linestyle='dotted',linewidth=1)
+    ax1.add_patch(circle)
+    ax1.add_patch(circle2)
+    ax1.set(xlim=(-1.2,1.2),ylim=(-1.2,1.2))
+    plt.xlabel(r'$X$')
+    plt.ylabel(r'$Y$')
+    # plt.subplot(3, 3, 3)
+    # plt.plot(self.time*1e6, self.varphi_pos)
+    # plt.xlabel(r"$t (s)$")
+    # plt.ylabel(r"$\varphi$")
     plt.subplot(3, 3, 4)
     plt.plot(self.time*1e6, self.v_parallel)
     plt.plot(self.time[v_valleys]*1e6, self.v_parallel[v_valleys], color='blue', marker='.',linestyle='None')
@@ -167,7 +184,7 @@ def plot_parameters(self, r_minor=1, show=True, savefig=None):
     # plt.plot(self.rpos_cylindrical[0][v_valleys], self.rpos_cylindrical[1][v_valleys], color='red', marker='.', linestyle='None')
     # plt.xlabel(r"$R$")
     # plt.ylabel(r"$Z$")
-    plt.plot(phases[v_valleys], self.r_pos[v_valleys], color='blue', marker='.', linestyle='None')
+    # plt.plot(phases[v_valleys], self.r_pos[v_valleys], color='blue', marker='.', linestyle='None')
     if r_minor!=1:
         norm_r_pos_v=(self.r_pos[v_valleys_0]/r_minor)**2
         plt.plot(phases[v_valleys_0], norm_r_pos_v, color='red', marker='.', linestyle='None')
@@ -181,7 +198,7 @@ def plot_parameters(self, r_minor=1, show=True, savefig=None):
     plt.tight_layout()
     if savefig is not None: plt.savefig(savefig)
     if show: plt.show()
-    # plt.close()
+    plt.close()
 
 
 def plot_animation3d(
@@ -253,7 +270,7 @@ def plot_animation3d(
 
 def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
     """Obtain (X, Y, Z) of a magnetic flux surface from a vmec equilibrium"""
-    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    net_file = netcdf_file(wout_filename, "r", mmap=False)
     try:
         nsurfaces = net_file.variables["ns"][()]
         nfp = net_file.variables["nfp"][()]
@@ -330,7 +347,7 @@ def get_vmec_magB(
     wout_filename, spos=None, ntheta=50, nzeta=100
 ):  # pylint: disable=R0914
     """Obtain contours of B on a magnetic flux surface from a vmec equilibrium"""
-    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    net_file = netcdf_file(wout_filename, "r", mmap=False)
     try:
         nsurfaces = net_file.variables["ns"][()]
         xn_nyq = net_file.variables["xn_nyq"][()]

@@ -296,11 +296,11 @@ class ParticleOrbit:  # pylint: disable=R0902
             savefig=savefig,
         )
 
-    def plot(self, show=True, savefig=None):
+    def plot(self, r_minor=1, show=True, savefig=None):
         """Plot relevant physics parameters of the particle orbit"""
         from .plotting import plot_parameters
 
-        plot_parameters(self=self, show=show, savefig=savefig)
+        plot_parameters(self=self,r_minor=r_minor, show=show, savefig=savefig)
 
     def plot_animation(self, r_surface=0.1, distance=7, show=True, save_movie=False):
         """Plot three-dimensional animation of the particle orbit"""

@@ -146,10 +146,12 @@ plt.plot(g_orbit_booz.r_pos, label='booz')
 plt.legend()
 # plt.show()
 
+g_orbit
+
 g_orbit.plot_orbit_contourB(show=False)
 g_orbit_booz.plot_orbit_contourB(show=True)
 
-g_orbit_qsc.plot(show=False)
+g_orbit_qsc.plot(r=r_avg,show=False)
 
 # # # print("Creating parameter plot")
 g_orbit.plot(show=False)
