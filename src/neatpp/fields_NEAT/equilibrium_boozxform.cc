@@ -26,7 +26,8 @@ equilibrium_boozxform::equilibrium_boozxform(
     std::valarray<double> bmnc_i = (p->bmnc_b())[s_cut]/this->m_factor();
     bmnc_b_[i] = ifactory->interpolate_data( s_range, dblock_adapter(bmnc_i));
   };
-  std::valarray<double> iota_i = (p->iota_b());
+  double sign_iota_change = -1;
+  std::valarray<double> iota_i = sign_iota_change*(p->iota_b());
   iota_b_ = ifactory->interpolate_data(s_range, dblock_adapter(iota_i));
   std::valarray<double> bvco_i = (p->bvco_b())/this->m_factor();
   G_ = ifactory->interpolate_data(s_range, dblock_adapter(bvco_i));
