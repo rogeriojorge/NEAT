@@ -28,15 +28,15 @@ from qsc import Qsc
 from scipy.io import netcdf
 
 from neatpp import (
+    booztrace,
     gc_solver,
     gc_solver_ensemble,
     gc_solver_qs,
     gc_solver_qs_ensemble,
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
-    vmectrace,
     vmecloss,
-    booztrace,
+    vmectrace,
 )
 
 from .constants import ELEMENTARY_CHARGE, PROTON_MASS
@@ -274,9 +274,8 @@ if simple_loaded:
             integmode: int = 1,
             npoiper: int = 100,
             npoiper2: int = 128,
-            nper: int =1000,
+            nper: int = 1000,
         ) -> None:
-
             self.near_axis = False
             self.wout_filename = wout_filename
             net_file = netcdf.netcdf_file(self.wout_filename, "r", mmap=False)
@@ -300,7 +299,7 @@ if simple_loaded:
             # self.params.nper = nper
             self.stuff = copy.deepcopy(stuff_local)
             self.simple = copy.deepcopy(simple_local)
-            
+
             self.tracy = self.params.Tracer()
             self.stuff.vmec_b_scale = self.B_scale
             self.stuff.vmec_rz_scale = self.Aminor_scale
@@ -353,10 +352,10 @@ if simple_loaded:
 
             relative_error = 1e-13
             # npoints=3000
-            npoints=256
+            npoints = 256
             # Simple.init_params(Tracy, charge, mass, energy, npoints, 1, relative_error)
             # self.params.nper=npoints
-            Simple.init_params(Tracy, charge, mass, energy, npoints,  1, relative_error)
+            Simple.init_params(Tracy, charge, mass, energy, npoints, 1, relative_error)
             # self.params.n_e = charge
             # self.params.n_d = mass
             # self.params.trace_time = tfinal
@@ -369,7 +368,6 @@ if simple_loaded:
             # self.tracy.n_e = charge
             # self.tracy.n_d = mass
             # self.tracy.relerr = relative_error
-            
 
             # s, th, ph, v/v_th, v_par/v
             abs_v_parallel_over_v = np.sqrt(1 - Lambda)
@@ -392,7 +390,8 @@ if simple_loaded:
             dtaumin = 2 * np.pi * Rmajor / npoints
             v_th = np.sqrt(2 * energy * ELEMENTARY_CHARGE / (mass * PROTON_MASS))
             nt = int(tfinal * v_th / dtaumin)
-            if nsamples<nt: print(f'Warning: nsamples={nsamples} smaller than nt={nt}')
+            if nsamples < nt:
+                print(f"Warning: nsamples={nsamples} smaller than nt={nt}")
             time = np.linspace(dtaumin / v_th, nt * dtaumin / v_th, nt)
             # dtaumin (time step of the integrator) = 2*pi*Rmajor/npoiper2
             # actual time step dt = dtaumin/v_th
@@ -435,14 +434,14 @@ if simple_loaded:
                         [Lambda * np.sqrt(2 * energy / mass)] * len(z_vmec[:, 2])
                     ),  # perpendicular energy
                     np.array([0] * len(z_vmec[:, 2])),  # magnetic_field_strength,
-                    -z_vmec[:, 4]*v_th,  # parallel velocity
+                    -z_vmec[:, 4] * v_th,  # parallel velocity
                     np.array([0] * len(z_vmec[:, 2])),  # rdot,
                     np.array([0] * len(z_vmec[:, 2])),  # thetadot,
                     np.array([0] * len(z_vmec[:, 2])),  # varphidot,
                     np.array([0] * len(z_vmec[:, 2])),  # vparalleldot,
-                    z_cyl[:, 0]/100,
+                    z_cyl[:, 0] / 100,
                     z_cyl[:, 2],
-                    z_cyl[:, 1]/100,
+                    z_cyl[:, 1] / 100,
                 ]
             ).T
 
@@ -533,7 +532,7 @@ class Vmec:
         net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp"][()]
         self.maximum_s = maximum_s
-        self.integrator=integrator
+        self.integrator = integrator
         net_file.close()
 
     def gyronimo_parameters(self):
@@ -547,7 +546,6 @@ class Vmec:
     def neatpp_solver_ensemble(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
         return vmecloss(*args, *kwargs)
-
 
 
 class Boozxform:
@@ -565,7 +563,7 @@ class Boozxform:
         net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp_b"][()]
         self.maximum_s = maximum_s
-        self.integrator=integrator
+        self.integrator = integrator
         net_file.close()
 
     def gyronimo_parameters(self):
