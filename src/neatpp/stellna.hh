@@ -136,21 +136,33 @@ public:
     void operator()(const guiding_centre::state& s, double t) {
         IR3 x = gc_pointer_->get_position(s);
         double B = (eq_pointer_->magnitude(x, t)) * eq_pointer_->m_factor();
-        IR3 B_cov = (eq_pointer_->covariant(x,t))* eq_pointer_->m_factor();
-        IR3 B_contrav = (eq_pointer_->contravariant(x,t))* eq_pointer_->m_factor();
         guiding_centre::state dots = (*gc_pointer_)(s, t);
         IR3 y = gc_pointer_->get_position(dots);
-        double jac = eq_pointer_->metric()->jacobian(x);
-        std::cout << "STELLNA" << std::endl;
-        std::cout << "jac: " << jac << std::endl;
-        std::cout << "B: " << B << std::endl;
-        std::cout << "B_cov[IR3::u]:" << B_cov[IR3::u] << std::endl;
-        std::cout << "B_cov[IR3::v]:" << B_cov[IR3::v] << std::endl;
-        std::cout << "B_cov[IR3::w]:" << B_cov[IR3::w] << std::endl;
-        std::cout << "B_contrav[IR3::u]:" << B_contrav[IR3::u] << std::endl;
-        std::cout << "B_contrav[IR3::v]:" << B_contrav[IR3::v] << std::endl;
-        std::cout << "B_contrav[IR3::w]:" << B_contrav[IR3::w] << std::endl;
-        // exit(0);
+        IR3 X = eq_pointer_->metric()->transform2cylindrical(x);
+        double v_parallel = gc_pointer_->get_vpp(s);
+        IR3 B_cov = (eq_pointer_->covariant(x, t)) * eq_pointer_->m_factor();
+        IR3 B_con = (eq_pointer_->contravariant(x, t)) * eq_pointer_->m_factor();
+
+    // std::cout << "STELLNA" << std::endl;
+
+    // dIR3 dB_cov = (eq_pointer_->del_covariant(x, t));
+    // dIR3 dB_con = (eq_pointer_->del_contravariant(x, t));
+    // double jac = eq_pointer_->metric()->jacobian(x);
+    // IR3 del_jac = eq_pointer_->metric()->del_jacobian(x);
+    // std::cout << "jac: " << jac << std::endl;
+    // std::cout << "G/B^2: " << B_cov[IR3::w]/B/B << std::endl;
+    // std::cout << "del_jac_u:" << del_jac[IR3::u] << ", del_jac_v:" << del_jac[IR3::v] << ", del_jac_w:" << del_jac[IR3::w]<< std::endl;
+    // std::cout << "B: " << B << std::endl;
+    // std::cout << "B_cov[IR3::u]:" << B_cov[IR3::u] << std::endl;
+    // std::cout << "B_cov[IR3::v]:" << B_cov[IR3::v] << std::endl;
+    // std::cout << "B_cov[IR3::w]:" << B_cov[IR3::w] << std::endl;
+    // std::cout << "dB_covw_u:" << dB_cov[dIR3::wu] * eq_pointer_->m_factor() << ", dB_covw_v:" << dB_cov[dIR3::wv] * eq_pointer_->m_factor() << ", dB_covw_w:" << dB_cov[dIR3::ww] * eq_pointer_->m_factor() << std::endl;
+    // std::cout << "B_con[IR3::u]:" << B_con[IR3::u] << std::endl;
+    // std::cout << "B_con[IR3::v]:" << B_con[IR3::v] << std::endl;
+    // std::cout << "B_con[IR3::w]:" << B_con[IR3::w] << std::endl;
+    // std::cout << "dB_conv_u:" << dB_con[dIR3::vu] * eq_pointer_->m_factor() << ", dB_conv_v:" << dB_con[dIR3::vv] * eq_pointer_->m_factor() << ", dB_conv_w:" << dB_con[dIR3::vw] * eq_pointer_->m_factor() << std::endl;
+    // std::cout << "dB_conw_u:" << dB_con[dIR3::wu] * eq_pointer_->m_factor() << ", dB_conw_v:" << dB_con[dIR3::wv] * eq_pointer_->m_factor() << ", dB_conw_w:" << dB_con[dIR3::ww] * eq_pointer_->m_factor() << std::endl;
+    // exit(0);
         m_states.push_back({
             t,x[0],x[1],x[2],
             gc_pointer_->energy_parallel(s),
@@ -158,7 +170,7 @@ public:
             B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
             gc_pointer_->get_vpp(dots),
             B_cov[IR3::u], B_cov[IR3::w], B_cov[IR3::v],
-            B_contrav[IR3::u], B_contrav[IR3::w], B_contrav[IR3::v]
+            B_con[IR3::u], B_con[IR3::w], B_con[IR3::v]
         });
     }
 private:

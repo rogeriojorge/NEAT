@@ -46,7 +46,7 @@ equilibrium_boozxform::~equilibrium_boozxform() {
 IR3 equilibrium_boozxform::contravariant(const IR3& position, double time) const {
   double s    = position[IR3::u];
   double jac   = metric_->jacobian(position);
-  double Bv = 1/jac/this->m_factor();
+  double Bv = metric_->psi_boundary()/jac/this->m_factor();
   return {0.0, (*iota_b_)(s)*Bv, Bv};
 }
 
@@ -59,10 +59,10 @@ dIR3 equilibrium_boozxform::del_contravariant(
   double d_v_jac = metric_->del_jacobian(position)[IR3::v];
   double d_w_jac = metric_->del_jacobian(position)[IR3::w];
 
-  double Bv = 1/jac/this->m_factor();
-  double d_u_Bv = -d_u_jac/(jac*jac)/this->m_factor();
-  double d_v_Bv = -d_v_jac/(jac*jac)/this->m_factor();
-  double d_w_Bv = -d_w_jac/(jac*jac)/this->m_factor();
+  double Bv = metric_->psi_boundary()/jac/this->m_factor();
+  double d_u_Bv = -metric_->psi_boundary()*d_u_jac/(jac*jac)/this->m_factor();
+  double d_v_Bv = -metric_->psi_boundary()*d_v_jac/(jac*jac)/this->m_factor();
+  double d_w_Bv = -metric_->psi_boundary()*d_w_jac/(jac*jac)/this->m_factor();
 
   return {
       0.0, 0.0, 0.0,
@@ -86,7 +86,7 @@ dIR3 equilibrium_boozxform::del_covariant(
       0.0, 0.0, 0.0, 
       (*I_).derivative(s), 
       0.0, 0.0,
-	  (*G_).derivative(s), 
+	    (*G_).derivative(s), 
       0.0, 0.0
   };
 }
@@ -95,7 +95,7 @@ dIR3 equilibrium_boozxform::del_covariant(
 double equilibrium_boozxform::magnitude(
     const IR3& position, double time) const {
   double s = position[IR3::u];
-  double theta = position[IR3::v];
+  double theta = std::numbers::pi-position[IR3::v];
   double zeta = position[IR3::w];
   double Bnorm = 0.0;
   #pragma omp parallel for reduction(+: Bnorm)
@@ -107,13 +107,13 @@ double equilibrium_boozxform::magnitude(
 IR3 equilibrium_boozxform::del_magnitude(
     const IR3& position, double time) const {
   double s = position[IR3::u];
-  double theta = position[IR3::v];
+  double theta = std::numbers::pi-position[IR3::v];
   double zeta = position[IR3::w];
   double B_ds = 0.0, B_dzeta = 0.0, B_dtheta = 0.0;
   #pragma omp parallel for reduction(+: B_ds, B_dzeta, B_dtheta)
   for (size_t i = 0; i < ixm_b_.size(); i++) {  
     B_ds     += (*bmnc_b_[i]).derivative(s)  * std::cos( ixm_b_[i]*theta - ixn_b_[i]*zeta );
-    B_dtheta -= ixm_b_[i] * (*bmnc_b_[i])(s) * std::sin( ixm_b_[i]*theta - ixn_b_[i]*zeta );
+    B_dtheta += ixm_b_[i] * (*bmnc_b_[i])(s) * std::sin( ixm_b_[i]*theta - ixn_b_[i]*zeta );
     B_dzeta  += ixn_b_[i] * (*bmnc_b_[i])(s) * std::sin( ixm_b_[i]*theta - ixn_b_[i]*zeta );
   };
   return {B_ds, B_dtheta, B_dzeta};

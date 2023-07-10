@@ -19,8 +19,8 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.1  # = mu * B0 / energy
 vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
-nsamples_array = [1]  # resolution in time
-tfinal = 5e-7  # seconds
+nsamples_array = [3000]  # resolution in time
+tfinal = 5e-5  # seconds
 
 B0 = 5.3267
 Rmajor_ARIES = 7.7495*2
@@ -41,7 +41,7 @@ g_field_booz= Boozxform(wout_filename=boozmn_filename)
 
 g_particle = ChargedParticle(
     r_initial=r_initial,
-    theta_initial=np.pi-theta_initial,
+    theta_initial=theta_initial,
     phi_initial=phi_initial,
     energy=energy,
     Lambda=Lambda,
@@ -58,9 +58,11 @@ for nsamples in nsamples_array:
     print(f"nsamples = {nsamples}")
     print("  Starting particle tracer vmec")
     start_time = time.time()
+    g_particle.theta_initial=np.pi-theta_initial
     g_orbit_vmec = ParticleOrbit(
         g_particle, g_field_vmec, nsamples=nsamples, tfinal=tfinal
     )
+    g_particle.theta_initial=theta_initial
     total_time = time.time() - start_time
     print(f"  Finished vmec in {total_time}s")
     time_vmec.append(total_time)
@@ -77,10 +79,8 @@ for nsamples in nsamples_array:
     print("  Starting particle tracer qsc")
     start_time = time.time()
     g_particle.r_initial=r_avg*np.sqrt(r_initial)
-    g_particle.theta_initial=theta_initial
     g_orbit_qsc = ParticleOrbit(g_particle, g_field_qsc, nsamples=nsamples, tfinal=tfinal,constant_b20 = False)
     g_particle.r_initial=r_initial
-    g_particle.theta_initial=np.pi-theta_initial
     total_time = time.time() - start_time
     print(f"  Finished in {total_time}s")
     time_qsc.append(total_time)
@@ -105,7 +105,7 @@ plt.xlabel(r"$t (s)$")
 plt.ylabel(r"$r$")
 plt.subplot(3, 3, 2)
 plt.plot(g_orbit_vmec.time, np.pi-g_orbit_vmec.theta_pos, label="vmec")
-plt.plot(g_orbit_booz.time, np.pi-g_orbit_booz.theta_pos, label="booz")
+plt.plot(g_orbit_booz.time, g_orbit_booz.theta_pos, label="booz")
 plt.plot(g_orbit_qsc.time,  g_orbit_qsc.theta_pos, 'k--', label="qsc")
 plt.legend()
 plt.xlabel(r"$t (s)$")
@@ -185,8 +185,8 @@ plt.plot(
     label="vmec",
 )
 plt.plot(
-    g_orbit_booz.r_pos * np.cos(np.pi-g_orbit_booz.theta_pos),
-    g_orbit_booz.r_pos * np.sin(np.pi-g_orbit_booz.theta_pos),
+    g_orbit_booz.r_pos * np.cos(g_orbit_booz.theta_pos),
+    g_orbit_booz.r_pos * np.sin(g_orbit_booz.theta_pos),
     label="booz",
 )
 plt.plot(
