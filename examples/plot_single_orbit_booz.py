@@ -15,7 +15,7 @@ vmec equilibrium
 
 # Initialize an alpha particle at a radius = r_initial
 r_initial = 0.5  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
-theta_initial = np.pi/2  # initial poloidal angle
+theta_initial = np.pi / 2  # initial poloidal angle
 phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
