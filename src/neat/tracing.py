@@ -443,7 +443,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
 
         self.lambda_all = np.array(result[0])
         self.lambda_trapped = self.lambda_all[: int(particles.nlambda_trapped)]
-        self.lambda_passing = self.lambda_all[int(particles.nlambda_trapped):]
+        self.lambda_passing = self.lambda_all[int(particles.nlambda_trapped) :]
 
         solution = np.array(result[1])
         self.solution = solution
