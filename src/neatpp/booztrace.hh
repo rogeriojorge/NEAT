@@ -174,7 +174,7 @@ vector<vector<double>> booztrace(
   double refEnergy = 0.5 * codata::m_proton * mass * Vref * Vref;
   double energySI = energy * codata::e;
   double energySI_over_refEnergy = energySI / refEnergy;
-  double Bi = veq.magnitude({s0, phi0, theta0}, 0);
+  double Bi = veq.magnitude({s0, theta0, phi0}, 0);
   // double Bi = veq.B_0();
 //   cout << "Booz: " << Bi << endl;
 

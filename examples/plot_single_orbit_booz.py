@@ -14,16 +14,16 @@ vmec equilibrium
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.2  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
-theta_initial = 0.1  # initial poloidal angle
+r_initial = 0.5  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
+theta_initial = np.pi/2  # initial poloidal angle
 phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.1  # = mu * B0 / energy
-vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
+Lambda = 0.99  # = mu * B0 / energy
+vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples_array = [3000]  # resolution in time
-tfinal = 5e-5  # seconds
+tfinal = 3e-4  # seconds
 
 B0 = 5.3267
 Rmajor_ARIES = 7.7495 * 2
@@ -184,7 +184,7 @@ plt.plot(g_orbit_vmec.time, g_orbit_vmec.rdot, "r-", label=r"$\dot r$ vmec")
 plt.plot(g_orbit_booz.time, g_orbit_booz.rdot, "b--", label=r"$\dot r$ booz")
 plt.plot(g_orbit_qsc.time, g_orbit_qsc.rdot, "g--", label=r"$\dot r$ qsc")
 plt.plot(g_orbit_vmec.time, -g_orbit_vmec.thetadot, "g-", label=r"$\dot \theta$ vmec")
-plt.plot(g_orbit_booz.time, -g_orbit_booz.thetadot, "k--", label=r"$\dot \theta$ booz")
+plt.plot(g_orbit_booz.time, g_orbit_booz.thetadot, "k--", label=r"$\dot \theta$ booz")
 plt.plot(g_orbit_qsc.time, g_orbit_qsc.thetadot, "y--", label=r"$\dot \theta$ qsc")
 plt.plot(g_orbit_vmec.time, g_orbit_vmec.varphidot, "m-", label=r"$\dot \varphi$ vmec")
 plt.plot(g_orbit_booz.time, g_orbit_booz.varphidot, "c--", label=r"$\dot \varphi$ booz")
