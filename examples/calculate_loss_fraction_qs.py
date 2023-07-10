@@ -29,13 +29,20 @@ nlambda_passing = 2  # number of pitch angles for passing particles
 nsamples = 1000  # resolution in time
 tfinal = 1e-5  # seconds
 nthreads_array = [4]
-stellarator_index = 'precise QA'
-Rmajor_ARIES = 7.7495*2
+stellarator_index = "precise QA"
+Rmajor_ARIES = 7.7495 * 2
 Rminor_ARIES = 1.7044
 g_field_basis = StellnaQS.from_paper(stellarator_index, B0=B0, nphi=401)
-g_field = StellnaQS(rc=g_field_basis.rc*Rmajor_ARIES, zs=g_field_basis.zs*Rmajor_ARIES, \
-                        etabar=g_field_basis.etabar/Rmajor_ARIES, B2c=g_field_basis.B2c*(B0/Rmajor_ARIES/Rmajor_ARIES),\
-                            B0=B0, nfp=g_field_basis.nfp, order='r3', nphi=401)
+g_field = StellnaQS(
+    rc=g_field_basis.rc * Rmajor_ARIES,
+    zs=g_field_basis.zs * Rmajor_ARIES,
+    etabar=g_field_basis.etabar / Rmajor_ARIES,
+    B2c=g_field_basis.B2c * (B0 / Rmajor_ARIES / Rmajor_ARIES),
+    B0=B0,
+    nfp=g_field_basis.nfp,
+    order="r3",
+    nphi=401,
+)
 g_particle = ChargedParticleEnsemble(
     r_initial=r_initial,
     r_max=r_max,
@@ -88,18 +95,19 @@ plt.show()
 # )
 # g_orbits.plot_loss_fraction()
 import numpy as np
-for i in np.arange(0,10,1):
-    plt.plot(g_orbits.time,g_orbits.r_pos[i],label=str(i))
+
+for i in np.arange(0, 10, 1):
+    plt.plot(g_orbits.time, g_orbits.r_pos[i], label=str(i))
 plt.legend()
 plt.show()
 
-for i in np.arange(0,5,1):
-    plt.plot(g_orbits.time,g_orbits.r_pos[i],label=str(i))
+for i in np.arange(0, 5, 1):
+    plt.plot(g_orbits.time, g_orbits.r_pos[i], label=str(i))
 plt.legend()
 plt.show()
 
-for i in np.arange(0,3,1):
-    plt.plot(g_orbits.time,g_orbits.r_pos[i],label=str(i))
+for i in np.arange(0, 3, 1):
+    plt.plot(g_orbits.time, g_orbits.r_pos[i], label=str(i))
 plt.legend()
 plt.show()
 

@@ -20,7 +20,7 @@
 #include <cassert>
 #include <gyronimo/core/error.hh>
 #include <gyronimo/core/linspace.hh>
-#include <gyronimo/parsers/parser_boozxform.hh>
+#include "parser_boozxform.hh"
 
 namespace gyronimo {
   typedef std::valarray<double> narray_type;

@@ -2,11 +2,12 @@
 
 from neat.fields import Simple  # isort:skip
 from neat.tracing import ChargedParticle, ParticleOrbit  # isort:skip
-from neat.plotting import get_vmec_boundary
 import os
 import time
 
 import numpy as np
+
+from neat.plotting import get_vmec_boundary
 
 """                                                                           
 Trace the orbit of a single particle in a
@@ -64,8 +65,6 @@ g_field = Simple(
 # print("Creating animation plot")
 # g_orbit.plot_animation(show=True)
 
-*coordinates,bfield=get_vmec_boundary(wout_filename=wout_filename)
-print(coordinates[0][0][0][0], coordinates[0][1][0][0],coordinates[0][2][0][0])
+*coordinates, bfield = get_vmec_boundary(wout_filename=wout_filename)
+print(coordinates[0][0][0][0], coordinates[0][1][0][0], coordinates[0][2][0][0])
 print(bfield[0][0])
-
-

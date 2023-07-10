@@ -22,7 +22,7 @@
 
 #include <gyronimo/fields/IR3field_c1.hh>
 #include <metric_boozxform.hh>
-#include <gyronimo/parsers/parser_boozxform.hh>
+#include "parser_boozxform.hh"
 #include <gyronimo/interpolators/interpolator2d.hh>
 
 namespace gyronimo{

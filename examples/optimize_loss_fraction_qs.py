@@ -22,7 +22,7 @@ B0 = 5
 B2c = B0 / 7
 nsamples = 600
 tfinal = 4e-5
-stellarator_index = 'precise QA'
+stellarator_index = "precise QA"
 constant_b20 = True
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
@@ -46,7 +46,6 @@ class optimize_loss_fraction:
         parallel=False,
         constant_b20=constant_b20,
     ) -> None:
-
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
@@ -106,11 +105,19 @@ class optimize_loss_fraction:
         else:
             least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
 
-Rmajor_ARIES = 7.7495/2
+
+Rmajor_ARIES = 7.7495 / 2
 g_field_basis = StellnaQS.from_paper(stellarator_index, nphi=51, B2c=B2c, B0=B0)
-g_field = StellnaQS(rc=g_field_basis.rc*Rmajor_ARIES, zs=g_field_basis.zs*Rmajor_ARIES, \
-                        etabar=g_field_basis.etabar/Rmajor_ARIES, B2c=g_field_basis.B2c*(B0/Rmajor_ARIES/Rmajor_ARIES),\
-                            B0=B0, nfp=g_field_basis.nfp, order='r3', nphi=111)
+g_field = StellnaQS(
+    rc=g_field_basis.rc * Rmajor_ARIES,
+    zs=g_field_basis.zs * Rmajor_ARIES,
+    etabar=g_field_basis.etabar / Rmajor_ARIES,
+    B2c=g_field_basis.B2c * (B0 / Rmajor_ARIES / Rmajor_ARIES),
+    B0=B0,
+    nfp=g_field_basis.nfp,
+    order="r3",
+    nphi=111,
+)
 g_particle = ChargedParticleEnsemble(
     r_initial=r_initial,
     r_max=r_max,
