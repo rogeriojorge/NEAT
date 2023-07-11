@@ -31,9 +31,6 @@ equilibrium_vmec_interp3D::equilibrium_vmec_interp3D(
     bmnc_[i] = ifactory->interpolate_data( s_half_range, dblock_adapter(bmnc_i));
   };
     DataTable contravariant_vmec_samples_u, contravariant_vmec_samples_v, contravariant_vmec_samples_w;
-    DataTable del_contravariant_vmec_samples_uu, del_contravariant_vmec_samples_uv, del_contravariant_vmec_samples_uw,
-              del_contravariant_vmec_samples_vu, del_contravariant_vmec_samples_vv, del_contravariant_vmec_samples_vw,
-              del_contravariant_vmec_samples_wu, del_contravariant_vmec_samples_wv, del_contravariant_vmec_samples_ww;
     IR3 contravariant_vmec_temp = {0, 0, 0};
     dIR3 del_contravariant_vmec_temp = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     // dblock_adapter s_radius = (p->radius());
@@ -54,55 +51,21 @@ equilibrium_vmec_interp3D::equilibrium_vmec_interp3D(
                 pos = {x(0), x(1), x(2)};
                 
                 contravariant_vmec_temp = contravariant_vmec(pos, 0);
-                // contravariant_vmec_samples_u.addSample(x, contravariant_vmec_temp[IR3::u]);
                 contravariant_vmec_samples_v.addSample(x, contravariant_vmec_temp[IR3::v]);
                 contravariant_vmec_samples_w.addSample(x, contravariant_vmec_temp[IR3::w]);
-
-                // del_contravariant_vmec_temp = del_contravariant_vmec(pos, 0);
-                // del_contravariant_vmec_samples_uu.addSample(x, del_contravariant_vmec_temp[dIR3::uu]);
-                // del_contravariant_vmec_samples_uv.addSample(x, del_contravariant_vmec_temp[dIR3::uv]);
-                // del_contravariant_vmec_samples_uw.addSample(x, del_contravariant_vmec_temp[dIR3::uw]);
-                // del_contravariant_vmec_samples_vu.addSample(x, del_contravariant_vmec_temp[dIR3::vu]);
-                // del_contravariant_vmec_samples_vv.addSample(x, del_contravariant_vmec_temp[dIR3::vv]);
-                // del_contravariant_vmec_samples_vw.addSample(x, del_contravariant_vmec_temp[dIR3::vw]);
-                // del_contravariant_vmec_samples_wu.addSample(x, del_contravariant_vmec_temp[dIR3::wu]);
-                // del_contravariant_vmec_samples_wv.addSample(x, del_contravariant_vmec_temp[dIR3::wv]);
-                // del_contravariant_vmec_samples_ww.addSample(x, del_contravariant_vmec_temp[dIR3::ww]);
             }
         }
     }
-    // contravariant_vmec_spline_u_ = new BSpline(BSpline::Builder(contravariant_vmec_samples_u).degree(1).build());
     contravariant_vmec_spline_v_ = new BSpline(BSpline::Builder(contravariant_vmec_samples_v).degree(1).build());
     contravariant_vmec_spline_w_ = new BSpline(BSpline::Builder(contravariant_vmec_samples_w).degree(1).build());
-
-    // del_contravariant_vmec_spline_uu_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_uu).degree(3).build());
-    // del_contravariant_vmec_spline_uv_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_uv).degree(3).build());
-    // del_contravariant_vmec_spline_uw_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_uw).degree(3).build());
-    // del_contravariant_vmec_spline_vu_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_vu).degree(3).build());
-    // del_contravariant_vmec_spline_vv_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_vv).degree(3).build());
-    // del_contravariant_vmec_spline_vw_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_vw).degree(3).build());
-    // del_contravariant_vmec_spline_wu_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_wu).degree(3).build());
-    // del_contravariant_vmec_spline_wv_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_wv).degree(3).build());
-    // del_contravariant_vmec_spline_ww_ = new BSpline(BSpline::Builder(del_contravariant_vmec_samples_ww).degree(3).build());
 }
 equilibrium_vmec_interp3D::~equilibrium_vmec_interp3D() {
   if(bmnc_) delete bmnc_;
   if(bsupumnc_) delete bsupumnc_;
   if(bsupvmnc_) delete bsupvmnc_;
 
-  // if(contravariant_vmec_spline_u_) delete contravariant_vmec_spline_u_;
   if(contravariant_vmec_spline_v_) delete contravariant_vmec_spline_v_;
   if(contravariant_vmec_spline_w_) delete contravariant_vmec_spline_w_;
-
-  // if(del_contravariant_vmec_spline_uu_) delete del_contravariant_vmec_spline_uu_;
-  // if(del_contravariant_vmec_spline_uv_) delete del_contravariant_vmec_spline_uv_;
-  // if(del_contravariant_vmec_spline_uw_) delete del_contravariant_vmec_spline_uw_;
-  // if(del_contravariant_vmec_spline_vu_) delete del_contravariant_vmec_spline_vu_;
-  // if(del_contravariant_vmec_spline_vv_) delete del_contravariant_vmec_spline_vv_;
-  // if(del_contravariant_vmec_spline_vw_) delete del_contravariant_vmec_spline_vw_;
-  // if(del_contravariant_vmec_spline_wu_) delete del_contravariant_vmec_spline_wu_;
-  // if(del_contravariant_vmec_spline_wv_) delete del_contravariant_vmec_spline_wv_;
-  // if(del_contravariant_vmec_spline_ww_) delete del_contravariant_vmec_spline_ww_;
 }
 
 IR3 equilibrium_vmec_interp3D::contravariant_vmec(const IR3& position, double time) const {
@@ -166,7 +129,6 @@ dIR3 equilibrium_vmec_interp3D::del_contravariant(const IR3& position, double ti
   x(0) = position[IR3::u];
   x(1) = metric_->reduce_phi(position[IR3::v]);
   x(2) = metric_->reduce_theta(position[IR3::w]);
-  // auto del_contravariant_u = contravariant_vmec_spline_u_->evalJacobian(x);
   auto del_contravariant_v = contravariant_vmec_spline_v_->evalJacobian(x);
   auto del_contravariant_w = contravariant_vmec_spline_w_->evalJacobian(x);
   return {0,0,0,

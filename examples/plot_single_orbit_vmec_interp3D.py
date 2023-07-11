@@ -14,13 +14,13 @@ vmec equilibrium
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.3  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
+r_initial = 0.2  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
 theta_initial = 0.1  # initial poloidal angle
 phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.8  # = mu * B0 / energy
+Lambda = 0.2  # = mu * B0 / energy
 vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
 nsamples_array = [800]  # resolution in time
 tfinal = 5e-5  # seconds

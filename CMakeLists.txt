@@ -30,7 +30,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 elseif(MSVC)
     add_compile_options(/O2)
 endif()
-add_compile_options(-fcommon)
+add_compile_options(-fcommon -Wno-shadow -Wno-packed-not-aligned)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -117,6 +117,10 @@ add_subdirectory(external/gyronimo)
 add_subdirectory(external/splinter)
 include_directories(external/splinter/include)
 include_directories(external/splinter/thirdparty/Eigen)
+
+# Add mlinterp
+add_subdirectory(external/mlinterp)
+include_directories(external/mlinterp/mlinterp)
 
 # Add pybind11 include directories
 execute_process(

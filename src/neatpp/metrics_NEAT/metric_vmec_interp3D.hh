@@ -7,11 +7,12 @@
 #include <datatable.h>
 #include <bspline.h>
 #include <bsplinebuilder.h>
+#include <mlinterp>
 
 using namespace gyronimo;
 using namespace SPLINTER;
+using namespace mlinterp;
 
-//! Covariant metric in `VMEC` curvilinear coordinates.
 class metric_vmec_interp3D : public metric_covariant {
  public:
   typedef std::valarray<double> narray_type;
@@ -24,7 +25,7 @@ class metric_vmec_interp3D : public metric_covariant {
   virtual SM3 operator()(const IR3& position) const override;
   virtual dSM3 del(const IR3& position) const override;
   virtual IR3 transform2cylindrical(const IR3& position) const override;
-  // virtual IR3 transform2cylindrical_vmec(const IR3& position) const;
+  virtual IR3 transform2cylindrical_vmec(const IR3& position) const;
   virtual SM3 metric_vmec(const IR3& position) const;
   virtual dSM3 del_metric_vmec(const IR3& position) const;
   double jacobian_vmec(const IR3& position) const;
@@ -49,9 +50,9 @@ class metric_vmec_interp3D : public metric_covariant {
   interpolator1d **Zmns_;
   interpolator1d **gmnc_;
 
-  // BSpline* transform2cylindrical_spline_u_;
-  // BSpline* transform2cylindrical_spline_v_;
-  // BSpline* transform2cylindrical_spline_w_;
+  BSpline* transform2cylindrical_spline_u_;
+  BSpline* transform2cylindrical_spline_v_;
+  BSpline* transform2cylindrical_spline_w_;
 
   BSpline* metric_vmec_spline_uu_;
   BSpline* metric_vmec_spline_uv_;
@@ -59,25 +60,6 @@ class metric_vmec_interp3D : public metric_covariant {
   BSpline* metric_vmec_spline_vv_;
   BSpline* metric_vmec_spline_vw_;
   BSpline* metric_vmec_spline_ww_;
-
-  // BSpline* del_metric_vmec_spline_uuu_;
-  // BSpline* del_metric_vmec_spline_uuv_;
-  // BSpline* del_metric_vmec_spline_uuw_;
-  // BSpline* del_metric_vmec_spline_uvu_;
-  // BSpline* del_metric_vmec_spline_uvv_;
-  // BSpline* del_metric_vmec_spline_uvw_;
-  // BSpline* del_metric_vmec_spline_uwu_;
-  // BSpline* del_metric_vmec_spline_uwv_;
-  // BSpline* del_metric_vmec_spline_uww_;
-  // BSpline* del_metric_vmec_spline_vvu_;
-  // BSpline* del_metric_vmec_spline_vvv_;
-  // BSpline* del_metric_vmec_spline_vvw_;
-  // BSpline* del_metric_vmec_spline_vwu_;
-  // BSpline* del_metric_vmec_spline_vwv_;
-  // BSpline* del_metric_vmec_spline_vww_;
-  // BSpline* del_metric_vmec_spline_wwu_;
-  // BSpline* del_metric_vmec_spline_wwv_;
-  // BSpline* del_metric_vmec_spline_www_;
 };
 
 #endif // GYRONIMO_METRIC_VMEC

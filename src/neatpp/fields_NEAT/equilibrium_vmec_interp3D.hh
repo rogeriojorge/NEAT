@@ -39,19 +39,8 @@ class equilibrium_vmec_interp3D : public IR3field_c1{
   interpolator1d **bsupumnc_;
   interpolator1d **bsupvmnc_;
 
-//   BSpline* contravariant_vmec_spline_u_;
   BSpline* contravariant_vmec_spline_v_;
   BSpline* contravariant_vmec_spline_w_;
-
-//   BSpline* del_contravariant_vmec_spline_uu_;
-//   BSpline* del_contravariant_vmec_spline_uv_;
-//   BSpline* del_contravariant_vmec_spline_uw_;
-//   BSpline* del_contravariant_vmec_spline_vu_;
-//   BSpline* del_contravariant_vmec_spline_vv_;
-//   BSpline* del_contravariant_vmec_spline_vw_;
-//   BSpline* del_contravariant_vmec_spline_wu_;
-//   BSpline* del_contravariant_vmec_spline_wv_;
-//   BSpline* del_contravariant_vmec_spline_ww_;
 };
 
 #endif // GYRONIMO_EQUILIBRIUM_VMEC
