@@ -118,6 +118,9 @@ add_subdirectory(external/splinter)
 include_directories(external/splinter/include)
 include_directories(external/splinter/thirdparty/Eigen)
 
+# Add linterp
+include_directories(external/linterp/src)
+
 # Add pybind11 include directories
 execute_process(
     COMMAND "${PYTHON}" -c

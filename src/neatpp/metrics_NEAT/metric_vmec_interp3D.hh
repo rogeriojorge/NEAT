@@ -7,6 +7,9 @@
 #include <datatable.h>
 #include <bspline.h>
 #include <bsplinebuilder.h>
+#include "linterp.h"
+
+// add example similar to https://github.com/rncarpio/linterp/blob/master/src/linterp_test2.cpp
 
 using namespace gyronimo;
 using namespace SPLINTER;
