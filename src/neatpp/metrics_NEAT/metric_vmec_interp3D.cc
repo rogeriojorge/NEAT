@@ -45,23 +45,25 @@ metric_vmec_interp3D::metric_vmec_interp3D(
     auto ds = (s_max - s_min) / (ns_interp_ - 1);
     auto dtheta = theta_modulus_factor_ / ntheta_interp_;
     auto dzeta = phi_modulus_factor_ / nzeta_interp_;
+    // double s_array[ns_interp_]; theta_array[ntheta_interp_]; zeta_array[nzeta_interp_];
     DenseVector x(3);
-    IR3 pos = {0,0,0};
 
     for (size_t i = 0; i < ns_interp_; ++i) {
+        // s_array[i] = s_min + i * ds;
         for (size_t j = 0; j <= ntheta_interp_; ++j) {
+            // if (i==0) theta_array[j] = j * dtheta;
             for (size_t k = 0; k <= nzeta_interp_; ++k) {
-                x(0) = s_min + i * ds;
+                // if (i==0 && j==0) zeta_array[k] = k * dzeta;
+                x(0) = s_min + i * ds;//s_array[i];
                 x(1) = k * dzeta;
                 x(2) = j * dtheta;
-                pos = {x(0), x(1), x(2)};
                 
-                transform2cylindrical_temp = transform2cylindrical_vmec(pos);
+                transform2cylindrical_temp = transform2cylindrical_vmec({x(0), x(1), x(2)});
                 transform2cylindrical_samples_u.addSample(x, transform2cylindrical_temp[IR3::u]);
                 transform2cylindrical_samples_v.addSample(x, transform2cylindrical_temp[IR3::v]);
                 transform2cylindrical_samples_w.addSample(x, transform2cylindrical_temp[IR3::w]);
 
-                metric_vmec_temp = metric_vmec(pos);
+                metric_vmec_temp = metric_vmec({x(0), x(1), x(2)});
                 metric_vmec_samples_uu.addSample(x, metric_vmec_temp[SM3::uu]);
                 metric_vmec_samples_uv.addSample(x, metric_vmec_temp[SM3::uv]);
                 metric_vmec_samples_uw.addSample(x, metric_vmec_temp[SM3::uw]);
@@ -81,58 +83,6 @@ metric_vmec_interp3D::metric_vmec_interp3D(
     metric_vmec_spline_vv_ = new BSpline(BSpline::Builder(metric_vmec_samples_vv).degree(1).build());
     metric_vmec_spline_vw_ = new BSpline(BSpline::Builder(metric_vmec_samples_vw).degree(1).build());
     metric_vmec_spline_ww_ = new BSpline(BSpline::Builder(metric_vmec_samples_ww).degree(1).build());
-
-    // // Boundaries of the interval [-pi, pi]
-    // constexpr double b = 3.14159265358979323846, a = -b;
-
-    // // Discretize the set [-pi, pi] X [-pi, pi] using 15 evenly-spaced
-    // // points along the x axis and 15 evenly-spaced points along the y axis
-    // // and evaluate sin(x)cos(y) at each of those points
-    // constexpr int nxd = 15, nyd = 15, nd[] = { nxd, nyd };
-    // double xd[nxd];
-    // for(int i = 0; i < nxd; ++i) {
-    //   xd[i] = a + (b - a) / (nxd - 1) * i;
-    // }
-    // double yd[nyd];
-    // for(int j = 0; j < nyd; ++j) {
-    //   yd[j] = a + (b - a) / (nyd - 1) * j;
-    // }
-    // double zd[nxd * nyd];
-    // for(int i = 0; i < nxd; ++i) {
-    //   for(int j = 0; j < nyd; ++j) {
-    //     const int n = j + i * nyd;
-    //     zd[n] = sin(xd[i]) * cos(yd[j]);
-    //   }
-    // }
-
-    // // Subdivide the set [-pi, pi] X [-pi, pi] using 100 evenly-spaced
-    // // points along the x axis and 100 evenly-spaced points along the y axis
-    // // (these are the points at which we interpolate)
-    // constexpr int m = 100, ni = m * m;
-    // double xi[ni];
-    // double yi[ni];
-    // for(int i = 0; i < m; ++i) {
-    //   for(int j = 0; j < m; ++j) {
-    //     const int n = j + i * m;
-    //     xi[n] = a + (b - a) / (m - 1) * i;
-    //     yi[n] = a + (b - a) / (m - 1) * j;
-    //   }
-    // }
-
-    // // Perform the interpolation
-    // double zi[ni]; // Result is stored in this buffer
-    // interp(
-    //   nd, ni,        // Number of points
-    //   zd, zi,        // Output axis (z)
-    //   xd, xi, yd, yi // Input axes (x and y)
-    // );
-
-    // // Print the interpolated values
-    // cout << scientific << setprecision(8) << showpos;
-    // for(int n = 0; n < ni; ++n) {
-    //   cout << xi[n] << "\t" << yi[n] << "\t" << zi[n] << endl;
-    // }
-
 }
 
 metric_vmec_interp3D::~metric_vmec_interp3D() {

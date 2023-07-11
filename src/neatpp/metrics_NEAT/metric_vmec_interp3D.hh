@@ -7,11 +7,9 @@
 #include <datatable.h>
 #include <bspline.h>
 #include <bsplinebuilder.h>
-#include <mlinterp>
 
 using namespace gyronimo;
 using namespace SPLINTER;
-using namespace mlinterp;
 
 class metric_vmec_interp3D : public metric_covariant {
  public:
