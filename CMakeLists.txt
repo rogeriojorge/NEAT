@@ -118,10 +118,6 @@ add_subdirectory(external/splinter)
 include_directories(external/splinter/include)
 include_directories(external/splinter/thirdparty/Eigen)
 
-# Add mlinterp
-add_subdirectory(external/mlinterp)
-include_directories(external/mlinterp/mlinterp)
-
 # Add pybind11 include directories
 execute_process(
     COMMAND "${PYTHON}" -c
