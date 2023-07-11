@@ -22,12 +22,12 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.2  # = mu * B0 / energy
 vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
-nsamples_array = [800]  # resolution in time
+nsamples_array = [1000]  # resolution in time
 tfinal = 5e-5  # seconds
 wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
-ns = 24  # radial interpolation resolution
-ntheta = 24  # poloidal interpolation resolution
-nzeta = 24  # toroidal interpolation resolution
+ns = 10  # radial interpolation resolution
+ntheta = 10  # poloidal interpolation resolution
+nzeta = 10  # toroidal interpolation resolution
 
 g_field_interp = Vmec(
     wout_filename=wout_filename, interp3D=True, ns=ns, ntheta=ntheta, nzeta=nzeta
