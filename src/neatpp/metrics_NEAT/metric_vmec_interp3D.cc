@@ -55,6 +55,7 @@ metric_vmec_interp3D::metric_vmec_interp3D(
     auto dtheta = theta_modulus_factor_ / ntheta_interp_;
     auto dzeta = phi_modulus_factor_ / nzeta_interp_;
     DenseVector x(3);
+    IR3 pos = {0,0,0};
 
     for (size_t i = 0; i < ns_interp_; ++i) {
         for (size_t j = 0; j <= ntheta_interp_; ++j) {
@@ -62,12 +63,12 @@ metric_vmec_interp3D::metric_vmec_interp3D(
                 x(0) = s_min + i * ds;
                 x(1) = k * dzeta;
                 x(2) = j * dtheta;
-                IR3 pos = {x(0), x(1), x(2)};
+                pos = {x(0), x(1), x(2)};
                 
-                transform2cylindrical_temp = transform2cylindrical_vmec(pos);
-                transform2cylindrical_samples_u.addSample(x, transform2cylindrical_temp[IR3::u]);
-                transform2cylindrical_samples_v.addSample(x, transform2cylindrical_temp[IR3::v]);
-                transform2cylindrical_samples_w.addSample(x, transform2cylindrical_temp[IR3::w]);
+  //               transform2cylindrical_temp = transform2cylindrical_vmec(pos);
+  //               transform2cylindrical_samples_u.addSample(x, transform2cylindrical_temp[IR3::u]);
+  //               transform2cylindrical_samples_v.addSample(x, transform2cylindrical_temp[IR3::v]);
+  //               transform2cylindrical_samples_w.addSample(x, transform2cylindrical_temp[IR3::w]);
 
                 metric_vmec_temp = metric_vmec(pos);
                 metric_vmec_samples_uu.addSample(x, metric_vmec_temp[SM3::uu]);
@@ -77,58 +78,60 @@ metric_vmec_interp3D::metric_vmec_interp3D(
                 metric_vmec_samples_vw.addSample(x, metric_vmec_temp[SM3::vw]);
                 metric_vmec_samples_ww.addSample(x, metric_vmec_temp[SM3::ww]);
 
-                del_metric_vmec_temp = del_metric_vmec(pos);
-                del_metric_vmec_samples_uuu.addSample(x, del_metric_vmec_temp[dSM3::uuu]);
-                del_metric_vmec_samples_uuv.addSample(x, del_metric_vmec_temp[dSM3::uuv]);
-                del_metric_vmec_samples_uuw.addSample(x, del_metric_vmec_temp[dSM3::uuw]);
-                del_metric_vmec_samples_uvu.addSample(x, del_metric_vmec_temp[dSM3::uvu]);
-                del_metric_vmec_samples_uvv.addSample(x, del_metric_vmec_temp[dSM3::uvv]);
-                del_metric_vmec_samples_uvw.addSample(x, del_metric_vmec_temp[dSM3::uvw]);
-                del_metric_vmec_samples_uwu.addSample(x, del_metric_vmec_temp[dSM3::uwu]);
-                del_metric_vmec_samples_uwv.addSample(x, del_metric_vmec_temp[dSM3::uwv]);
-                del_metric_vmec_samples_uww.addSample(x, del_metric_vmec_temp[dSM3::uww]);
-                del_metric_vmec_samples_vvu.addSample(x, del_metric_vmec_temp[dSM3::vvu]);
-                del_metric_vmec_samples_vvv.addSample(x, del_metric_vmec_temp[dSM3::vvv]);
-                del_metric_vmec_samples_vvw.addSample(x, del_metric_vmec_temp[dSM3::vvw]);
-                del_metric_vmec_samples_vwu.addSample(x, del_metric_vmec_temp[dSM3::vwu]);
-                del_metric_vmec_samples_vwv.addSample(x, del_metric_vmec_temp[dSM3::vwv]);
-                del_metric_vmec_samples_vww.addSample(x, del_metric_vmec_temp[dSM3::vww]);
-                del_metric_vmec_samples_wwu.addSample(x, del_metric_vmec_temp[dSM3::wwu]);
-                del_metric_vmec_samples_wwv.addSample(x, del_metric_vmec_temp[dSM3::wwv]);
-                del_metric_vmec_samples_www.addSample(x, del_metric_vmec_temp[dSM3::www]);
+  //               del_metric_vmec_temp = del_metric_vmec(pos);
+  //               del_metric_vmec_samples_uuu.addSample(x, del_metric_vmec_temp[dSM3::uuu]);
+  //               del_metric_vmec_samples_uuv.addSample(x, del_metric_vmec_temp[dSM3::uuv]);
+  //               del_metric_vmec_samples_uuw.addSample(x, del_metric_vmec_temp[dSM3::uuw]);
+  //               del_metric_vmec_samples_uvu.addSample(x, del_metric_vmec_temp[dSM3::uvu]);
+  //               del_metric_vmec_samples_uvv.addSample(x, del_metric_vmec_temp[dSM3::uvv]);
+  //               del_metric_vmec_samples_uvw.addSample(x, del_metric_vmec_temp[dSM3::uvw]);
+  //               del_metric_vmec_samples_uwu.addSample(x, del_metric_vmec_temp[dSM3::uwu]);
+  //               del_metric_vmec_samples_uwv.addSample(x, del_metric_vmec_temp[dSM3::uwv]);
+  //               del_metric_vmec_samples_uww.addSample(x, del_metric_vmec_temp[dSM3::uww]);
+  //               del_metric_vmec_samples_vvu.addSample(x, del_metric_vmec_temp[dSM3::vvu]);
+  //               del_metric_vmec_samples_vvv.addSample(x, del_metric_vmec_temp[dSM3::vvv]);
+  //               del_metric_vmec_samples_vvw.addSample(x, del_metric_vmec_temp[dSM3::vvw]);
+  //               del_metric_vmec_samples_vwu.addSample(x, del_metric_vmec_temp[dSM3::vwu]);
+  //               del_metric_vmec_samples_vwv.addSample(x, del_metric_vmec_temp[dSM3::vwv]);
+  //               del_metric_vmec_samples_vww.addSample(x, del_metric_vmec_temp[dSM3::vww]);
+  //               del_metric_vmec_samples_wwu.addSample(x, del_metric_vmec_temp[dSM3::wwu]);
+  //               del_metric_vmec_samples_wwv.addSample(x, del_metric_vmec_temp[dSM3::wwv]);
+  //               del_metric_vmec_samples_www.addSample(x, del_metric_vmec_temp[dSM3::www]);
             }
         }
     }
 
-    transform2cylindrical_spline_u_ = new BSpline(BSpline::Builder(transform2cylindrical_samples_u).degree(3).build());
-    transform2cylindrical_spline_v_ = new BSpline(BSpline::Builder(transform2cylindrical_samples_v).degree(3).build());
-    transform2cylindrical_spline_w_ = new BSpline(BSpline::Builder(transform2cylindrical_samples_w).degree(3).build());
+  //   transform2cylindrical_spline_u_ = new BSpline(BSpline::Builder(transform2cylindrical_samples_u).degree(3).build());
+  //   transform2cylindrical_spline_v_ = new BSpline(BSpline::Builder(transform2cylindrical_samples_v).degree(3).build());
+  //   transform2cylindrical_spline_w_ = new BSpline(BSpline::Builder(transform2cylindrical_samples_w).degree(3).build());
 
-    metric_vmec_spline_uu_ = new BSpline(BSpline::Builder(metric_vmec_samples_uu).degree(3).build());
-    metric_vmec_spline_uv_ = new BSpline(BSpline::Builder(metric_vmec_samples_uv).degree(3).build());
-    metric_vmec_spline_uw_ = new BSpline(BSpline::Builder(metric_vmec_samples_uw).degree(3).build());
-    metric_vmec_spline_vv_ = new BSpline(BSpline::Builder(metric_vmec_samples_vv).degree(3).build());
-    metric_vmec_spline_vw_ = new BSpline(BSpline::Builder(metric_vmec_samples_vw).degree(3).build());
-    metric_vmec_spline_ww_ = new BSpline(BSpline::Builder(metric_vmec_samples_ww).degree(3).build());
+    metric_vmec_spline_uu_ = new BSpline(BSpline::Builder(metric_vmec_samples_uu).degree(1).build());
+    metric_vmec_spline_uv_ = new BSpline(BSpline::Builder(metric_vmec_samples_uv).degree(1).build());
+    metric_vmec_spline_uw_ = new BSpline(BSpline::Builder(metric_vmec_samples_uw).degree(1).build());
+    metric_vmec_spline_vv_ = new BSpline(BSpline::Builder(metric_vmec_samples_vv).degree(1).build());
+    metric_vmec_spline_vw_ = new BSpline(BSpline::Builder(metric_vmec_samples_vw).degree(1).build());
+    metric_vmec_spline_ww_ = new BSpline(BSpline::Builder(metric_vmec_samples_ww).degree(1).build());
 
-    del_metric_vmec_spline_uuu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uuu).degree(3).build());
-    del_metric_vmec_spline_uuv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uuv).degree(3).build());
-    del_metric_vmec_spline_uuw_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uuw).degree(3).build());
-    del_metric_vmec_spline_uvu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uvu).degree(3).build());
-    del_metric_vmec_spline_uvv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uvv).degree(3).build());
-    del_metric_vmec_spline_uvw_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uvw).degree(3).build());
-    del_metric_vmec_spline_uwu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uwu).degree(3).build());
-    del_metric_vmec_spline_uwv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uwv).degree(3).build());
-    del_metric_vmec_spline_uww_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uww).degree(3).build());
-    del_metric_vmec_spline_vvu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vvu).degree(3).build());
-    del_metric_vmec_spline_vvv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vvv).degree(3).build());
-    del_metric_vmec_spline_vvw_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vvw).degree(3).build());
-    del_metric_vmec_spline_vwu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vwu).degree(3).build());
-    del_metric_vmec_spline_vwv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vwv).degree(3).build());
-    del_metric_vmec_spline_vww_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vww).degree(3).build());
-    del_metric_vmec_spline_wwu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_wwu).degree(3).build());
-    del_metric_vmec_spline_wwv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_wwv).degree(3).build());
-    del_metric_vmec_spline_www_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_www).degree(3).build());
+  // // adicionar evalJacobian do splinter para calcular derivadas em vez de del_metric_vmec
+
+  //   del_metric_vmec_spline_uuu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uuu).degree(3).build());
+  //   del_metric_vmec_spline_uuv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uuv).degree(3).build());
+  //   del_metric_vmec_spline_uuw_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uuw).degree(3).build());
+  //   del_metric_vmec_spline_uvu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uvu).degree(3).build());
+  //   del_metric_vmec_spline_uvv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uvv).degree(3).build());
+  //   del_metric_vmec_spline_uvw_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uvw).degree(3).build());
+  //   del_metric_vmec_spline_uwu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uwu).degree(3).build());
+  //   del_metric_vmec_spline_uwv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uwv).degree(3).build());
+  //   del_metric_vmec_spline_uww_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_uww).degree(3).build());
+  //   del_metric_vmec_spline_vvu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vvu).degree(3).build());
+  //   del_metric_vmec_spline_vvv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vvv).degree(3).build());
+  //   del_metric_vmec_spline_vvw_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vvw).degree(3).build());
+  //   del_metric_vmec_spline_vwu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vwu).degree(3).build());
+  //   del_metric_vmec_spline_vwv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vwv).degree(3).build());
+  //   del_metric_vmec_spline_vww_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_vww).degree(3).build());
+  //   del_metric_vmec_spline_wwu_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_wwu).degree(3).build());
+  //   del_metric_vmec_spline_wwv_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_wwv).degree(3).build());
+  //   del_metric_vmec_spline_www_ = new BSpline(BSpline::Builder(del_metric_vmec_samples_www).degree(3).build());
 }
 
 metric_vmec_interp3D::~metric_vmec_interp3D() {
@@ -136,9 +139,9 @@ metric_vmec_interp3D::~metric_vmec_interp3D() {
   if(Zmns_) delete Zmns_;
   if(gmnc_) delete gmnc_;
 
-  if(transform2cylindrical_spline_u_) delete transform2cylindrical_spline_u_;
-  if(transform2cylindrical_spline_v_) delete transform2cylindrical_spline_v_;
-  if(transform2cylindrical_spline_w_) delete transform2cylindrical_spline_w_;
+  // if(transform2cylindrical_spline_u_) delete transform2cylindrical_spline_u_;
+  // if(transform2cylindrical_spline_v_) delete transform2cylindrical_spline_v_;
+  // if(transform2cylindrical_spline_w_) delete transform2cylindrical_spline_w_;
 
   if(metric_vmec_spline_uu_) delete metric_vmec_spline_uu_;
   if(metric_vmec_spline_uv_) delete metric_vmec_spline_uv_;
@@ -147,24 +150,24 @@ metric_vmec_interp3D::~metric_vmec_interp3D() {
   if(metric_vmec_spline_vw_) delete metric_vmec_spline_vw_;
   if(metric_vmec_spline_ww_) delete metric_vmec_spline_ww_;
 
-  if(del_metric_vmec_spline_uuu_) delete del_metric_vmec_spline_uuu_;
-  if(del_metric_vmec_spline_uuv_) delete del_metric_vmec_spline_uuv_;
-  if(del_metric_vmec_spline_uuw_) delete del_metric_vmec_spline_uuw_;
-  if(del_metric_vmec_spline_uvu_) delete del_metric_vmec_spline_uvu_;
-  if(del_metric_vmec_spline_uvv_) delete del_metric_vmec_spline_uvv_;
-  if(del_metric_vmec_spline_uvw_) delete del_metric_vmec_spline_uvw_;
-  if(del_metric_vmec_spline_uwu_) delete del_metric_vmec_spline_uwu_;
-  if(del_metric_vmec_spline_uwv_) delete del_metric_vmec_spline_uwv_;
-  if(del_metric_vmec_spline_uww_) delete del_metric_vmec_spline_uww_;
-  if(del_metric_vmec_spline_vvu_) delete del_metric_vmec_spline_vvu_;
-  if(del_metric_vmec_spline_vvv_) delete del_metric_vmec_spline_vvv_;
-  if(del_metric_vmec_spline_vvw_) delete del_metric_vmec_spline_vvw_;
-  if(del_metric_vmec_spline_vwu_) delete del_metric_vmec_spline_vwu_;
-  if(del_metric_vmec_spline_vwv_) delete del_metric_vmec_spline_vwv_;
-  if(del_metric_vmec_spline_vww_) delete del_metric_vmec_spline_vww_;
-  if(del_metric_vmec_spline_wwu_) delete del_metric_vmec_spline_wwu_;
-  if(del_metric_vmec_spline_wwv_) delete del_metric_vmec_spline_wwv_;
-  if(del_metric_vmec_spline_www_) delete del_metric_vmec_spline_www_;
+  // if(del_metric_vmec_spline_uuu_) delete del_metric_vmec_spline_uuu_;
+  // if(del_metric_vmec_spline_uuv_) delete del_metric_vmec_spline_uuv_;
+  // if(del_metric_vmec_spline_uuw_) delete del_metric_vmec_spline_uuw_;
+  // if(del_metric_vmec_spline_uvu_) delete del_metric_vmec_spline_uvu_;
+  // if(del_metric_vmec_spline_uvv_) delete del_metric_vmec_spline_uvv_;
+  // if(del_metric_vmec_spline_uvw_) delete del_metric_vmec_spline_uvw_;
+  // if(del_metric_vmec_spline_uwu_) delete del_metric_vmec_spline_uwu_;
+  // if(del_metric_vmec_spline_uwv_) delete del_metric_vmec_spline_uwv_;
+  // if(del_metric_vmec_spline_uww_) delete del_metric_vmec_spline_uww_;
+  // if(del_metric_vmec_spline_vvu_) delete del_metric_vmec_spline_vvu_;
+  // if(del_metric_vmec_spline_vvv_) delete del_metric_vmec_spline_vvv_;
+  // if(del_metric_vmec_spline_vvw_) delete del_metric_vmec_spline_vvw_;
+  // if(del_metric_vmec_spline_vwu_) delete del_metric_vmec_spline_vwu_;
+  // if(del_metric_vmec_spline_vwv_) delete del_metric_vmec_spline_vwv_;
+  // if(del_metric_vmec_spline_vww_) delete del_metric_vmec_spline_vww_;
+  // if(del_metric_vmec_spline_wwu_) delete del_metric_vmec_spline_wwu_;
+  // if(del_metric_vmec_spline_wwv_) delete del_metric_vmec_spline_wwv_;
+  // if(del_metric_vmec_spline_www_) delete del_metric_vmec_spline_www_;
 }
 
 double metric_vmec_interp3D::reduce_theta(double theta) const {
@@ -177,7 +180,7 @@ double metric_vmec_interp3D::reduce_phi(double phi) const {
   return (phi < 0 ? phi + phi_modulus_factor_ : phi);
 }
 
-IR3 metric_vmec_interp3D::transform2cylindrical_vmec(const IR3& position) const {
+IR3 metric_vmec_interp3D::transform2cylindrical(const IR3& position) const {
     double u = position[gyronimo::IR3::u];
     double v = position[gyronimo::IR3::v];
     double w = position[gyronimo::IR3::w];
@@ -295,25 +298,24 @@ dSM3 metric_vmec_interp3D::del_metric_vmec(const IR3& position) const {
   };
 }
 
-IR3 metric_vmec_interp3D::transform2cylindrical(const IR3& position) const {
-  DenseVector x(3);
-  x(0) = position[IR3::u];
-  x(1) = this->reduce_phi(position[IR3::v]);
-  x(2) = this->reduce_theta(position[IR3::w]);
-  IR3 transform2cylindrical_temp = {transform2cylindrical_spline_u_->eval(x),
-                                    transform2cylindrical_spline_v_->eval(x),
-                                    transform2cylindrical_spline_w_->eval(x)};
-  return transform2cylindrical_temp;
-}
+// IR3 metric_vmec_interp3D::transform2cylindrical(const IR3& position) const {
+//   DenseVector x(3);
+//   x(0) = position[IR3::u];
+//   x(1) = this->reduce_phi(position[IR3::v]);
+//   x(2) = this->reduce_theta(position[IR3::w]);
+//   IR3 transform2cylindrical_temp = {transform2cylindrical_spline_u_->eval(x),
+//                                     transform2cylindrical_spline_v_->eval(x),
+//                                     transform2cylindrical_spline_w_->eval(x)};
+//   return transform2cylindrical_temp;
+// }
 
 SM3 metric_vmec_interp3D::operator()(const IR3& position) const {
   DenseVector x(3);
   x(0) = position[IR3::u];
   x(1) = this->reduce_phi(position[IR3::v]);
   x(2) = this->reduce_theta(position[IR3::w]);
-  SM3 metric_vmec_temp = {metric_vmec_spline_uu_->eval(x),metric_vmec_spline_uv_->eval(x),metric_vmec_spline_uw_->eval(x),
-                          metric_vmec_spline_vv_->eval(x),metric_vmec_spline_vw_->eval(x),metric_vmec_spline_ww_->eval(x)};
-  return metric_vmec_temp;
+  return {metric_vmec_spline_uu_->eval(x),metric_vmec_spline_uv_->eval(x),metric_vmec_spline_uw_->eval(x),
+          metric_vmec_spline_vv_->eval(x),metric_vmec_spline_vw_->eval(x),metric_vmec_spline_ww_->eval(x)};
 }
 
 dSM3 metric_vmec_interp3D::del(const IR3& position) const {
@@ -321,13 +323,19 @@ dSM3 metric_vmec_interp3D::del(const IR3& position) const {
   x(0) = position[IR3::u];
   x(1) = this->reduce_phi(position[IR3::v]);
   x(2) = this->reduce_theta(position[IR3::w]);
-  dSM3 del_metric_vmec_temp = {del_metric_vmec_spline_uuu_->eval(x),del_metric_vmec_spline_uuv_->eval(x),del_metric_vmec_spline_uuw_->eval(x),
-                               del_metric_vmec_spline_uvu_->eval(x),del_metric_vmec_spline_uvv_->eval(x),del_metric_vmec_spline_uvw_->eval(x),
-                               del_metric_vmec_spline_uwu_->eval(x),del_metric_vmec_spline_uwv_->eval(x),del_metric_vmec_spline_uww_->eval(x),
-                               del_metric_vmec_spline_vvu_->eval(x),del_metric_vmec_spline_vvv_->eval(x),del_metric_vmec_spline_vvw_->eval(x),
-                               del_metric_vmec_spline_vwu_->eval(x),del_metric_vmec_spline_vwv_->eval(x),del_metric_vmec_spline_vww_->eval(x),
-                               del_metric_vmec_spline_wwu_->eval(x),del_metric_vmec_spline_wwv_->eval(x),del_metric_vmec_spline_www_->eval(x)};
-  return del_metric_vmec_temp;
+  auto del_metric_uu = metric_vmec_spline_uu_->evalJacobian(x);
+  auto del_metric_uv = metric_vmec_spline_uv_->evalJacobian(x);
+  auto del_metric_uw = metric_vmec_spline_uw_->evalJacobian(x);
+  auto del_metric_vv = metric_vmec_spline_vv_->evalJacobian(x);
+  auto del_metric_vw = metric_vmec_spline_vw_->evalJacobian(x);
+  auto del_metric_ww = metric_vmec_spline_ww_->evalJacobian(x);
+  return {del_metric_uu(0),del_metric_uu(1),del_metric_uu(2),
+          del_metric_uv(0),del_metric_uv(1),del_metric_uv(2),
+          del_metric_uw(0),del_metric_uw(1),del_metric_uw(2),
+          del_metric_vv(0),del_metric_vv(1),del_metric_vv(2),
+          del_metric_vw(0),del_metric_vw(1),del_metric_vw(2),
+          del_metric_ww(0),del_metric_ww(1),del_metric_ww(2),
+          };
 }
 
 //@todo move this to jacobian and think about testing this by calling the parent

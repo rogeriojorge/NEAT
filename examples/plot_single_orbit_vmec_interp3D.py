@@ -14,20 +14,20 @@ vmec equilibrium
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.2  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
+r_initial = 0.3  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
 theta_initial = 0.1  # initial poloidal angle
 phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.1  # = mu * B0 / energy
+Lambda = 0.8  # = mu * B0 / energy
 vpp_sign = 1  # initial sign of the parallel velocity, +1 or -1
-nsamples_array = [100, 300, 1000, 3000]  # resolution in time
-tfinal = 1e-6  # seconds
+nsamples_array = [800]  # resolution in time
+tfinal = 5e-5  # seconds
 wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
-ns = 12  # radial interpolation resolution
-ntheta = 9  # poloidal interpolation resolution
-nzeta = 6  # toroidal interpolation resolution
+ns = 24  # radial interpolation resolution
+ntheta = 24  # poloidal interpolation resolution
+nzeta = 24  # toroidal interpolation resolution
 
 g_field_interp = Vmec(
     wout_filename=wout_filename, interp3D=True, ns=ns, ntheta=ntheta, nzeta=nzeta
