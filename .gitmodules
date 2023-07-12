@@ -4,3 +4,4 @@
 [submodule "external/simple"]
 	path = external/simple
 	url = https://github.com/rogeriojorge/SIMPLE.git
+	branch = optimization
