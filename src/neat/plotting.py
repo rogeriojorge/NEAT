@@ -151,9 +151,11 @@ def plot_parameters(self, show=True):
     if show:
         plt.show()
 
+
 def update(num, data, line):
-        line.set_data(data[:2, 0:num])
-        line.set_3d_properties(data[2, 0:num])
+    line.set_data(data[:2, 0:num])
+    line.set_3d_properties(data[2, 0:num])
+
 
 def plot_animation3d(
     boundary, rpos_cartesian, nsamples, distance=7, show=True, save_movie=False
@@ -190,7 +192,6 @@ def plot_animation3d(
 
     ani = []
 
-    
     (line,) = ax.plot(
         rpos_cartesian[0][0:1],
         rpos_cartesian[1][0:1],
@@ -217,7 +218,6 @@ def plot_animation3d(
             bitrate=-1,
             extra_args=["-pix_fmt", "yuv420p"],
         )
-
 
 
 def get_vmec_boundary(wout_filename):  # pylint: disable=R0914

@@ -79,18 +79,20 @@ class testtracing(unittest.TestCase):
     #     self.assertTrue(np.array_equal(obj.rpos_cylindrical, excepted_rpros_cylindrical))
 
     def test_get_vmec_boundary(self):
-
-        from neat.fields import Vmec
         import os
 
-        wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
+        from neat.fields import Vmec
+
+        wout_filename = os.path.join(
+            os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc"
+        )
 
         n_samples = 2000
         tfinal = 0.001
         precision = 7
         r_initial = 0.12
         theta_initial = np.pi / 2
-        B0=6
+        B0 = 6
         phi_initial = np.pi
         energy = 3.52e6
         charge = 2
@@ -115,7 +117,6 @@ class testtracing(unittest.TestCase):
             g_field,
             nsamples=n_samples,
             tfinal=tfinal,
-            
         )
         np.testing.assert_allclose(
             g_orbit.total_energy,
@@ -125,7 +126,6 @@ class testtracing(unittest.TestCase):
         np.testing.assert_allclose(
             g_orbit.p_phi, [g_orbit.p_phi[0]] * (n_samples + 1), rtol=precision
         )
-
 
     def test_plot_orbit_contourB(self):
         import os
@@ -200,20 +200,18 @@ class testtracing(unittest.TestCase):
             charge=charge,
             mass=mass,
         )
-        
+
         # field = StellnaQS.from_paper(1, B0=1)
         # nsamples = 800
         tfinal = 0.0001
         # nthreads = 2
         nparticles = 32
-        
 
         obj = ParticleEnsembleOrbit_Simple(
             g_particle,
             g_field,
             tfinal=tfinal,
             nparticles=nparticles,
-            
         )
 
         self.assertEqual(obj.particles, g_particle)

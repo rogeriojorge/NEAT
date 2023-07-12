@@ -1,26 +1,21 @@
+import os
 import sys
 import unittest
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-
-
-
-
-
-import os
-from neat.plotting import get_vmec_boundary, get_vmec_magB, plot_animation3d, update
 from scipy.io import netcdf_file
+
+from neat.plotting import get_vmec_boundary, get_vmec_magB, plot_animation3d, update
 
 
 class MyTestCase(unittest.TestCase):
     def test_update(self):
         fig = plt.figure()
-        ax = plt.axes(projection='3d')
+        ax = plt.axes(projection="3d")
 
         data = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])
-        line, = ax.plot(data[0], data[1], data[2])
+        (line,) = ax.plot(data[0], data[1], data[2])
 
         update(2, data, line)
 
@@ -28,7 +23,6 @@ class MyTestCase(unittest.TestCase):
         np.testing.assert_array_equal(line.get_data_3d(), expected_data)
 
     def test_read_data(self):
-        
         wout_filename = os.path.join(
             os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc"
         )

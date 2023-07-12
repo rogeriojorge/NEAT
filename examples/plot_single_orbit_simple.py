@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# from neat.fields import Simple  # isort:skip
+from neat.fields import Simple  # isort:skip
 from neat.tracing import ChargedParticle, ParticleOrbit  # isort:skip
 import os
 import time
@@ -29,9 +29,9 @@ wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor
 
-# g_field = Simple(
-#     wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
-# )
+g_field = Simple(
+    wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
+)
 # g_particle = ChargedParticle(
 #     r_initial=r_initial,
 #     theta_initial=theta_initial,
