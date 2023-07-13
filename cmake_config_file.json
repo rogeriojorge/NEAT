@@ -2,9 +2,9 @@
     "comment": "Flags used to compile NEAT. Change this according to your needs.",
     "cmake_args": [
             "-DINSTALL_SIMPLE=ON",
-            "-DCMAKE_C_COMPILER=gcc-10",
-            "-DCMAKE_CXX_COMPILER=g++-10",
-            "-DCMAKE_Fortran_COMPILER=gfortran-10",
+            "-DCMAKE_C_COMPILER=gcc",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_Fortran_COMPILER=gfortran",
             "-DPROFILING=OFF"
         ]
 }
