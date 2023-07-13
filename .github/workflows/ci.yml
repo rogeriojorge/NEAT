@@ -58,9 +58,9 @@ jobs:
     - name: ls
       run: ls
 
-    - name: Install simsopt
-      run: |
-        pip3 install simsopt
+    # - name: Install simsopt
+    #   run: |
+    #     pip3 install simsopt
 
     # - name: Try running simsopt
     #   run: |
@@ -107,7 +107,7 @@ jobs:
         sed -i -e '7d' cmake_config_file.json
         sed -i -e '7i             "-DCMAKE_CXX_COMPILER=g++-10",\' cmake_config_file.json
         cat cmake_config_file.json
-        pip3 install -e .
+        python3 setup.py install
 
     - name: ls
       run: ls

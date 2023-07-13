@@ -31,15 +31,17 @@ class MyTestCase(unittest.TestCase):
         net_file.close()
 
     def test_read_netcdf_array(self):
-        wout_filename = "/home/rodrigo/NEAT/examples/inputs/wout_ARIESCS.nc"
-
+        wout_filename = os.path.join(
+            os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc"
+        )
         result = get_vmec_boundary(wout_filename)
 
         self.assertEqual(result[0][0][0][0], 9.564622227455484)
 
     def test_get_vmec_magB(self):
-        wout_filename = "/home/rodrigo/NEAT/examples/inputs/wout_ARIESCS.nc"
-
+        wout_filename = os.path.join(
+            os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc"
+        )
         result = get_vmec_magB(wout_filename)
 
         self.assertEqual(result[0][0], 5.179016053586765)

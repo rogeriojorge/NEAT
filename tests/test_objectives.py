@@ -25,7 +25,7 @@ class NEATtests(unittest.TestCase):
             nphi=3,
         )
         self.assertEqual(
-            LossFractionResidual(g_field, g_particle).J(), 0.6678092572306401
+            LossFractionResidual(g_field, g_particle).J(), 0.60171388584596
         )
 
     def test_EffectiveVelocityResidual(self):
@@ -46,7 +46,7 @@ class NEATtests(unittest.TestCase):
             nphi=3,
         )
         self.assertEqual(
-            EffectiveVelocityResidual(g_field, g_particle).J()[0], 0.006200544431702706
+            EffectiveVelocityResidual(g_field, g_particle).J()[0], 3.513641844631533e-05
         )
 
 

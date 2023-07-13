@@ -73,13 +73,15 @@ class NEATtests(unittest.TestCase):
         )
 
     def setUp(self):
+        self.wout_filename = os.path.join(
+            os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc"
+        )
         self.simple_object = Simple(
-            wout_filename="/home/rodrigo/NEAT/examples/inputs/wout_ARIESCS.nc",
+            wout_filename=self.wout_filename,
             B_scale=1.0,
             Aminor_scale=1.0,
             multharm=3,
         )
-        self.wout_filename = "/home/rodrigo/NEAT/examples/inputs/wout_ARIESCS.nc"
         self.vmec = Vmec(self.wout_filename)
         self.nfp = [2]
         self.G0 = [0.5]
