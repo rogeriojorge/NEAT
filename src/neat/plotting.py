@@ -11,7 +11,7 @@ import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 from matplotlib import animation
 from mpl_toolkits.mplot3d import Axes3D
-from scipy.io import netcdf
+from scipy.io import netcdf_file
 
 
 def set_axes_equal(ax):
@@ -222,7 +222,7 @@ def plot_animation3d(
 
 def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
     """Obtain (X, Y, Z) of a magnetic flux surface from a vmec equilibrium"""
-    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    net_file = netcdf_file(wout_filename, "r", mmap=False)
     nsurfaces = net_file.variables["ns"][()]
     nfp = net_file.variables["nfp"][()]
     xn = net_file.variables["xn"][()]  # pylint: disable=C0103
@@ -286,7 +286,7 @@ def get_vmec_magB(
     wout_filename, spos=None, ntheta=50, nzeta=100
 ):  # pylint: disable=R0914
     """Obtain contours of B on a magnetic flux surface from a vmec equilibrium"""
-    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    net_file = netcdf_file(wout_filename, "r", mmap=False)
     nsurfaces = net_file.variables["ns"][()]
     xn_nyq = net_file.variables["xn_nyq"][()]
     xm_nyq = net_file.variables["xm_nyq"][()]

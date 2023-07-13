@@ -24,7 +24,7 @@ import copy
 import numpy as np
 from qic import Qic
 from qsc import Qsc
-from scipy.io import netcdf
+from scipy.io import netcdf_file
 
 from neatpp import (
     gc_solver,
@@ -270,7 +270,7 @@ if simple_loaded:
         ) -> None:
             self.near_axis = False
             self.wout_filename = wout_filename
-            net_file = netcdf.netcdf_file(self.wout_filename, "r", mmap=False)
+            net_file = netcdf_file(self.wout_filename, "r", mmap=False)
             self.nfp = net_file.variables["nfp"][()]
             self.Rmajor = net_file.variables["Rmajor_p"][()]
             net_file.close()
@@ -496,7 +496,7 @@ class Vmec:
     def __init__(self, wout_filename: str) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
-        net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+        net_file = netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp"][()]
         net_file.close()
 
