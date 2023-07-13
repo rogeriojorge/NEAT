@@ -122,23 +122,23 @@ jobs:
         python3 -m unittest -v
 
     - name: Install coverage dependencies
-    #   if: contains(matrix.test-type, 'unit')
+      if: contains(matrix.test-type, 'unit')
       run: pip3 install coverage
 
     - name: Run tests on 1 process using coverage
-    #   if: contains(matrix.test-type, 'unit')
+      if: contains(matrix.test-type, 'unit')
       run: | 
         coverage run --source=neat -m unittest discover -t tests -v -s tests
 
     - name: Combine coverage reports
-    #   if: contains(matrix.test-type, 'unit')
+      if: contains(matrix.test-type, 'unit')
       run: | 
         coverage report
         coverage xml
       # coverage combine ## When several reports are generated, use this command before coverage report
 
     - name: Upload coverage to github
-    #   if: contains(matrix.test-type, 'unit')
+      if: contains(matrix.test-type, 'unit')
       uses: actions/upload-artifact@v2
       with:
         name: tox-gh-actions-coverage
@@ -147,7 +147,7 @@ jobs:
 
     - name: Upload coverage to Codecov
       # The last conditional on the next line prevents github from trying to upload to Codecov on forks of the repository, avoiding a permissions error
-    #   if: contains(matrix.test-type, 'unit') && github.repository_owner == 'rogeriojorge'
+      if: contains(matrix.test-type, 'unit') && github.repository_owner == 'rogeriojorge'
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
