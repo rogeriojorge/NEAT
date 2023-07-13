@@ -20,6 +20,7 @@ try:
     from simsopt.objectives import LeastSquaresProblem
     from simsopt.solve import least_squares_mpi_solve, least_squares_serial_solve
     from simsopt.util import MpiPartition
+
     simsopt_available = True
 except ImportError as error:
     print("simsopt not avaiable")
@@ -27,7 +28,10 @@ except ImportError as error:
 
 from neat.tracing import ParticleEnsembleOrbit
 
-base_class = Optimizable if simsopt_available else object  # Dynamically select the base class
+base_class = (
+    Optimizable if simsopt_available else object
+)  # Dynamically select the base class
+
 
 class LossFractionResidual(base_class):
     """
@@ -52,7 +56,8 @@ class LossFractionResidual(base_class):
         self.nthreads = nthreads
         self.r_max = r_max
 
-        if simsopt_available: super().__init__(depends_on=[self.field])
+        if simsopt_available:
+            super().__init__(depends_on=[self.field])
 
     def compute(self):
         """Calculate the loss fraction"""
@@ -100,7 +105,8 @@ class EffectiveVelocityResidual(base_class):
         self.r_max = r_max
         self.constant_b20 = constant_b20
 
-        if simsopt_available: super().__init__(depends_on=[self.field])
+        if simsopt_available:
+            super().__init__(depends_on=[self.field])
 
     def compute(self):
         """Calculate the effective velocity"""
@@ -147,7 +153,9 @@ class EffectiveVelocityResidual(base_class):
         self.compute()
         return 1e-5 * self.effective_velocity / np.sqrt(self.orbits.nparticles)
 
+
 if simsopt_available:
+
     class OptimizeLossFractionSkeleton(Optimizable):
         """
         Skeleton of a class used to optimize a given
