@@ -22,12 +22,12 @@ try:
     from simsopt.solve import least_squares_mpi_solve, least_squares_serial_solve
     from simsopt.util import MpiPartition
 except ImportError as error:
-    print(error.__class__.__name__ + ": " + error.message)
+    print("simsopt not avaiable")
 
 from neat.tracing import ParticleEnsembleOrbit
 
 
-class LossFractionResidual(Optimizable):
+class LossFractionResidual:  # Optimizable):
     """
     Objective function for optimization.
     The residual here is the loss fraction of
@@ -50,7 +50,7 @@ class LossFractionResidual(Optimizable):
         self.nthreads = nthreads
         self.r_max = r_max
 
-        Optimizable.__init__(self, depends_on=[field])
+        # Optimizable.__init__(self, depends_on=[field])
 
     def compute(self):
         """Calculate the loss fraction"""
@@ -65,7 +65,7 @@ class LossFractionResidual(Optimizable):
         return self.orbits.loss_fraction_array[-1]
 
 
-class EffectiveVelocityResidual(Optimizable):
+class EffectiveVelocityResidual:  # Optimizable):
     """
     Objective function for optimization.
     The residual here is the effective velocity of
@@ -98,7 +98,7 @@ class EffectiveVelocityResidual(Optimizable):
         self.r_max = r_max
         self.constant_b20 = constant_b20
 
-        Optimizable.__init__(self, depends_on=[field])
+        # Optimizable.__init__(self, depends_on=[field])
 
     def compute(self):
         """Calculate the effective velocity"""
