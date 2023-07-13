@@ -21,6 +21,7 @@ class NEATtests(unittest.TestCase):
             g_field, g_particle, r_max, tfinal=tfinal, nsamples=nsamples
         )
         initial_loss_fraction = optimizer.residual.J()
+        optimizer.run_parallel(n_iterations=4)
         optimizer.run(n_iterations=4)
         final_loss_fraction = optimizer.residual.J()
         print(" Initial loss fraction: ", initial_loss_fraction)
