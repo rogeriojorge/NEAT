@@ -71,7 +71,9 @@ class NEATtests(unittest.TestCase):
             -0.018692578813516082,
             decimal=10,
         )
-        self.assertAlmostEqual(StellnaQS.from_paper(1).gyronimo_parameters()[0], 1.0470998216534495)
+        self.assertAlmostEqual(
+            StellnaQS.from_paper(1).gyronimo_parameters()[0], 1.0470998216534495
+        )
         self.assertAlmostEqual(Stellna.from_paper(1).gyronimo_parameters()[0], 2)
 
     def setUp(self):
