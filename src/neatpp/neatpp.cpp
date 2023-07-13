@@ -6,7 +6,7 @@ namespace py = pybind11;
 
 // Python wrapper functions
 PYBIND11_MODULE(neatpp, m) {
-    m.doc() = "Python Wrapper for the gyronimo-based C++ functions that traces"
+    m.doc() = "Python Wrapper for the gyronimo-based C++ function that traces"
               "particle orbits in a stellarator magnetic field (near-axis or VMEC)";
     m.def("gc_solver", &gc_solver,
           "Trace a single particle in a fully quasisymmetric near-axis magnetic field");
