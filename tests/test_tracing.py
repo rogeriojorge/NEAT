@@ -223,5 +223,6 @@ class testtracing(unittest.TestCase):
         self.assertTrue(plt.fignum_exists(1))
         self.assertTrue(plt.fignum_exists(2))
 
+
 if __name__ == "__main__":
     unittest.main()

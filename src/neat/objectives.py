@@ -9,7 +9,6 @@ script makes heavy use of SIMSOPT's Optimizable class.
 
 """
 
-from ast import Import
 from typing import Union
 
 import numpy as np
@@ -21,13 +20,16 @@ try:
     from simsopt.objectives import LeastSquaresProblem
     from simsopt.solve import least_squares_mpi_solve, least_squares_serial_solve
     from simsopt.util import MpiPartition
+    simsopt_available = True
 except ImportError as error:
     print("simsopt not avaiable")
+    simsopt_available = False
 
 from neat.tracing import ParticleEnsembleOrbit
 
+base_class = Optimizable if simsopt_available else object  # Dynamically select the base class
 
-class LossFractionResidual:  # Optimizable):
+class LossFractionResidual(base_class):
     """
     Objective function for optimization.
     The residual here is the loss fraction of
@@ -50,7 +52,7 @@ class LossFractionResidual:  # Optimizable):
         self.nthreads = nthreads
         self.r_max = r_max
 
-        # Optimizable.__init__(self, depends_on=[field])
+        if simsopt_available: super().__init__(depends_on=[self.field])
 
     def compute(self):
         """Calculate the loss fraction"""
@@ -65,7 +67,7 @@ class LossFractionResidual:  # Optimizable):
         return self.orbits.loss_fraction_array[-1]
 
 
-class EffectiveVelocityResidual:  # Optimizable):
+class EffectiveVelocityResidual(base_class):
     """
     Objective function for optimization.
     The residual here is the effective velocity of
@@ -98,7 +100,7 @@ class EffectiveVelocityResidual:  # Optimizable):
         self.r_max = r_max
         self.constant_b20 = constant_b20
 
-        # Optimizable.__init__(self, depends_on=[field])
+        if simsopt_available: super().__init__(depends_on=[self.field])
 
     def compute(self):
         """Calculate the effective velocity"""
@@ -145,76 +147,76 @@ class EffectiveVelocityResidual:  # Optimizable):
         self.compute()
         return 1e-5 * self.effective_velocity / np.sqrt(self.orbits.nparticles)
 
+if simsopt_available:
+    class OptimizeLossFractionSkeleton(Optimizable):
+        """
+        Skeleton of a class used to optimize a given
+        objective function using SIMSOPT.
+        """
 
-class OptimizeLossFractionSkeleton:
-    """
-    Skeleton of a class used to optimize a given
-    objective function using SIMSOPT.
-    """
+        def __init__(
+            self,
+            field,
+            particles,
+            r_max=0.12,
+            nsamples=800,
+            tfinal=0.0001,
+            nthreads=2,
+        ) -> None:
+            # log(level=logging.DEBUG)
 
-    def __init__(
-        self,
-        field,
-        particles,
-        r_max=0.12,
-        nsamples=800,
-        tfinal=0.0001,
-        nthreads=2,
-    ) -> None:
-        # log(level=logging.DEBUG)
+            self.field = field
+            self.particles = particles
+            self.nsamples = nsamples
+            self.tfinal = tfinal
+            self.nthreads = nthreads
+            self.r_max = r_max
 
-        self.field = field
-        self.particles = particles
-        self.nsamples = nsamples
-        self.tfinal = tfinal
-        self.nthreads = nthreads
-        self.r_max = r_max
+            self.residual = LossFractionResidual(
+                self.field,
+                self.particles,
+                self.nsamples,
+                self.tfinal,
+                self.nthreads,
+                self.r_max,
+            )
 
-        self.residual = LossFractionResidual(
-            self.field,
-            self.particles,
-            self.nsamples,
-            self.tfinal,
-            self.nthreads,
-            self.r_max,
-        )
+            self.field.fix_all()
+            # self.field.unfix("etabar")
+            # self.field.unfix("rc(1)")
+            # self.field.unfix("zs(1)")
+            self.field.unfix("rc(2)")
+            # self.field.unfix("zs(2)")
+            self.field.unfix("rc(3)")
+            # self.field.unfix("zs(3)")
+            # self.field.unfix("B2c")
 
-        self.field.fix_all()
-        # self.field.unfix("etabar")
-        # self.field.unfix("rc(1)")
-        # self.field.unfix("zs(1)")
-        self.field.unfix("rc(2)")
-        # self.field.unfix("zs(2)")
-        self.field.unfix("rc(3)")
-        # self.field.unfix("zs(3)")
-        # self.field.unfix("B2c")
+            # Define objective function
+            self.prob = LeastSquaresProblem.from_tuples(
+                [
+                    (self.residual.J, 0, 1),
+                    # (self.field.get_elongation, 0.0, 3),
+                    # (self.field.get_inv_L_grad_B, 0, 2),
+                    # (self.field.get_grad_grad_B_inverse_scale_length_vs_varphi, 0, 2),
+                    # (self.field.get_B20_mean, 0, 0.01),
+                ]
+            )
 
-        # Define objective function
-        self.prob = LeastSquaresProblem.from_tuples(
-            [
-                (self.residual.J, 0, 1),
-                # (self.field.get_elongation, 0.0, 3),
-                # (self.field.get_inv_L_grad_B, 0, 2),
-                # (self.field.get_grad_grad_B_inverse_scale_length_vs_varphi, 0, 2),
-                # (self.field.get_B20_mean, 0, 0.01),
-            ]
-        )
+        def run(self, ftol=1e-6, n_iterations=100):
+            """Run the optimization problem defined in this class in serial"""
+            print("Starting optimization in serial")
+            least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
 
-    def run(self, ftol=1e-6, n_iterations=100):
-        """Run the optimization problem defined in this class in serial"""
-        print("Starting optimization in serial")
-        least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
-
-    def run_parallel(self, n_iterations=100, rel_step=1e-3, abs_step=1e-5):
-        """Run the optimization problem defined in this class in parallel"""
-        self.mpi = MpiPartition()  # pylint: disable=W0201
-        if self.mpi.proc0_world:
-            print("Starting optimization in parallel")
-        least_squares_mpi_solve(
-            self.prob,
-            self.mpi,
-            grad=True,
-            rel_step=rel_step,
-            abs_step=abs_step,
-            max_nfev=n_iterations,
-        )
+        def run_parallel(self, n_iterations=100, rel_step=1e-3, abs_step=1e-5):
+            """Run the optimization problem defined in this class in parallel"""
+            self.mpi = MpiPartition()  # pylint: disable=W0201
+            if self.mpi.proc0_world:
+                print("Starting optimization in parallel")
+            least_squares_mpi_solve(
+                self.prob,
+                self.mpi,
+                grad=True,
+                rel_step=rel_step,
+                abs_step=abs_step,
+                max_nfev=n_iterations,
+            )
