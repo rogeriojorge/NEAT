@@ -44,7 +44,9 @@ g_orbits = ParticleEnsembleOrbit_Simple(
 )
 total_time = time.time() - start_time
 print(f"  Running with {g_orbits.nparticles} particles took {total_time}s")
-print(f"  Loss fraction = {100*g_orbits.loss_fraction_array[-1]}% for a time of {tfinal}s")
+print(
+    f"  Loss fraction = {100*g_orbits.loss_fraction_array[-1]}% for a time of {tfinal}s"
+)
 
 # Plot resulting loss fraction
 g_orbits.plot_loss_fraction()

@@ -9,7 +9,6 @@ script makes heavy use of SIMSOPT's Optimizable class.
 
 """
 
-from ast import Import
 from typing import Union
 
 import numpy as np
@@ -21,13 +20,20 @@ try:
     from simsopt.objectives import LeastSquaresProblem
     from simsopt.solve import least_squares_mpi_solve, least_squares_serial_solve
     from simsopt.util import MpiPartition
+
+    simsopt_available = True
 except ImportError as error:
-    print(error.__class__.__name__ + ": " + error.message)
+    print("simsopt not avaiable")
+    simsopt_available = False
 
 from neat.tracing import ParticleEnsembleOrbit
 
+base_class = (
+    Optimizable if simsopt_available else object
+)  # Dynamically select the base class
 
-class LossFractionResidual(Optimizable):
+
+class LossFractionResidual(base_class):
     """
     Objective function for optimization.
     The residual here is the loss fraction of
@@ -43,7 +49,6 @@ class LossFractionResidual(Optimizable):
         nthreads=2,
         r_max=0.12,
     ) -> None:
-
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
@@ -51,7 +56,8 @@ class LossFractionResidual(Optimizable):
         self.nthreads = nthreads
         self.r_max = r_max
 
-        Optimizable.__init__(self, depends_on=[field])
+        if simsopt_available:
+            super().__init__(depends_on=[self.field])
 
     def compute(self):
         """Calculate the loss fraction"""
@@ -66,7 +72,7 @@ class LossFractionResidual(Optimizable):
         return self.orbits.loss_fraction_array[-1]
 
 
-class EffectiveVelocityResidual(Optimizable):
+class EffectiveVelocityResidual(base_class):
     """
     Objective function for optimization.
     The residual here is the effective velocity of
@@ -91,7 +97,6 @@ class EffectiveVelocityResidual(Optimizable):
         r_max=0.12,
         constant_b20=True,
     ) -> None:
-
         self.field = field
         self.particles = particles
         self.nsamples = nsamples
@@ -100,7 +105,8 @@ class EffectiveVelocityResidual(Optimizable):
         self.r_max = r_max
         self.constant_b20 = constant_b20
 
-        Optimizable.__init__(self, depends_on=[field])
+        if simsopt_available:
+            super().__init__(depends_on=[self.field])
 
     def compute(self):
         """Calculate the effective velocity"""
@@ -148,7 +154,7 @@ class EffectiveVelocityResidual(Optimizable):
         return 1e-5 * self.effective_velocity / np.sqrt(self.orbits.nparticles)
 
 
-class OptimizeLossFractionSkeleton:
+class OptimizeLossFractionSkeleton(base_class):
     """
     Skeleton of a class used to optimize a given
     objective function using SIMSOPT.
@@ -163,7 +169,6 @@ class OptimizeLossFractionSkeleton:
         tfinal=0.0001,
         nthreads=2,
     ) -> None:
-
         # log(level=logging.DEBUG)
 
         self.field = field
@@ -206,18 +211,24 @@ class OptimizeLossFractionSkeleton:
     def run(self, ftol=1e-6, n_iterations=100):
         """Run the optimization problem defined in this class in serial"""
         print("Starting optimization in serial")
-        least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
+        if simsopt_available:
+            least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
+        else:
+            print("Currently optimization with run() only available with simsopt")
 
     def run_parallel(self, n_iterations=100, rel_step=1e-3, abs_step=1e-5):
         """Run the optimization problem defined in this class in parallel"""
-        self.mpi = MpiPartition()  # pylint: disable=W0201
-        if self.mpi.proc0_world:
-            print("Starting optimization in parallel")
-        least_squares_mpi_solve(
-            self.prob,
-            self.mpi,
-            grad=True,
-            rel_step=rel_step,
-            abs_step=abs_step,
-            max_nfev=n_iterations,
-        )
+        if simsopt_available:
+            self.mpi = MpiPartition()  # pylint: disable=W0201
+            if self.mpi.proc0_world:
+                print("Starting optimization in parallel")
+            least_squares_mpi_solve(
+                self.prob,
+                self.mpi,
+                grad=True,
+                rel_step=rel_step,
+                abs_step=abs_step,
+                max_nfev=n_iterations,
+            )
+        else:
+            print("Currently optimization with run() only available with simsopt")

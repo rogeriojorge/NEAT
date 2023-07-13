@@ -1,5 +1,17 @@
 #include <omp.h>
 #include <numbers>
+using namespace std;
+#include <array>
+// Define multiplication by scalar and vector sum
+std::array<double,4> operator*(const double& a, const array<double,4>& v) {
+    array<double, 4> result = {a*v[0], a*v[1], a*v[2], a*v[3]};
+    return result;
+}
+std::array<double,4> operator+(
+    const array<double,4>& u, const array<double,4>& v) {
+    array<double, 4> result = {u[0]+v[0],u[1]+v[1],u[2]+v[2],u[3]+v[3]};
+    return result;
+}
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
 #include <gyronimo/core/codata.hh>
@@ -15,7 +27,6 @@
 #include "metric_stellna.hh"
 #include "equilibrium_stellna.hh"
 using namespace gyronimo;
-using namespace std;
 
 // Normalization to SI units
 double Lref = 1.0;
@@ -54,17 +65,6 @@ vector<double> neat_linspace(T start_in, T end_in, int num_in)
   linspaced.push_back(end); // I want to ensure that start and end
                             // are exactly the same as the input
   return linspaced;
-}
-
-// Define multiplication by scalar and vector sum
-array<double,4> operator*(const double& a, const array<double,4>& v) {
-    array<double, 4> result = {a*v[0], a*v[1], a*v[2], a*v[3]};
-    return result;
-}
-array<double,4> operator+(
-    const array<double,4>& u, const array<double,4>& v) {
-    array<double, 4> result = {u[0]+v[0],u[1]+v[1],u[2]+v[2],u[3]+v[3]};
-    return result;
 }
 
 // Particle ensemble class. The "Gyrons"!
