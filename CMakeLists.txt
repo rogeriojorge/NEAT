@@ -15,6 +15,7 @@ find_package(Python 3 COMPONENTS Interpreter Development NumPy)
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_LIBDIR lib)
+add_compile_options(-Wfatal-errors -Wpedantic)
 # detect virtualenv and set Pip args accordingly
 # if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
 #   set(_pip_args)
@@ -122,14 +123,20 @@ pybind11_add_module(${PROJECT_NAME}
     src/neatpp/metrics_NEAT/metric_stellna.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs.cc
     src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+    src/neatpp/parsers_NEAT/parser_boozxform.cc
     src/neatpp/stellna.hh
     src/neatpp/vmectrace.hh
+    src/neatpp/vmec_loss.hh
+    src/neatpp/booztrace.hh
     src/neatpp/neatpp.cpp
     # src/neatpp/NEAT_Mercier.cc
+    src/neatpp/fields_NEAT/equilibrium_boozxform.cc
+    src/neatpp/metrics_NEAT/metric_boozxform.cc
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/fields_NEAT)
 include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/metrics_NEAT)
+include_directories(${PROJECT_SOURCE_DIR}/src/neatpp/parsers_NEAT)
 
 if(PROFILING)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -lprofiler")
@@ -143,27 +150,35 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${GSL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
-# Add the profiling executable
-add_library(profiling_lib
-    src/neatpp/fields_NEAT/equilibrium_stellna.cc
-    src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
-    src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
-    src/neatpp/metrics_NEAT/metric_stellna.cc
-    src/neatpp/metrics_NEAT/metric_stellna_qs.cc
-    src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
-    src/neatpp/stellna.hh
-    src/neatpp/vmectrace.hh
-)
-target_link_libraries(profiling_lib PRIVATE gyronimo)
-target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
-target_compile_features(profiling_lib PRIVATE cxx_std_20)
+if(PROFILING)
+    # Add the profiling executable
+    add_library(profiling_lib
+        src/neatpp/fields_NEAT/equilibrium_stellna.cc
+        src/neatpp/fields_NEAT/equilibrium_stellna_qs.cc
+        src/neatpp/fields_NEAT/equilibrium_stellna_qs_partial.cc
+        src/neatpp/metrics_NEAT/metric_stellna.cc
+        src/neatpp/metrics_NEAT/metric_stellna_qs.cc
+        src/neatpp/metrics_NEAT/metric_stellna_qs_partial.cc
+        # src/neatpp/fields_NEAT/equilibrium_vmec_optimized.cc
+        # src/neatpp/metrics_NEAT/metric_vmec_optimized.cc
+        src/neatpp/stellna.hh
+        src/neatpp/vmectrace.hh
+        src/neatpp/vmec_loss.hh
+        src/neatpp/booztrace.hh
+        src/neatpp/fields_NEAT/equilibrium_boozxform.cc
+        src/neatpp/metrics_NEAT/metric_boozxform.cc
+    )
+    target_link_libraries(profiling_lib PRIVATE gyronimo)
+    target_link_libraries(profiling_lib PRIVATE ${GSL_LIBRARIES})
+    target_compile_features(profiling_lib PRIVATE cxx_std_20)
 
-add_executable(profiling src/neatpp/neatpp_profiling.cpp)
-target_link_libraries(profiling PRIVATE profiling_lib)
-target_link_libraries(profiling PRIVATE gyronimo)
-target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
-target_compile_features(profiling PRIVATE cxx_std_20)
-install(TARGETS profiling DESTINATION .)
+    add_executable(profiling src/neatpp/neatpp_profiling.cpp)
+    target_link_libraries(profiling PRIVATE profiling_lib)
+    target_link_libraries(profiling PRIVATE gyronimo)
+    target_link_libraries(profiling PRIVATE ${GSL_LIBRARIES})
+    target_compile_features(profiling PRIVATE cxx_std_20)
+    install(TARGETS profiling DESTINATION .)
+endif()
 
 ## Attempt at making an executable from neatpp.cpp directly
 # add_executable(profiling src/neatpp/neatpp.cpp)

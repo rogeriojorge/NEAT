@@ -10,5 +10,5 @@
            	"-DNETCDF_LIB_PATH=/marconi/home/userexternal/pfigueir/.conda/envs/simsopt/lib",
            	"-DBLA_VENDOR=OpenBLAS",
            	"-DSCALAPACK_LIB_NAME=scalapack"
-        ]
+		]
 }

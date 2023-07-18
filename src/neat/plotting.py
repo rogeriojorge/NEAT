@@ -43,7 +43,7 @@ def set_axes_equal(ax):
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
-def plot_orbit2d(x_position, y_position, show=True):
+def plot_orbit2d(x_position, y_position, show=True, savefig=None):
     """
     Make a plot of a single particle orbit in
     (r,theta) coordinates where r is the square
@@ -58,9 +58,11 @@ def plot_orbit2d(x_position, y_position, show=True):
     plt.tight_layout()
     if show:
         plt.show()
+    if savefig is not None:
+        plt.savefig(savefig)
 
 
-def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
+def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True, savefig=None):
     """
     Make a three-dimensional plot of a single particle orbit
     together with the corresponding stellarator toroidal flux
@@ -94,62 +96,127 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True):
     plt.tight_layout()
     if show:
         plt.show()
+    if savefig is not None:
+        plt.savefig(savefig)
+    # plt.close()
 
 
-def plot_parameters(self, show=True):
+def plot_parameters(self, r_minor=1, show=True, savefig=None):
     """
     Make a single plot with relevant physics parameters
     of a single particle orbit on a magnetic field.
     """
+    from scipy import signal
+
+    v_valleys, _ = signal.find_peaks(
+        -np.abs(self.v_parallel), distance=(1 / 100) * self.time.size
+    )
+    v_valleys_0 = v_valleys[(np.abs(self.v_parallel[v_valleys]) < 1e5)]
+
+    phases = self.varphi_pos
+    phases = (phases + np.pi) % (2 * np.pi) - np.pi
+
     plt.figure(figsize=(10, 6))
     plt.subplot(3, 3, 1)
-    plt.plot(self.time, self.r_pos)
+    plt.plot(self.time * 1e6, self.r_pos)
     plt.xlabel(r"$t (s)$")
     plt.ylabel(r"$r$")
     plt.subplot(3, 3, 2)
-    plt.plot(self.time, self.theta_pos)
+    plt.plot(self.time * 1e6, self.theta_pos)
     plt.xlabel(r"$t (s)$")
     plt.ylabel(r"$\theta$")
     plt.subplot(3, 3, 3)
-    plt.plot(self.time, self.varphi_pos)
+    plt.plot(self.time * 1e6, self.varphi_pos)
     plt.xlabel(r"$t (s)$")
     plt.ylabel(r"$\varphi$")
     plt.subplot(3, 3, 4)
-    plt.plot(self.time, self.v_parallel)
+    plt.plot(self.time * 1e6, self.v_parallel)
+    plt.plot(
+        self.time[v_valleys] * 1e6,
+        self.v_parallel[v_valleys],
+        color="blue",
+        marker=".",
+        linestyle="None",
+    )
+    plt.plot(
+        self.time[v_valleys_0] * 1e6,
+        self.v_parallel[v_valleys_0],
+        color="red",
+        marker=".",
+        linestyle="None",
+    )
     plt.xlabel(r"$t (s)$")
     plt.ylabel(r"$v_\parallel$")
     plt.subplot(3, 3, 5)
     plt.plot(
-        self.time, (self.total_energy - self.total_energy[0]) / self.total_energy[0]
+        self.time * 1e6,
+        (self.total_energy - self.total_energy[0]) / self.total_energy[0],
     )
     plt.xlabel(r"$t (s)$")
     plt.ylabel(r"$(E-E_0)/E_0$")
     plt.subplot(3, 3, 6)
-    plt.plot(self.time, (self.p_phi - self.p_phi[0]) / self.p_phi[0])
+    plt.plot(self.time * 1e6, (self.p_phi - self.p_phi[0]) / self.p_phi[0])
     plt.xlabel(r"$t (s)$")
     plt.ylabel(r"$(p_\phi-p_{\phi_initial})/p_{\phi_initial}$")
     plt.subplot(3, 3, 7)
-    plt.plot(self.time, self.rdot, label=r"$\dot r$")
-    plt.plot(self.time, self.thetadot, label=r"$\dot \theta$")
-    plt.plot(self.time, self.varphidot, label=r"$\dot \varphi$")
-    # plt.plot(self.time, self.vparalleldot, label=r"$\dot v_\parallel$")
+    plt.plot(self.time * 1e6, self.rdot, label=r"$\dot r$")
+    plt.plot(self.time * 1e6, self.thetadot, label=r"$\dot \theta$")
+    plt.plot(self.time * 1e6, self.varphidot, label=r"$\dot \varphi$")
+    plt.plot(self.time * 1e6, self.vparalleldot, label=r"$\dot v_\parallel$")
+    # plt.plot(self.time*1e6, self.B_s, label="s")
+    # plt.plot(self.time*1e6, self.B_theta, label="theta")
+    # plt.plot(self.time*1e6, self.B_varphi, label="varphi")
+    # plt.plot(self.time*1e6, self.B_s_contr, label="s_contr")
+    # plt.plot(self.time*1e6, self.B_theta_contr, label="theta_contr")
+    # plt.plot(self.time*1e6, self.B_varphi_contr, label="varphi_contra")
+    plt.xlabel(r"$t$")
+    plt.ylabel(r"$|B|$")
     plt.xlabel(r"$t (s)$")
     plt.legend()
     plt.subplot(3, 3, 8)
-    plt.plot(self.r_pos * np.cos(self.theta_pos), self.r_pos * np.sin(self.theta_pos))
-    plt.gca().set_aspect("equal", adjustable="box")
-    plt.xlabel(r"r cos($\theta$)")
-    plt.ylabel(r"r sin($\theta$)")
-    plt.subplot(3, 3, 9)
-    # plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
-    # plt.xlabel(r"$R$")
-    # plt.ylabel(r"$Z$")
-    plt.plot(self.time, self.magnetic_field_strength)
+    plt.plot(self.time * 1e6, self.magnetic_field_strength)
     plt.xlabel(r"$t$")
     plt.ylabel(r"$|B|$")
+    # Uncomment below to see tokamak-like orbit
+    # plt.plot(self.r_pos * np.cos(self.theta_pos), self.r_pos * np.sin(self.theta_pos))
+    # plt.gca().set_aspect("equal", adjustable="box")
+    # plt.xlabel(r"r cos($\theta$)")
+    # plt.ylabel(r"r sin($\theta$)")
+    plt.subplot(3, 3, 9)
+    # plt.plot(self.rpos_cylindrical[0][v_valleys], self.rpos_cylindrical[1][v_valleys], color='red', marker='.', linestyle='None')
+    # plt.xlabel(r"$R$")
+    # plt.ylabel(r"$Z$")
+    plt.plot(
+        phases[v_valleys],
+        self.r_pos[v_valleys],
+        color="blue",
+        marker=".",
+        linestyle="None",
+    )
+    if r_minor != 1:
+        norm_r_pos_v = (self.r_pos[v_valleys_0] / r_minor) ** 2
+        plt.plot(
+            phases[v_valleys_0], norm_r_pos_v, color="red", marker=".", linestyle="None"
+        )
+    else:
+        plt.plot(
+            phases[v_valleys_0],
+            self.r_pos[v_valleys_0],
+            color="red",
+            marker=".",
+            linestyle="None",
+        )
+    plt.xlabel(r"$\varphi$")
+    plt.ylabel(r"$r$")
+    plt.ylim(0, np.max([1, np.nanmax(self.r_pos)]))
+    plt.xlim(-np.pi, np.pi)
+
     plt.tight_layout()
+    if savefig is not None:
+        plt.savefig(savefig)
     if show:
         plt.show()
+    # plt.close()
 
 
 def update(num, data, line):
@@ -222,16 +289,29 @@ def plot_animation3d(
 
 def get_vmec_boundary(wout_filename):  # pylint: disable=R0914
     """Obtain (X, Y, Z) of a magnetic flux surface from a vmec equilibrium"""
-    net_file = netcdf_file(wout_filename, "r", mmap=False)
-    nsurfaces = net_file.variables["ns"][()]
-    nfp = net_file.variables["nfp"][()]
-    xn = net_file.variables["xn"][()]  # pylint: disable=C0103
-    xm = net_file.variables["xm"][()]  # pylint: disable=C0103
-    xn_nyq = net_file.variables["xn_nyq"][()]
-    xm_nyq = net_file.variables["xm_nyq"][()]
-    rmnc = net_file.variables["rmnc"][()]
-    zmns = net_file.variables["zmns"][()]
-    bmnc = net_file.variables["bmnc"][()]
+    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    try:
+        nsurfaces = net_file.variables["ns"][()]
+        nfp = net_file.variables["nfp"][()]
+        xn = net_file.variables["xn"][()]  # pylint: disable=C0103
+        xm = net_file.variables["xm"][()]  # pylint: disable=C0103
+        xn_nyq = net_file.variables["xn_nyq"][()]
+        xm_nyq = net_file.variables["xm_nyq"][()]
+        rmnc = net_file.variables["rmnc"][()]
+        zmns = net_file.variables["zmns"][()]
+        bmnc = net_file.variables["bmnc"][()]
+    except:
+        nsurfaces = net_file.variables["ns_b"][()]
+        nsurfaces -= 1
+        nfp = net_file.variables["nfp_b"][()]
+        xn = net_file.variables["ixn_b"][()]  # pylint: disable=C0103
+        xm = net_file.variables["ixm_b"][()]  # pylint: disable=C0103
+        xn_nyq = xn
+        xm_nyq = xm
+        rmnc = net_file.variables["rmnc_b"][()]
+        zmns = net_file.variables["zmns_b"][()]
+        bmnc = net_file.variables["bmnc_b"][()]
+        print(len(bmnc))
     lasym = net_file.variables["lasym__logical__"][()]
     if lasym == 1:
         rmns = net_file.variables["rmns"][()]
@@ -286,12 +366,19 @@ def get_vmec_magB(
     wout_filename, spos=None, ntheta=50, nzeta=100
 ):  # pylint: disable=R0914
     """Obtain contours of B on a magnetic flux surface from a vmec equilibrium"""
-    net_file = netcdf_file(wout_filename, "r", mmap=False)
-    nsurfaces = net_file.variables["ns"][()]
-    xn_nyq = net_file.variables["xn_nyq"][()]
-    xm_nyq = net_file.variables["xm_nyq"][()]
-    bmnc = net_file.variables["bmnc"][()]
-    lasym = net_file.variables["lasym__logical__"][()]
+    net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+    try:
+        nsurfaces = net_file.variables["ns"][()]
+        xn_nyq = net_file.variables["xn_nyq"][()]
+        xm_nyq = net_file.variables["xm_nyq"][()]
+        bmnc = net_file.variables["bmnc"][()]
+        lasym = net_file.variables["lasym__logical__"][()]
+    except:
+        nsurfaces = net_file.variables["ns_b"][()]
+        xn_nyq = net_file.variables["ixn_b"][()]
+        xm_nyq = net_file.variables["ixm_b"][()]
+        bmnc = net_file.variables["bmnc_b"][()]
+        lasym = net_file.variables["lasym__logical__"][()]
     if lasym == 1:
         bmns = net_file.variables["bmns"][()]
     else:
@@ -322,3 +409,377 @@ def get_vmec_magB(
         )
 
     return b_field
+
+
+def butter_lowpass_filter2(
+    data, cutoff, fs, half_order=5, axis=-1, handle_nans=True, keep_nans=True
+):
+    from scipy import signal
+    from scipy.interpolate import interp1d
+
+    """This function applies a linear digital filter twice, once forward and once backwards. 
+    The combined filter has zero phase and a filter order twice that of *half_order*.
+
+    Parameters
+    ----------
+    data: ndarray
+        Array of data to filter
+    cutoff: float
+        Cutoff frequency in Hz.
+    fs: float
+        Sampling frequency in Hz.
+    half_order: int
+        Half of the filter order.
+    axis: int, optional
+        The axis of x to which the filter is applied. Default is -1.
+    handle_nans: bool, optional
+        If True, NaN values are inter- and/or extrapolated before filtering. Defaults to False.
+    keep_nans: bool, optional
+        If True, values in the output are returned to NaN in the same locations as *data*. 
+        
+    Returns
+    -------
+    y: ndarray
+        Filtered array
+
+    Note: If *data* contains NaNs and *handle_nans*=False, the returned array will be all-NaNs.
+    """
+
+    y = np.array(data)
+
+    if handle_nans:
+        nan_mask = np.isnan(data)
+        if nan_mask.any():
+            if (~nan_mask).any():
+                time = np.arange(len(data))
+                y[nan_mask] = interp1d(
+                    time[~nan_mask],
+                    data[~nan_mask],
+                    assume_sorted=True,
+                    bounds_error=False,
+                    fill_value="extrapolate",
+                )(time[nan_mask])
+            else:
+                y[nan_mask] = np.nan
+
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    sos = signal.butter(half_order, normal_cutoff, btype="low", output="sos")
+    y = signal.sosfiltfilt(sos, y, axis)
+
+    if handle_nans and keep_nans:
+        y[nan_mask] = np.nan
+
+    return y
+
+
+def butter_lowpass_filter(data, cutoff, fs, half_order=5, axis=-1):
+    from scipy import signal
+
+    """This function applies a linear digital filter twice, once forward and once backwards. 
+    The combined filter has zero phase and a filter order twice that of *half_order*.
+    
+    Parameters
+    ----------
+    data: ndarray
+        Array of data to filter
+    cutoff: float
+        Cutoff frequency in Hz.
+    fs: float
+        Sampling frequency in Hz.
+    half_order: int
+        Half of the filter order.
+    axis: int, optional
+        The axis of x to which the filter is applied. Default is -1.
+        
+    Returns
+    -------
+    y: ndarray
+        Filtered array
+    """
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    sos = signal.butter(half_order, normal_cutoff, btype="low", output="sos")
+    y = signal.sosfiltfilt(sos, data, axis)
+    return y
+
+
+def plot_diff_boozer(self, self2, r_minor, show=True, savefig=None):
+    from matplotlib import patches
+    from scipy import signal
+
+    """
+    Make a single plot with particle orbits on a magnetic field and their
+    differences in cylindrical coordinates.
+    """
+
+    if r_minor != 1:
+        norm_r_pos = (self.r_pos / r_minor) ** 2
+    else:
+        norm_r_pos = self.r_pos
+
+    peaks, _ = signal.find_peaks(norm_r_pos, distance=(5 / 100) * self.time.size)
+    valleys, _ = signal.find_peaks(-norm_r_pos, distance=(5 / 100) * self.time.size)
+
+    if peaks.size > valleys.size:
+        peaks = peaks[: valleys.size]
+    else:
+        valleys = valleys[: peaks.size]
+
+    peaks2, _ = signal.find_peaks(self2.r_pos, distance=(7 / 100) * self.time.size)
+    valleys2, _ = signal.find_peaks(-self2.r_pos, distance=(7 / 100) * self.time.size)
+
+    if peaks2.size > valleys2.size:
+        peaks2 = peaks2[: valleys2.size]
+    else:
+        valleys2 = valleys2[: peaks2.size]
+
+    fs = 1 / (self.time[1] - self.time[0])  # Sampling frequency
+    cutoff = 1e4  # Frequency cutoff value in Hz
+
+    norm_r_pos_filt = butter_lowpass_filter(norm_r_pos, cutoff, fs)
+    r_pos_filt2 = butter_lowpass_filter2(self2.r_pos, cutoff, fs)
+
+    diff_s = norm_r_pos - self2.r_pos  # This needs to be changed
+    diff_s_filt = norm_r_pos_filt - r_pos_filt2
+
+    # Transforming theta_near-axis in theta_Boozer
+    if self.field.near_axis:
+        self_theta_pos = (
+            self.theta_pos + (self.field.iota - self.field.iotaN) * self.varphi_pos
+        )
+    else:
+        self_theta_pos = self.theta_pos
+
+    diff_theta = (
+        np.unwrap(np.mod(self_theta_pos, 2 * np.pi))
+        - np.unwrap(np.mod(self2.theta_pos, 2 * np.pi))
+    ) / (2 * np.pi)
+    diff_Phi = (
+        np.unwrap(np.mod(self.varphi_pos, 2 * np.pi))
+        - np.unwrap(np.mod(self2.varphi_pos, 2 * np.pi))
+    ) / (2 * np.pi)
+
+    plt.figure(figsize=(10, 6))
+    plt.subplot(3, 4, 1)
+    plt.plot(self.time * 1e6, norm_r_pos)
+    plt.plot(self.time * 1e6, norm_r_pos_filt)
+    plt.plot(
+        self.time[valleys] * 1e6,
+        norm_r_pos[valleys],
+        color="red",
+        marker=".",
+        linestyle="None",
+    )
+    plt.plot(
+        self.time[peaks] * 1e6,
+        norm_r_pos[peaks],
+        color="red",
+        marker=".",
+        linestyle="None",
+    )
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$r$")
+    plt.subplot(3, 4, 2)
+    plt.plot(self.time * 1e6, self_theta_pos)
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$\theta_B$")
+    plt.subplot(3, 4, 3)
+    plt.plot(self.time * 1e6, self.varphi_pos)
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$\varphi$")
+    ax = plt.subplot(3, 4, 4)
+    plt.plot(norm_r_pos * np.cos(self_theta_pos), norm_r_pos * np.sin(self_theta_pos))
+    circle = patches.Circle(
+        (0, 0), radius=1, color="black", fill=False, linestyle="dotted", linewidth=1
+    )
+    circle2 = patches.Circle(
+        (0, 0),
+        radius=norm_r_pos[0],
+        color="black",
+        fill=False,
+        linestyle="dotted",
+        linewidth=1,
+    )
+    ax.add_patch(circle)
+    ax.add_patch(circle2)
+    ax.set(xlim=(-1.2, 1.2), ylim=(-1.2, 1.2))
+    plt.xlabel(r"$X$")
+    plt.ylabel(r"$Y$")
+    plt.subplot(3, 4, 5)
+    plt.plot(self2.time * 1e6, self2.r_pos)
+    plt.plot(self2.time * 1e6, r_pos_filt2)
+    plt.plot(
+        self2.time[valleys2] * 1e6,
+        self2.r_pos[valleys2],
+        color="red",
+        marker=".",
+        linestyle="None",
+    )
+    plt.plot(
+        self2.time[peaks2] * 1e6,
+        self2.r_pos[peaks2],
+        color="red",
+        marker=".",
+        linestyle="None",
+    )
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$r$")
+    plt.subplot(3, 4, 6)
+    plt.plot(self2.time * 1e6, self2.theta_pos)
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$\theta_B$")
+    plt.subplot(3, 4, 7)
+    plt.plot(self2.time * 1e6, self2.varphi_pos)
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$\varphi$")
+    ax1 = plt.subplot(3, 4, 8)
+    plt.plot(
+        self2.r_pos * np.cos(self2.theta_pos), self2.r_pos * np.sin(self2.theta_pos)
+    )
+    circle = patches.Circle(
+        (0, 0), radius=1, color="black", fill=False, linestyle="dotted", linewidth=1
+    )
+    circle2 = patches.Circle(
+        (0, 0),
+        radius=self2.r_pos[0],
+        color="black",
+        fill=False,
+        linestyle="dotted",
+        linewidth=1,
+    )
+    ax1.add_patch(circle)
+    ax1.add_patch(circle2)
+    ax1.set(xlim=(-1.2, 1.2), ylim=(-1.2, 1.2))
+    plt.xlabel(r"$X$")
+    plt.ylabel(r"$Y$")
+    plt.subplot(3, 4, 9)
+    plt.plot(self2.time * 1e6, np.abs(diff_s))
+    plt.plot(self2.time * 1e6, np.abs(diff_s_filt), label="Average")
+    plt.legend(fontsize="small")
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$\Delta  s$")
+    plt.subplot(3, 4, 10)
+    plt.plot(self2.time * 1e6, np.abs(diff_theta))
+    plt.xlabel(r"t  ($\mu$s)")
+    plt.ylabel(r"$\Delta$  $\theta_B$ (turns)")
+    plt.subplot(3, 4, 11)
+    plt.plot(self2.time * 1e6, np.abs(diff_Phi))
+    plt.xlabel(r"t  ($\mu$s)")
+    plt.ylabel(r"$\Delta \Phi (turns)$")
+    plt.subplot(3, 4, 12)
+    avg_time = (self.time[peaks] + self.time[valleys]) * 1e6 / 2
+    avg_time2 = (self2.time[peaks2] + self2.time[valleys2]) * 1e6 / 2
+    plt.plot(avg_time, norm_r_pos[peaks] - norm_r_pos[valleys], label="NA")
+    plt.plot(avg_time2, self2.r_pos[peaks2] - self2.r_pos[valleys2], label="Non-NA")
+    try:
+        max = np.minimum(avg_time[-1], avg_time2[-1])
+        plt.xlim(0, max)
+    except:
+        print("No radial oscillation")
+
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"Radial amplitude $\Delta s$")
+    plt.legend(fontsize="small")
+
+    plt.tight_layout()
+    if savefig is not None:
+        plt.savefig(savefig)
+    if show:
+        plt.show()
+    plt.close()
+
+
+def plot_diff_cyl(self, self2, show=True, savefig=None):
+    """
+    Make a single plot with particle orbits on a magnetic field and their
+    differences in Boozer coordinates.
+    """
+    from scipy.interpolate import interp1d
+
+    diff_r = (
+        self.rpos_cylindrical[0][: self2.rpos_cylindrical[0].shape[0]]
+        - self2.rpos_cylindrical[0][: self.rpos_cylindrical[0].shape[0]]
+    ) / self2.rpos_cylindrical[0][: self.rpos_cylindrical[0].shape[0]]
+    max_Z_vmec = np.nanmax(
+        np.abs(self2.rpos_cylindrical[1][: self.rpos_cylindrical[0].shape[0]])
+    )
+    diff_Z = (
+        self.rpos_cylindrical[1][: self2.rpos_cylindrical[0].shape[0]]
+        - self2.rpos_cylindrical[1][: self.rpos_cylindrical[0].shape[0]]
+    ) / max_Z_vmec
+    diff_phi = (
+        np.unwrap(
+            np.mod(
+                self.rpos_cylindrical[2][: self2.rpos_cylindrical[0].shape[0]],
+                2 * np.pi,
+            )
+        )
+        - np.unwrap(
+            np.mod(
+                self2.rpos_cylindrical[2][: self.rpos_cylindrical[0].shape[0]],
+                2 * np.pi,
+            )
+        )
+    ) / (2 * np.pi)
+
+    _ = plt.figure(figsize=(25, 12))
+    plt.subplot(3, 4, 1)
+    plt.plot(self.time * 1e6, self.rpos_cylindrical[0])
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$R$")
+    plt.subplot(3, 4, 2)
+    plt.plot(self.time * 1e6, self.rpos_cylindrical[1])
+    plt.xlabel(r"t  ($\mu$s)")
+    plt.ylabel(r"$Z$")
+    plt.subplot(3, 4, 3)
+    plt.plot(self.time * 1e6, np.mod(self.rpos_cylindrical[2], 2 * np.pi))
+    plt.xlabel(r"t  ($\mu$s)")
+    plt.ylabel(r"$\Phi$")
+    plt.subplot(3, 4, 4)
+    # plt.plot(self.rpos_cylindrical[0], self.rpos_cylindrical[1])
+    plt.plot(
+        self.rpos_cylindrical[0] * np.cos(self.rpos_cylindrical[2]),
+        self.rpos_cylindrical[0] * np.sin(self.rpos_cylindrical[2]),
+    )
+    plt.xlabel(r"$X$")
+    plt.ylabel(r"$Y$")
+    plt.subplot(3, 4, 5)
+    plt.plot(self2.time * 1e6, self2.rpos_cylindrical[0])
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$R_V$")
+    plt.subplot(3, 4, 6)
+    plt.plot(self2.time * 1e6, self2.rpos_cylindrical[1])
+    plt.xlabel(r"t  ($\mu$s)")
+    plt.ylabel(r"$Z_V$")
+    plt.subplot(3, 4, 7)
+    plt.plot(self2.time * 1e6, np.mod(self2.rpos_cylindrical[2], 2 * np.pi))
+    plt.xlabel(r"t  ($\mu$s)")
+    plt.ylabel(r"$\Phi_V $")
+    plt.subplot(3, 4, 8)
+    # plt.plot(self2.rpos_cylindrical[0], self2.rpos_cylindrical[1])
+    plt.plot(
+        self2.rpos_cylindrical[0] * np.cos(self2.rpos_cylindrical[2]),
+        self2.rpos_cylindrical[0] * np.sin(self2.rpos_cylindrical[2]),
+    )
+    plt.xlabel(r"$X$")
+    plt.ylabel(r"$Y$")
+    plt.subplot(3, 4, 9)
+    plt.plot(self2.time * 1e6, np.abs(diff_r) * 100)
+    plt.xlabel(r"t ($\mu$s)")
+    plt.ylabel(r"$\Delta  R (\%)$")
+    plt.subplot(3, 4, 10)
+    plt.plot(self2.time * 1e6, np.abs(diff_Z) * 100)
+    plt.xlabel(r"t  ($\mu$s)")
+    plt.ylabel(r"$\Delta$  Z ($\%$ of max)")
+    plt.subplot(3, 4, 11)
+    plt.plot(self2.time * 1e6, np.abs(diff_phi))
+    plt.xlabel(r"t  ($\mu$s)")
+    plt.ylabel(r"$\Delta \Phi (turns)$")
+
+    plt.tight_layout()
+    if savefig is not None:
+        plt.savefig(savefig)
+    if show:
+        plt.show()
+    plt.close()
