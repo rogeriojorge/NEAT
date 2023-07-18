@@ -247,4 +247,7 @@ CMakeDoxygenDefaults.cmake
 .vscode/c_cpp_properties.json
 healaxis.dat
 fort.6601
+examples/start.dat
+tests/start.dat
 start.dat
+.pylintrc

@@ -194,4 +194,6 @@ print(len(g_field_qsc.to_RZ([r_avg*np.sqrt(g_orbit_booz.r_pos),
 # # # print("Creating animation plot")
 # # # g_orbit.plot_animation(show=True)
 
-# plt.show()
+
+print("Creating animation plot")
+g_orbit.plot_animation(show=True)

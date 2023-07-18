@@ -1,13 +1,14 @@
 {
     "comment": "Flags used to compile NEAT. Change this according to your needs.",
     "cmake_args": [
-            "-DINSTALL_SIMPLE=ON",
-            "-DCMAKE_C_COMPILER=gcc",
-            "-DCMAKE_CXX_COMPILER=g++",
-            "-DCMAKE_Fortran_COMPILER=gfortran",
-            "-DPROFILING=OFF",
-            "-DCMAKE_BUILD_TYPE=Debug",
-    	    "-DCMAKE_C_FLAGS_DEBUG=-Og -ggdb3",
-	    "-DCMAKE_CXX_FLAGS_DEBUG=-Og -ggdb3"
-        ]
+           	"-DINSTALL_SIMPLE=ON",
+	   	"-DCMAKE_C_COMPILER=mpicc",
+          	"-DCMAKE_CXX_COMPILER=mpicxx",
+           	"-DCMAKE_Fortran_COMPILER=mpifort",
+           	"-DNETCDF_INC_PATH=/marconi/home/userexternal/pfigueir/.conda/envs/simsopt/include",
+           	"-DUSER_INC_DIR=/marconi/home/userexternal/pfigueir/.conda/envs/simsopt/lib/python3.9/site-packages/numpy/core/include",
+           	"-DNETCDF_LIB_PATH=/marconi/home/userexternal/pfigueir/.conda/envs/simsopt/lib",
+           	"-DBLA_VENDOR=OpenBLAS",
+           	"-DSCALAPACK_LIB_NAME=scalapack"
+		]
 }

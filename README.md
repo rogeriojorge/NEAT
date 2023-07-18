@@ -2,8 +2,8 @@
 # **NEAT**
 **NEar-Axis opTimisation**
 
-![GitHub](https://img.shields.io/github/license/rogeriojorge/neat)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/rogeriojorge/NEAT/CI)
+![GitHub](https://img.shields.io/github/license/rogeriojorge/neat?color)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/rogeriojorge/NEAT/ci.yml?branch=main)
 [![Documentation Status](https://readthedocs.org/projects/neat-docs/badge/?version=latest)](https://neat-docs.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/rogeriojorge/NEAT/branch/main/graph/badge.svg?token=8515A2RQL3)](https://codecov.io/gh/rogeriojorge/NEAT)
 

@@ -50,7 +50,7 @@ RUN pip3 install simsopt
 
 # Install NEAT
 WORKDIR /home
-RUN pip3 install -e .
+RUN python3 setup.py install
 
 # Run NEAT from entrypoint script /docker/docker-entrypoint.sh
 # RUN ["chmod", "+x", "/home/docker/docker-entrypoint.sh"]

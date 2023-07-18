@@ -25,7 +25,7 @@ import random
 import numpy as np
 from qic import Qic
 from qsc import Qsc
-from scipy.io import netcdf
+from scipy.io import netcdf_file
 
 from neatpp import (
     booztrace,
@@ -278,7 +278,7 @@ if simple_loaded:
         ) -> None:
             self.near_axis = False
             self.wout_filename = wout_filename
-            net_file = netcdf.netcdf_file(self.wout_filename, "r", mmap=False)
+            net_file = netcdf_file(self.wout_filename, "r", mmap=False)
             self.nfp = net_file.variables["nfp"][()]
             self.Rmajor = net_file.variables["Rmajor_p"][()]
             net_file.close()
@@ -471,7 +471,6 @@ if simple_loaded:
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
             # nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
             # Tracy = self.params.Tracer()
-
             self.params.ntestpart = nparticles
             self.params.trace_time = tfinal
             self.params.contr_pp = -1e10  # Trace all passing particles
@@ -499,6 +498,7 @@ if simple_loaded:
                 self.params.trace_time,
                 self.params.ntimstep,
             )
+
             # condi = np.logical_and(params.times_lost > 0, params.times_lost < params.trace_time)
 
             return_array = copy.deepcopy(
@@ -529,7 +529,7 @@ class Vmec:
     def __init__(self, wout_filename: str, maximum_s=0.95, integrator=2) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
-        net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+        net_file = netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp"][()]
         self.maximum_s = maximum_s
         self.integrator = integrator

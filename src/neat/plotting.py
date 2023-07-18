@@ -236,6 +236,11 @@ def plot_parameters(self, r_minor=1.0, show=True, savefig=None):
     plt.close()
 
 
+def update(num, data, line):
+    line.set_data(data[:2, 0:num])
+    line.set_3d_properties(data[2, 0:num])
+
+
 def plot_animation3d(
     boundary, rpos_cartesian, nsamples, distance=7, show=True, save_movie=False
 ):
@@ -270,10 +275,6 @@ def plot_animation3d(
     ax.dist = distance
 
     ani = []
-
-    def update(num, data, line):
-        line.set_data(data[:2, 0:num])
-        line.set_3d_properties(data[2, 0:num])
 
     (line,) = ax.plot(
         rpos_cartesian[0][0:1],
@@ -409,6 +410,10 @@ def get_vmec_magB(
         iradius = nsurfaces - 1
     else:
         iradius = int(nsurfaces * spos)
+
+    if spos != None and (spos <= 0 or spos >= 1):
+        print("Value spos must be higher than 0 and lower than 1")
+        exit()
 
     b_field = np.zeros((ntheta, nzeta))
 

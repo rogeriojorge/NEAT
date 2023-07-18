@@ -28,12 +28,6 @@ constant_b20 = False  # use a constant B20 (mean value) or the real function
 
 g_field = StellnaQS.from_paper(1, B0=B0)
 
-# import matplotlib.pyplot as plt
-# phi=np.linspace(0,10*np.pi,100)
-# plt.plot(phi,g_field.B_mag(0.1, g_field.iota * phi, phi))
-# plt.show()
-# exit()
-
 g_particle = ChargedParticle(
     r_initial=r_initial,
     theta_initial=theta_initial,
@@ -53,9 +47,6 @@ g_orbit = ParticleOrbit(
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
-# import matplotlib.pyplot as plt
-# plt.plot(g_orbit.magnetic_field_strength)
-
 print("Creating B contour plot")
 g_orbit.plot_orbit_contourB(show=False)
 
@@ -68,5 +59,5 @@ g_orbit.plot_orbit(show=False)
 # print("Creating 3D plot")
 # g_orbit.plot_orbit_3d(show=True)
 
-print("Creating animation plot")
-g_orbit.plot_animation(show=True, save_movie=False)
+#print("Creating animation plot")
+#g_orbit.plot_animation(show=True, save_movie=False)
