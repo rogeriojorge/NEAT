@@ -97,7 +97,7 @@ def plot_orbit3d(boundary, rpos_cartesian, distance=6, show=True, savefig=None):
         plt.show()
     if savefig is not None:
         plt.savefig(savefig)
-    # plt.close()
+    plt.close()
 
 
 def plot_parameters(self, r_minor=1.0, show=True, savefig=None):
@@ -233,7 +233,7 @@ def plot_parameters(self, r_minor=1.0, show=True, savefig=None):
         plt.savefig(savefig)
     if show:
         plt.show()
-    # plt.close()
+    plt.close()
 
 
 def plot_animation3d(

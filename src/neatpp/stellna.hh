@@ -143,26 +143,6 @@ public:
         IR3 B_cov = (eq_pointer_->covariant(x, t)) * eq_pointer_->m_factor();
         IR3 B_con = (eq_pointer_->contravariant(x, t)) * eq_pointer_->m_factor();
 
-    // std::cout << "STELLNA" << std::endl;
-
-    // dIR3 dB_cov = (eq_pointer_->del_covariant(x, t));
-    // dIR3 dB_con = (eq_pointer_->del_contravariant(x, t));
-    // double jac = eq_pointer_->metric()->jacobian(x);
-    // IR3 del_jac = eq_pointer_->metric()->del_jacobian(x);
-    // std::cout << "jac: " << jac << std::endl;
-    // std::cout << "G/B^2: " << B_cov[IR3::w]/B/B << std::endl;
-    // std::cout << "del_jac_u:" << del_jac[IR3::u] << ", del_jac_v:" << del_jac[IR3::v] << ", del_jac_w:" << del_jac[IR3::w]<< std::endl;
-    // std::cout << "B: " << B << std::endl;
-    // std::cout << "B_cov[IR3::u]:" << B_cov[IR3::u] << std::endl;
-    // std::cout << "B_cov[IR3::v]:" << B_cov[IR3::v] << std::endl;
-    // std::cout << "B_cov[IR3::w]:" << B_cov[IR3::w] << std::endl;
-    // std::cout << "dB_covw_u:" << dB_cov[dIR3::wu] * eq_pointer_->m_factor() << ", dB_covw_v:" << dB_cov[dIR3::wv] * eq_pointer_->m_factor() << ", dB_covw_w:" << dB_cov[dIR3::ww] * eq_pointer_->m_factor() << std::endl;
-    // std::cout << "B_con[IR3::u]:" << B_con[IR3::u] << std::endl;
-    // std::cout << "B_con[IR3::v]:" << B_con[IR3::v] << std::endl;
-    // std::cout << "B_con[IR3::w]:" << B_con[IR3::w] << std::endl;
-    // std::cout << "dB_conv_u:" << dB_con[dIR3::vu] * eq_pointer_->m_factor() << ", dB_conv_v:" << dB_con[dIR3::vv] * eq_pointer_->m_factor() << ", dB_conv_w:" << dB_con[dIR3::vw] * eq_pointer_->m_factor() << std::endl;
-    // std::cout << "dB_conw_u:" << dB_con[dIR3::wu] * eq_pointer_->m_factor() << ", dB_conw_v:" << dB_con[dIR3::wv] * eq_pointer_->m_factor() << ", dB_conw_w:" << dB_con[dIR3::ww] * eq_pointer_->m_factor() << std::endl;
-    // exit(0);
         m_states.push_back({
             t,x[0],x[1],x[2],
             gc_pointer_->energy_parallel(s),
@@ -312,7 +292,7 @@ vector< vector<double>> gc_solver_qs_partial(
                                    double B0, double B1c,
                                    const vector<double>& B20,
                                    double B2c, double beta1s, double charge,
-                                   double mass, double lambda, int vpp_sign,
+                                   double mass, double lambda, double vpp_sign,
                                    double energy, double r0, double theta0,
                                    double phi0, size_t nsamples, double Tfinal
                                )
@@ -327,7 +307,7 @@ vector< vector<double>> gc_solver_qs_partial(
     double Bi = qsc.magnitude({r0, theta0, phi0}, 0);
     guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc); 
     guiding_centre::state initial_state = gc.generate_state(
-    {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
+    {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0.0 ? guiding_centre::plus : guiding_centre::minus));
 
     vector<vector< double >> x_vec;
     // runge_kutta4<guiding_centre::state> integration_algorithm;
@@ -424,7 +404,7 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_qs_ensemble(
     vector<double> lambda_trapped(nlambda_trapped);
     vector<double> lambda_passing(nlambda_passing);
 
-    double threshold=0.75;
+    double threshold=0;
 
     if (dist==0) {
 
@@ -503,7 +483,7 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_qs_partial_ensemble(
 
     vector<double> lambda_trapped(nlambda_trapped);
     vector<double> lambda_passing(nlambda_passing);
-    double threshold=0.75;
+    double threshold=0;
 
     if (dist==0) {
         lambda_trapped = neat_linspace(threshold, 0.99, nlambda_trapped);
@@ -593,16 +573,16 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_ensemble(
 
     vector<double> lambda_trapped(nlambda_trapped);
     vector<double> lambda_passing(nlambda_passing);
-    double threshold=0.7;
+    double threshold=0;
 
     if (dist==0) {
-        lambda_trapped = neat_linspace(threshold, 1.0, nlambda_trapped);
+        lambda_trapped = neat_linspace(threshold, 0.99, nlambda_trapped);
         lambda_passing = neat_linspace(0.0, threshold, nlambda_passing);
         // lambda_trapped = neat_linspace(Bref/B_max, Bref/B_min, nlambda_trapped);
         // lambda_passing = neat_linspace(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing);
     }
     else {
-        lambda_trapped = neat_rand_dist(threshold, 1.0, nlambda_trapped, dist);
+        lambda_trapped = neat_rand_dist(threshold, 0.99, nlambda_trapped, dist);
         lambda_passing = neat_rand_dist(0.0, threshold, nlambda_passing, dist);
         // lambda_trapped = neat_rand_dist(Bref/B_max, Bref/B_min, nlambda_trapped, dist);
         // lambda_passing = neat_rand_dist(0.0, Bref/B_max*(1.0-1.0/nlambda_passing), nlambda_passing, dist);

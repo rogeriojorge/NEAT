@@ -219,12 +219,7 @@ class ParticleOrbit:  # pylint: disable=R0902
                 self.magnetic_field_strength,
             )
             # self.p_phi = np.array([1e-16] * len(self.time))
-            # print(self.r_pos)
-            # print(self.theta_pos)
-            # print(self.field.iota)
-            # print(self.field.iotaN)
-            # print(self.varphi_pos)
-            # print(self.phi_pos)
+
             self.rpos_cylindrical = np.array(
                 self.field.to_RZ(
                     np.array(
@@ -246,12 +241,13 @@ class ParticleOrbit:  # pylint: disable=R0902
             self.rpos_cylindrical = np.array(
                 [solution[:, 12], solution[:, 14], solution[:, 13]]
             )
-            self.B_s = solution[:, 15]
-            self.B_theta = solution[:, 16]
-            self.B_varphi = solution[:, 17]
-            self.B_s_contr = solution[:, 18]
-            self.B_theta_contr = solution[:, 19]
-            self.B_varphi_contr = solution[:, 20]
+            # self.B_s = solution[:, 15]
+            # self.B_theta = solution[:, 16]
+            # self.B_varphi = solution[:, 17]
+            # self.B_s_contr = solution[:, 18]
+            # self.B_theta_contr = solution[:, 19]
+            # self.B_varphi_contr = solution[:, 20]
+
         self.rpos_cartesian = np.array(
             [
                 self.rpos_cylindrical[0] * np.cos(self.rpos_cylindrical[2]),

@@ -26,10 +26,10 @@ phi_initial = 0  # initial poloidal angle
 energy = 3.52e5  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.5  # = mu * B0 / energy
+Lambda = 0.2  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 1000  # resolution in time
-tfinal = 1e-4  # seconds
+nsamples = 100  # resolution in time
+tfinal = 1e-6  # seconds
 
 B0 = 5.3267
 # Scaling values
@@ -79,8 +79,8 @@ g_field = VMEC_NEAT(wout_filename=wout_filename, maximum_s=1)
 # b.read_wout(wout_filename)
 # # b.comput_surfs=100
 
-# b.mboz = 30
-# b.nboz = 30
+# b.mboz = 100
+# b.nboz = 100
 # b.run()
 # b.write_boozmn(boozmn_filename)
 
@@ -120,7 +120,7 @@ g_particle = ChargedParticle(
 
 g_particle_booz = ChargedParticle(
     r_initial=r_initial,
-    theta_initial=np.pi - (theta_initial),
+    theta_initial=theta_initial,
     phi_initial=phi_initial,
     energy=energy,
     Lambda=Lambda,
@@ -129,19 +129,19 @@ g_particle_booz = ChargedParticle(
     vpp_sign=vpp_sign,
 )
 
-print("Starting particle tracer")
-start_time = time.time()
-g_orbit_qsc = ParticleOrbit(
-    g_particle_qsc, g_field_qsc, nsamples=nsamples, tfinal=tfinal, constant_b20=False
-)
-total_time = time.time() - start_time
-print(f"Finished in {total_time}s")
+# print("Starting particle tracer")
+# start_time = time.time()
+# g_orbit_qsc = ParticleOrbit(
+#     g_particle_qsc, g_field_qsc, nsamples=nsamples, tfinal=tfinal, constant_b20=False
+# )
+# total_time = time.time() - start_time
+# print(f"Finished in {total_time}s")
 
-print("Starting particle tracer")
-start_time = time.time()
-g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
-total_time = time.time() - start_time
-print(f"Finished in {total_time}s")
+# print("Starting particle tracer")
+# start_time = time.time()
+# g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
+# total_time = time.time() - start_time
+# print(f"Finished in {total_time}s")
 
 print("Starting particle tracer")
 start_time = time.time()
@@ -151,45 +151,47 @@ g_orbit_booz = ParticleOrbit(
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
-norm_r_pos = (g_orbit_qsc.r_pos / (r_avg)) ** 2
-plt.plot(norm_r_pos, label="qsc")
-plt.plot(g_orbit.r_pos, label="vmec")
-plt.plot(g_orbit_booz.r_pos, label="booz")
-plt.legend()
-# plt.show()
+print(len(g_field_qsc.to_RZ([r_avg*np.sqrt(g_orbit_booz.r_pos),
+                    g_orbit_booz.theta_pos,
+                    g_orbit_booz.varphi_pos])[2])
+)
+# norm_r_pos = (g_orbit_qsc.r_pos / (r_avg)) ** 2
+# plt.plot(norm_r_pos, label="qsc")
+# plt.plot(g_orbit.r_pos, label="vmec")
+# plt.plot(g_orbit_booz.r_pos, label="booz")
+# plt.legend()
+# # plt.show()
 
-g_orbit
+# g_orbit.plot_orbit_contourB(show=False)
+# g_orbit_booz.plot_orbit_contourB(show=True)
 
-g_orbit.plot_orbit_contourB(show=False)
-g_orbit_booz.plot_orbit_contourB(show=True)
+# g_orbit_qsc.plot(show=False)
 
-g_orbit_qsc.plot(r=r_avg,show=False)
+# # # # print("Creating parameter plot")
+# g_orbit.plot(show=False)
 
-# # # print("Creating parameter plot")
-g_orbit.plot(show=False)
+# # # # print("Creating parameter plot")
+# g_orbit_booz.plot(show=False)
 
-# # # print("Creating parameter plot")
-g_orbit_booz.plot(show=False)
+# # # g_orbit_booz.plot_diff_boozer(g_orbit,r_minor=r_avg,show=True)
 
-# # g_orbit_booz.plot_diff_boozer(g_orbit,r_minor=r_avg,show=True)
+# g_orbit_booz.plot_diff_cyl(g_orbit, show=True)
 
-g_orbit_booz.plot_diff_cyl(g_orbit, show=True)
+# # # print("Creating 2D plot")
+# # # g_orbit.plot_orbit(show=False)
 
 # # print("Creating 2D plot")
-# # g_orbit.plot_orbit(show=False)
+# # g_orbit_booz.plot_orbit(show=False)
 
-# print("Creating 2D plot")
-# g_orbit_booz.plot_orbit(show=False)
+# # plt.show()
+
+# # print("Creating 3D plot")
+# # g_orbit_booz.plot_orbit_3d(show=False)
+
+# # print("Creating 3D plot")
+# # g_orbit.plot_orbit_3d(show=False)
+
+# # # print("Creating animation plot")
+# # # g_orbit.plot_animation(show=True)
 
 # plt.show()
-
-# print("Creating 3D plot")
-# g_orbit_booz.plot_orbit_3d(show=False)
-
-# print("Creating 3D plot")
-# g_orbit.plot_orbit_3d(show=False)
-
-# # print("Creating animation plot")
-# # g_orbit.plot_animation(show=True)
-
-plt.show()
