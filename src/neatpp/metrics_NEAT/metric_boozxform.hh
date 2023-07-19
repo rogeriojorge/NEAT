@@ -52,6 +52,7 @@ class metric_boozxform : public metric_covariant {
   interpolator1d **Rmnc_b_;
   interpolator1d **Zmns_b_;
   interpolator1d **gmnc_b_;
+  interpolator1d **numns_b_;
   double psi_boundary_;
 };
 

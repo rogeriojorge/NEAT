@@ -259,9 +259,10 @@ vector<vector<double>> vmecloss(
     vector<double> phi(nphi);
 
     if (dist==0) {
+        double nfp=4;
         theta = vmec_linspace(0.0, 2*numbers::pi, ntheta);
-        phi = vmec_linspace(0.0, 2*numbers::pi/4, nphi);
-        // double nfp=4;
+        phi = vmec_linspace(0.0, 2*numbers::pi/nfp, nphi);
+        
         // phi = vmec_linspace(0.0, 2*M_PI/nfp, nphi);
         double threshold=0.75;
         lambda_trapped = vmec_linspace(threshold, 0.99, nlambda_trapped);

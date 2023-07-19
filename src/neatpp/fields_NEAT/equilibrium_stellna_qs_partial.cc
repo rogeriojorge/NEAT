@@ -30,21 +30,15 @@ dIR3 equilibrium_stellna_qs_partial::del_contravariant(const IR3& position, doub
   double d_v_jac = metric_->del_jacobian(position)[IR3::v];
   double d_w_jac = metric_->del_jacobian(position)[IR3::w];
 
-//   double d_u_Bu = 0;
-//   double d_v_Bu = 0;
-//   double d_w_Bu = 0;
-
-//   double d_u_Bv = metric_->Bref()*metric_->iotaN()/jac-d_u_jac*r*metric_->Bref()*metric_->iotaN()/(jac*jac);
-//   double d_v_Bv = -d_v_jac*r*metric_->Bref()*metric_->iotaN()/(jac*jac);
-//   double d_w_Bv = -d_w_jac*r*metric_->Bref()*metric_->iotaN()/(jac*jac);
-
   double d_u_Bw = metric_->Bref()/jac-d_u_jac*r*metric_->Bref()/(jac*jac);
   double d_v_Bw = -d_v_jac*r*metric_->Bref()/(jac*jac);
   double d_w_Bw = -d_w_jac*r*metric_->Bref()/(jac*jac);
 
   return {
       0, 0, 0,
-      metric_->iotaN()*d_u_Bw/ this->m_factor(), metric_->iotaN()*d_v_Bw/ this->m_factor(), metric_->iotaN()*d_w_Bw/ this->m_factor(),
+      metric_->iotaN()*d_u_Bw/ this->m_factor(), 
+      metric_->iotaN()*d_v_Bw/ this->m_factor(), 
+      metric_->iotaN()*d_w_Bw/ this->m_factor(),
       d_u_Bw/ this->m_factor(), d_v_Bw/ this->m_factor(), d_w_Bw/ this->m_factor()};
 }
 

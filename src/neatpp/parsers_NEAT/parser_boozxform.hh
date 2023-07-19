@@ -124,16 +124,12 @@ class parser_boozxform {
   narray_type zmns_b_; 
   narray_type zmnc_b_; // This is 0 for stell sym
   narray_type pmns_b_;
-  narray_type pmnc_b_;
+  narray_type pmnc_b_; // This is 0 for stell sym
   narray_type gmnc_b_;
   narray_type gmns_b_; // This is 0 for stell sym
   narray_type bmnc_b_;
   narray_type bmns_b_; // This is 0 for stell sym
-  // narray_type bsubumnc_;
-  // narray_type bsubvmnc_;
-  // narray_type bsubsmns_;
-  // narray_type bsubumns_;
-  // narray_type bsubvmns_;
+ 
   void ERR(int , std::string);
   void getData(const netCDF::NcFile&, const std::string&, bool&);
   void getData(const netCDF::NcFile&, const std::string&, int&);
