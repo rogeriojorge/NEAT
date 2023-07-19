@@ -1,5 +1,6 @@
 #include <gyronimo/core/dblock.hh>
 #include <equilibrium_boozxform.hh>
+#include <numbers>
 #include <iostream>
 using namespace std;
 
@@ -91,25 +92,25 @@ dIR3 equilibrium_boozxform::del_covariant(
 double equilibrium_boozxform::magnitude(
     const IR3& position, double time) const {
   double s = position[IR3::u];
-  double theta = std::numbers::pi-position[IR3::v];
+  double theta = numbers::pi-position[IR3::v];
   double zeta = position[IR3::w];
   double Bnorm = 0.0;
   // #pragma omp parallel for reduction(+: Bnorm)
   for (size_t i = 0; i < ixm_b_.size(); i++) {  
-    Bnorm += (*bmnc_b_[i])(s) * std::cos( ixm_b_[i] * theta - ixn_b_[i] *zeta );
+    Bnorm += (*bmnc_b_[i])(s) * cos( ixm_b_[i] * theta - ixn_b_[i] *zeta );
   };
   return Bnorm;
 }
 IR3 equilibrium_boozxform::del_magnitude(
     const IR3& position, double time) const {
   double s = position[IR3::u];
-  double theta = std::numbers::pi-position[IR3::v];
+  double theta = numbers::pi-position[IR3::v];
   double zeta = position[IR3::w];
   double B_ds = 0.0, B_dzeta = 0.0, B_dtheta = 0.0, sintheta = 0.0, bmnc = 0.0;
   // #pragma omp parallel for reduction(+: B_ds, B_dzeta, B_dtheta)
   for (size_t i = 0; i < ixm_b_.size(); i++) {  
-    B_ds     += (*bmnc_b_[i]).derivative(s)  * std::cos( ixm_b_[i]*theta - ixn_b_[i]*zeta );
-    sintheta = std::sin( ixm_b_[i]*theta - ixn_b_[i]*zeta );
+    B_ds     += (*bmnc_b_[i]).derivative(s)  * cos( ixm_b_[i]*theta - ixn_b_[i]*zeta );
+    sintheta = sin( ixm_b_[i]*theta - ixn_b_[i]*zeta );
     bmnc = (*bmnc_b_[i])(s);
     B_dtheta += ixm_b_[i] * bmnc * sintheta;
     B_dzeta  += ixn_b_[i] * bmnc * sintheta;

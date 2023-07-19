@@ -742,6 +742,9 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self.npoiper = npoiper
         self.npoiper2 = npoiper2
         self.nper = nper
+
+
+        self.gyronimo_parameters = [
             *self.field.gyronimo_parameters(),
             *self.particles.gyronimo_parameters(),
             self.nsamples,
