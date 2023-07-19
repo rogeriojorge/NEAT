@@ -622,15 +622,6 @@ class ParticleEnsembleOrbit_Vmec:  # pylint: disable=R0902
             self.dist,
         ]
 
-        self.gyronimo_parameters = [
-            *self.field.gyronimo_parameters(),
-            *self.particles.gyronimo_parameters(),
-            self.nsamples,
-            self.tfinal,
-            self.nthreads,
-            self.dist,
-        ]
-
         solution = np.array(
             self.field.neatpp_solver_ensemble(*self.gyronimo_parameters)
         )
@@ -742,8 +733,6 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
         self.npoiper = npoiper
         self.npoiper2 = npoiper2
         self.nper = nper
-
-
         self.gyronimo_parameters = [
             *self.field.gyronimo_parameters(),
             *self.particles.gyronimo_parameters(),
@@ -755,7 +744,7 @@ class ParticleEnsembleOrbit_Simple:  # pylint: disable=R0902
             self.npoiper,
             self.npoiper2,
             self.nper,
-        ]
+        ]	
 
         solution = np.array(
             self.field.neatpp_solver_ensemble(

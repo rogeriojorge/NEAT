@@ -1,15 +1,5 @@
 #include <omp.h>
 #include <numbers>
-<<<<<<< HEAD
-using namespace std;
-#include <array>
-// Define multiplication by scalar and vector sum
-std::array<double,4> operator*(const double& a, const array<double,4>& v) {
-    array<double, 4> result = {a*v[0], a*v[1], a*v[2], a*v[3]};
-    return result;
-}
-std::array<double,4> operator+(
-=======
 #include <random>
 #include <chrono>
 using namespace std;
@@ -19,7 +9,6 @@ array<double,4> operator*(const double& a, const array<double,4>& v) {
     return result;
 }
 array<double,4> operator+(
->>>>>>> 8b2a2c5bfa3af67c5e199d0b88eee254ce1df472
     const array<double,4>& u, const array<double,4>& v) {
     array<double, 4> result = {u[0]+v[0],u[1]+v[1],u[2]+v[2],u[3]+v[3]};
     return result;

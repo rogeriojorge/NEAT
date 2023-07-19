@@ -1,4 +1,5 @@
 #include "metric_boozxform.hh"
+#include <numbers>
 #include <gyronimo/core/error.hh>
 #include <numbers>
 using namespace std;
