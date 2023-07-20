@@ -2,6 +2,7 @@
 #include <numbers>
 #include <random>
 #include <chrono>
+#include <stdexcept>
 using namespace std;
 // Define multiplication by scalar and vector sum
 array<double,4> operator*(const double& a, const array<double,4>& v) {
@@ -81,6 +82,8 @@ vector<double> neat_linspace(T start_in, T end_in, int num_in)
   return linspaced;
 }
 
+struct stop_integration : std::exception { };
+
 // Definition of random distribution
 template<typename T>
 vector<double> neat_rand_dist(T start_in, T end_in, int num_in, int dist){
@@ -132,6 +135,9 @@ public:
         : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
     void operator()(const guiding_centre::state& s, double t) {
         IR3 x = gc_pointer_->get_position(s);
+        if (x[0] > 1.7044*sqrt(0.99)){
+            throw stop_integration();
+        } 
         double B = (eq_pointer_->magnitude(x, t)) * eq_pointer_->m_factor();
         guiding_centre::state dots = (*gc_pointer_)(s, t);
         IR3 y = gc_pointer_->get_position(dots);
@@ -432,11 +438,18 @@ vector< vector<double>> gc_solver_qs_partial(
     // typedef guiding_centre::state state_type;
     // typedef runge_kutta_cash_karp54<state_type> error_stepper_type;
     // double abs_err = 1.0e-10 , rel_err = 1.0e-6 , a_x = 1.0 , a_dxdt = 1.0;
-    integrate_const(integration_algorithm2, odeint_adapter(&gc),
-        initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
-    // integrate_adaptive(
-    //     make_controlled( 1.0e-14 , 1.0e-16 , error_stepper_type() ), odeint_adapter(&gc),
-    //     initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
+    
+    try{
+        integrate_const(integration_algorithm2, odeint_adapter(&gc),
+            initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
+        // integrate_adaptive(
+        //     make_controlled( 1.0e-14 , 1.0e-16 , error_stepper_type() ), odeint_adapter(&gc),
+        //     initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
+    }
+    catch( const stop_integration & )
+    {
+        // integration was stopped
+    }
 
     return x_vec;
 }

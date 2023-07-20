@@ -560,7 +560,7 @@ class Boozxform:
     def __init__(self, wout_filename: str, maximum_s=0.95, integrator=2) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
-        net_file = netcdf.netcdf_file(wout_filename, "r", mmap=False)
+        net_file = netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp_b"][()]
         self.maximum_s = maximum_s
         self.integrator = integrator

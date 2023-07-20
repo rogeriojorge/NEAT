@@ -69,7 +69,7 @@ IR3 metric_boozxform::transform2cylindrical(const IR3& position) const {
       Z+= (*Zmns_b_[i])(s) * sin( m*theta - n*zeta );
       Nu+= (*numns_b_[i])(s) * sin( m*theta - n*zeta );
     }
-    double zeta0 = zeta - Nu;
+    double zeta0 = zeta + Nu;
     return  {R, zeta0, Z};
 }
 
