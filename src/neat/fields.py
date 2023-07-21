@@ -549,6 +549,6 @@ class Dommaschk:
     def neatpp_solver_ensemble(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
         print(
-            "Sample Text" # NEEDS TO BE CHANGED
+            "Not currently implemented"
         )
         raise NotImplementedError

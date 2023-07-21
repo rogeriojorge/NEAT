@@ -1,20 +1,5 @@
 // ::gyronimo:: - gyromotion for the people, by the people -
 // An object-oriented library for gyromotion applications in plasma physics.
-// Copyright (C) 2021 Miguel Pereira.
-
-// ::gyronimo:: is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// ::gyronimo:: is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with ::gyronimo::.  If not, see <https://www.gnu.org/licenses/>.
-
 
 #ifndef GYRONIMO_EQUILIBRIUM_DOMMASCHK
 #define GYRONIMO_EQUILIBRIUM_DOMMASCHK
@@ -26,19 +11,25 @@
 
 namespace gyronimo{
 
-//! Tokamak equilibrium magnetic field in 'HELENA' curvilinear coordinates.
-/*!
-    Following IR3Field rules, the magnetic field is normalised by a `m_factor`
-    matching its on-axis value `B0()` in [T], which is located at `R0()` in [m].
-    The coordinates are set by the `metric_helena` object and the type of 2d
-    interpolators is set by the specific `interpolator2d_factory` supplied.
-    Contravariant components have dimensions of [m^{-1}]. Being an
-    **equilibrium** field, `t_factor` is set to one.
-    
-    Only the minimal interface is implemented for the moment and further
-    specialisations may enhance the object's performance.
+/* Stellarator equilibrium magnetic field using Dommaschk potentials, in cylindrical coordinates
+    To initialize an equilibrium_dommaschk object such that it can be used, 
+    a metric_cylindrical object must be provided, along with a magnetic field
+    normalization B0. Additionally, these potentials are characterized by four values.
+    They are: m and l, two integers that represent the number of toroidal and poloidal
+    periods of the field. The other two numbers are coeff1 and coeff2, two doubles.
+    If one is following the 1986 paper by W. Dommaschk, these values represent the following:
+    when l is even, coeff1 and coeff2 correspond to b and c of equation (12),
+    and if l is odd, then coeff1 and coeff2 correspond to a and d of equation (12).
+    This simplification assumed the Stellarator symmetry V_{m,l}(R,\phi,Z) = -V_{m,l}(R,-\phi,-Z)
+
 */
 
+/*
+Possible opimizations: not adding the 1/R and -1/R² terms in each field to then subtract
+them, instead just using the equilibrium_inverse_R_factor defined in dommaschktrace.hh to add
+those terms once at the end
+Also, there is currently no parallel computing 
+*/
 class equilibrium_dommaschk : public IR3field_c1{
  public:
   equilibrium_dommaschk(
@@ -51,54 +42,11 @@ class equilibrium_dommaschk : public IR3field_c1{
   virtual IR3 partial_t_contravariant(
       const IR3& position, double time) const override {return {0.0,0.0,0.0};};
 
-  
- /* equilibrium_dommaschk operator+(equilibrium_dommaschk const& obj)
-    {
-    equilibrium_dommaschk result(const metric_cylindrical *g,1,1,1,1,1); //placeholder values just to initialise
-
-    IR3 res::contravariant(const IR3& position, double time) const override {
-        return {
-	       obj.contravariant(position, time)+contravariant(position, time);
-        };
-
-    IR3 res::del_contravariant(const IR3& position, double time) const override {
-        return {
-	       obj.del_contravariant(position, time)+del_contravariant(position, time);
-        };
-    }
-
-    }
-     //   res.setValueB(BR1() + obj.BR1(), Bphi1() + obj.Bphi1(), BZ1() + obj.BZ1());
-    return result;
-    };*/
-
-/*
-void setValueB(double B1, double B2, double B3)  const
-  {
-    BR1_=B1;
-    Bphi1_=B2;
-    BZ1_=B3;
-
-  }*/
-  /*
-  void setValueB()  
-  {
-    BR1_=1;
-    Bphi1_=3;
-    BZ1_=2;
-
-  }*/
   const int m() const {return m_;};
   const int l() const {return l_;};
   const double coeff1() const {return coeff1_;};
   const double coeff2() const {return coeff2_;};
   const double B0() const {return B0_;};
- // const double BR1() const {return BR1_;};
-  //const double Bphi1() const {return Bphi1_;};
-  //const double BZ1() const {return BZ1_;};
-  
-  
-
 
  private:
   const metric_cylindrical *metric_;
@@ -106,13 +54,7 @@ void setValueB(double B1, double B2, double B3)  const
   int l_;
   double coeff1_;
   double coeff2_;
-  double B0_;
-  double BR1_;
-  double Bphi1_;
-  double BZ1_;
-  int flag;
-  double dB[9];
-  
+  double B0_;  
 };
 
 }// end namespace gyronimo.

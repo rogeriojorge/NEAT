@@ -107,7 +107,6 @@ double dRDmn(int m, int n, double R, double Z) {
 	for (k=0; k<=floor(n/2); k++) {
 		sumD = 0.0;
 		for (j=0;j<k+1;j++) {
-		//	sumD += -(alpha(m,j)*(alphas(m,k-m-j)*log(R)+gammas(m,k-m-j)-alpha(m,k-m-j)+alphas(m,k-m-j)/(2*j+m))-gamma1(m,j)*alphas(m,k-m-j)+alpha(m,j)*betas(m,k-j))*pow(R,(2*j+m-1))*(2*j+m) + alphas(m,k-j)*beta(m,j)*pow(R,2*j-m-1)*(2*j-m);
 			sumD += -(alpha(m,j)*(alphas(m,k-m-j)*(1.0/(2*j+m)+log(R))+gammas(m,k-m-j)-alpha(m,k-m-j))-gamma1(m,j)*alphas(m,k-m-j)+alpha(m,j)*betas(m,k-j))*pow(R,(2*j+m-1))*(2*j+m) + alphas(m,k-j)*beta(m,j)*pow(R,2*j-m-1)*(2*j-m);
 		}
 		y += (pow(Z,n-2*k)/tgamma(n-2*k+1))*sumD;
@@ -188,7 +187,6 @@ double dRNmn(int m, int n, double R, double Z) {
 	for (k=0;k<=floor(n/2); k++) {
 		sumN = 0.0;
 		for (j=0; j<k+1; j++) {
-		//	sumN += +(alpha(m,j)*(alpha(m,k-m-j)*log(R)+gamma1(m,k-m-j)+alpha(m,k-m-j)/(2*j+m))-gamma1(m,j)*alpha(m,k-m-j)+alpha(m,j)*beta(m,k-j))*pow(R,(2*j+m-1))*(2*j+m) - alpha(m,k-j)*beta(m,j)*pow(R,2*j-m-1)*(2*j-m);
 			sumN += +(alpha(m,j)*(alpha(m,k-m-j)*(1.0/(2*j+m)+log(R))+gamma1(m,k-m-j))-gamma1(m,j)*alpha(m,k-m-j)+alpha(m,j)*beta(m,k-j))*pow(R,(2*j+m-1))*(2*j+m) - alpha(m,k-j)*beta(m,j)*pow(R,2*j-m-1)*(2*j-m);
 
 		}	
@@ -500,7 +498,7 @@ IR3 equilibrium_dommaschk::contravariant(const IR3& position, double time) const
   	double Z = position[IR3::w];
 	return {
 		BR(m_, l_, R, Z, phi, coeff1_, coeff2_),
-		Bphi(m_, l_, R, Z, phi, coeff1_, coeff2_)+1/(R),//o código do Bphi já divide por R uma vez, não sei se o devo fazer só mais uma vez ou não de todo
+		Bphi(m_, l_, R, Z, phi, coeff1_, coeff2_)+1/(R),
 		BZ(m_, l_, R, Z, phi, coeff1_, coeff2_)	
 	};
 }
@@ -514,8 +512,7 @@ dIR3 equilibrium_dommaschk::del_contravariant(
 		dRBR(m_,l_,R,Z,phi,coeff1_,coeff2_), dphiBR(m_,l_,R,Z,phi,coeff1_,coeff2_), dZBR(m_,l_,R,Z,phi,coeff1_,coeff2_),
 		dRBphi(m_,l_,R,Z,phi,coeff1_,coeff2_)-1/(R*R), dphiBphi(m_,l_,R,Z,phi,coeff1_,coeff2_), dZBphi(m_,l_,R,Z,phi,coeff1_,coeff2_),
 		dRBZ(m_,l_,R,Z,phi,coeff1_,coeff2_), dphiBZ(m_,l_,R,Z,phi,coeff1_,coeff2_), dZBZ(m_,l_,R,Z,phi,coeff1_,coeff2_)
-	};	 //verificar se esta matriz não está transposta em relação ao que é suposto
-
+	};	 
 }
 
 }// end namespace gyronimo.

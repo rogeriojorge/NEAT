@@ -27,7 +27,6 @@ public:
                      const IR3field_c1* e, const guiding_centre* g)
     : m_states(states), eq_pointer_(e), gc_pointer_(g) {};
   void operator()(const guiding_centre::state& s, double t) {
-    ////printf("entered gc constructor\n");
     IR3 x = gc_pointer_->get_position(s);
     double B = eq_pointer_->magnitude(x, t);
     guiding_centre::state dots = (*gc_pointer_)(s, t);
@@ -37,9 +36,6 @@ public:
     // cout << y[IR3::u]<<y[IR3::v]<<y[IR3::w] << endl;
     // cout << B << endl;
     // cout << v_parallel << endl;
-
-
-      //printf("pushing back state\n");
 
     m_states.push_back({
         t,
@@ -65,7 +61,6 @@ vector< vector<double>>  dommaschktrace(
         double phi0, double Z0,
         size_t nsamples, double Tfinal)
 {
-  //printf("what\n");
   double Lref = 1.0;
   double Vref = 1.0;
   double refEnergy = 0.5*codata::m_proton*mass*Vref*Vref;
@@ -74,7 +69,6 @@ vector< vector<double>>  dommaschktrace(
   double Placeholder;
   metric_cylindrical g(Placeholder);
   int length=m.size();
- // equilibrium_dommaschk d_test1(&g,5,2,1.4,1.4,1);
   equilibrium_dommaschk deq_test_low(&g,5,2,1.4,1.4,1);
   equilibrium_dommaschk deq_test_higher(&g, 5, 4, 19.25, 0, 1);
   equilibrium_dommaschk deq_test_even_higher(&g, 5, 10, 5.1*pow(10,10),5.1*pow(10,10) , 1);
@@ -105,7 +99,7 @@ vector< vector<double>>  dommaschktrace(
 
   std::array<const IR3field_c1*, 3> p_test={&deq_test_higher,&deq_test_low,&R_factor};
   linear_combo_c1 d_test1(p_test, &g, 1, 1);
-  IR3 test_position_1={1.1,M_PI/4,0.07};
+  IR3 test_position_1={R0,phi0,Z0};
   dIR3 Dmag_field=d_test1.del_contravariant(test_position_1,0);
   IR3 mag_field=d_test1.contravariant(test_position_1,0);
 
@@ -115,113 +109,36 @@ vector< vector<double>>  dommaschktrace(
     IR3field_c1* deq_total;
     deq_total=new equilibrium_dommaschk(&g, m[0], l[0], coeff1[0], coeff2[0], B0[0]);
 
-
-  test_position_1={1.1,M_PI/4,0.07};
   mag_field=deq_total->contravariant(test_position_1,0);
   printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
 
-  test_position_1={1,M_PI/8,-0.02};
-  mag_field=deq_total->contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-  test_position_1={0.9,-M_PI/8,-0.02};
-  mag_field=deq_total->contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-
-  test_position_1={2,0,-0.02};
-  mag_field=deq_total->contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-  test_position_1={1,0,2};
-  mag_field=deq_total->contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-  test_position_1={1.1,M_PI/4,0.07};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
- 
-  test_position_1={1,M_PI/8,-0.02};
   Dmag_field=deq_total->del_contravariant(test_position_1,0);
   printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
 
-  test_position_1={0.9,-M_PI/8,-0.02};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
-
-  test_position_1={2,0,-0.02};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
-
-  test_position_1={1,0,2};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
-
-  test_position_1={1.1,M_PI/4,0.07};
   Dmag_field=deq_total->del_contravariant(test_position_1,0);
   printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
 
-  test_position_1={1,M_PI/8,-0.02};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  test_position_1={0.9,-M_PI/8,-0.02};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  test_position_1={2,0,-0.02};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  test_position_1={1,0,2};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  test_position_1={1.1,M_PI/4,0.07};
   Dmag_field=deq_total->del_contravariant(test_position_1,0);
   printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
 
-  test_position_1={1,M_PI/8,-0.02};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-  test_position_1={0.9,-M_PI/8,-0.02};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-  test_position_1={2,0,-0.02};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-  test_position_1={1,0,2};
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-    
     guiding_centre gc(
         Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy, deq_total);
-
-  // //printf("before guiding centre initial state R0=%f phi0=%f Z0=%f\n",R0,phi0,Z0);
 
     guiding_centre::state initial_state = gc.generate_state(
         {R0, phi0, Z0}, energySI_over_refEnergy,
         (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
-      //printf("before pushback \n");
 
     cout.precision(16);
     cout.setf(ios::scientific);
     vector<vector< double >> x_vec;
     push_back_state_and_time_dommaschk observer(x_vec, deq_total, &gc);
-        //printf("before rk4\n");
 
     boost::numeric::odeint::runge_kutta4<guiding_centre::state>
         integration_algorithm;
-    //printf("before integration\n");
     boost::numeric::odeint::integrate_const(
         integration_algorithm, odeint_adapter(&gc),
         initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
-
 
     return x_vec;
   }
@@ -233,12 +150,8 @@ vector< vector<double>>  dommaschktrace(
     p.fill(&null_field);
     deq_aux.push_back(new equilibrium_dommaschk(&g, m[0], l[0], coeff1[0], coeff2[0], B0[0]));
     p[0]=deq_aux[0];  
-    printf("entered loop");
-
-    printf("before starting loop length=%d\n",length);
     for(int i=1;i<length;++i)
     {
-      printf("entered loop");
       deq_aux.push_back(new equilibrium_dommaschk(&g, m[i], l[i], coeff1[i], coeff2[i], B0[i]));
       p[i]=deq_aux[i];   
       p[40-1-i]=&R_factor;
@@ -246,86 +159,16 @@ vector< vector<double>>  dommaschktrace(
     linear_combo_c1 deq_total(p, &g, 1, 1);
 
   linear_combo_c1 deq_total_test2=deq_total;
-  test_position_1={1.1,M_PI/4,0.07};
-  mag_field=deq_total_test2.contravariant(test_position_1,0);
-  printf("after calling\n");
-
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-  test_position_1={1,M_PI/8,-0.02};
   mag_field=deq_total_test2.contravariant(test_position_1,0);
   printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
 
-  test_position_1={0.9,-M_PI/8,-0.02};
-  mag_field=deq_total_test2.contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-
-  test_position_1={2,0,-0.02};
-  mag_field=deq_total_test2.contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-  test_position_1={1,0,2};
-  mag_field=deq_total_test2.contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-  test_position_1={1.1,M_PI/4,0.07};
   Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
   printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
+
  
-  test_position_1={1,M_PI/8,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
-
-  test_position_1={0.9,-M_PI/8,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
-
-  test_position_1={2,0,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
-
-  test_position_1={1,0,2};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
-
-  test_position_1={1.1,M_PI/4,0.07};
   Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
   printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
 
-  test_position_1={1,M_PI/8,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  test_position_1={0.9,-M_PI/8,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  test_position_1={2,0,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  test_position_1={1,0,2};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  test_position_1={1.1,M_PI/4,0.07};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-  test_position_1={1,M_PI/8,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-  test_position_1={0.9,-M_PI/8,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-  test_position_1={2,0,-0.02};
-  Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-  test_position_1={1,0,2};
   Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
   printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
 
@@ -333,27 +176,20 @@ vector< vector<double>>  dommaschktrace(
   guiding_centre gc(
       Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy, &deq_total);
 
- // //printf("before guiding centre initial state R0=%f phi0=%f Z0=%f\n",R0,phi0,Z0);
-
   guiding_centre::state initial_state = gc.generate_state(
       {R0, phi0, Z0}, energySI_over_refEnergy,
       (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
-
-    //printf("before pushback \n");
 
   cout.precision(16);
   cout.setf(ios::scientific);
   vector<vector< double >> x_vec;
   push_back_state_and_time_dommaschk observer(x_vec, &deq_total, &gc);
-      //printf("before rk4\n");
 
   boost::numeric::odeint::runge_kutta4<guiding_centre::state>
       integration_algorithm;
-  //printf("before integration\n");
   boost::numeric::odeint::integrate_const(
       integration_algorithm, odeint_adapter(&gc),
       initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
-
 
   return x_vec;
   }
