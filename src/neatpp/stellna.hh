@@ -388,9 +388,12 @@ vector< vector<double>> gc_solver_qs(
 
     double Bref = B0;
     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
-    metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
-                        B0, B1c, B20, B2c, beta1s);
-    equilibrium_stellna_qs qsc(&g);
+    // metric_stellna_qs g(Bref, G0, G2, I2, iota, iotaN,
+    //                     B0, B1c, B20, B2c, beta1s);
+    // equilibrium_stellna_qs qsc(&g);
+    cached_metric_qs g(Bref, G0, G2, I2, iota, iotaN,
+                    B0, B1c, B20, B2c, beta1s); // Not sure if it works
+    cached_field_qs qsc(&g);
     double Bi = qsc.magnitude({r0, theta0, phi0}, 0);
     guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc);  // -> Version with Bi
     guiding_centre::state initial_state = gc.generate_state(
@@ -424,9 +427,12 @@ vector< vector<double>> gc_solver_qs_partial(
     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
     cubic_periodic_gsl_factory ifactory;
 
-    metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
+    // metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
+    //                             dblock_adapter(B20), B2c, beta1s, &ifactory);
+    // equilibrium_stellna_qs_partial qsc(&g);
+    cached_metric_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
                                 dblock_adapter(B20), B2c, beta1s, &ifactory);
-    equilibrium_stellna_qs_partial qsc(&g);
+    cached_field_qs_partial qsc(&g);
     double Bi = qsc.magnitude({r0, theta0, phi0}, 0);
     guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc); 
     guiding_centre::state initial_state = gc.generate_state(
@@ -439,17 +445,17 @@ vector< vector<double>> gc_solver_qs_partial(
     // typedef runge_kutta_cash_karp54<state_type> error_stepper_type;
     // double abs_err = 1.0e-10 , rel_err = 1.0e-6 , a_x = 1.0 , a_dxdt = 1.0;
     
-    try{
-        integrate_const(integration_algorithm2, odeint_adapter(&gc),
-            initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
-        // integrate_adaptive(
-        //     make_controlled( 1.0e-14 , 1.0e-16 , error_stepper_type() ), odeint_adapter(&gc),
-        //     initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
-    }
-    catch( const stop_integration & )
-    {
-        // integration was stopped
-    }
+    // try{
+    integrate_const(integration_algorithm2, odeint_adapter(&gc),
+        initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
+    // integrate_adaptive(
+    //     make_controlled( 1.0e-14 , 1.0e-16 , error_stepper_type() ), odeint_adapter(&gc),
+    //     initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
+    // }
+    // catch( const stop_integration & )
+    // {
+    //     // integration was stopped
+    // }
 
     return x_vec;
 }
