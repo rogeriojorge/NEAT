@@ -77,8 +77,8 @@ vector< vector<double>>  dommaschktrace(
     public:
       equilibrium_inverse_R_factor(const metric_cylindrical *g): IR3field_c1(1.0, 1.0, g),metric_(g){}
       virtual ~equilibrium_inverse_R_factor() override {};
-      virtual IR3 contravariant(const IR3& position, double time) const override {return {0,-1/position[IR3::u],0};};
-      virtual dIR3 del_contravariant(const IR3& position, double time) const override {return{0,0,0, +1/(position[IR3::u]*position[IR3::u]),0,0, 0,0,0};};
+      virtual IR3 contravariant(const IR3& position, double time) const override {return {0,1/position[IR3::u],0};};
+      virtual dIR3 del_contravariant(const IR3& position, double time) const override {return{0,0,0, -1/(position[IR3::u]*position[IR3::u]),0,0, 0,0,0};};
       virtual IR3 partial_t_contravariant(const IR3& position, double time) const override {return {0.0,0.0,0.0};};
     private:
       const metric_cylindrical *metric_;
@@ -103,75 +103,39 @@ vector< vector<double>>  dommaschktrace(
   dIR3 Dmag_field=d_test1.del_contravariant(test_position_1,0);
   IR3 mag_field=d_test1.contravariant(test_position_1,0);
 
-
-  if(length==1)
+  std::vector<equilibrium_dommaschk*> deq_aux;
+  //  Currently hardcoded to a max of 20 dommaschk fields that can be combined, if linear combo c1 could receive a dblock instead of an array it would be simple to 
+  // use a vector of undeterminate size. Instead, a vector is used and then copied to an array that was null-initialized
+  std::array<const IR3field_c1*, 21> p; 
+  const equilibrium_null_field null_field(&g);
+  p.fill(&null_field);
+  deq_aux.push_back(new equilibrium_dommaschk(&g, m[0], l[0], coeff1[0], coeff2[0], B0[0]));
+  p[0]=deq_aux[0];  
+  for(int i=1;i<length;++i)
   {
-    IR3field_c1* deq_total;
-    deq_total=new equilibrium_dommaschk(&g, m[0], l[0], coeff1[0], coeff2[0], B0[0]);
-
-  mag_field=deq_total->contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
-
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
-
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
-
-  Dmag_field=deq_total->del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
-    guiding_centre gc(
-        Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy, deq_total);
-
-    guiding_centre::state initial_state = gc.generate_state(
-        {R0, phi0, Z0}, energySI_over_refEnergy,
-        (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
-
-
-    cout.precision(16);
-    cout.setf(ios::scientific);
-    vector<vector< double >> x_vec;
-    push_back_state_and_time_dommaschk observer(x_vec, deq_total, &gc);
-
-    boost::numeric::odeint::runge_kutta4<guiding_centre::state>
-        integration_algorithm;
-    boost::numeric::odeint::integrate_const(
-        integration_algorithm, odeint_adapter(&gc),
-        initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
-
-    return x_vec;
+    deq_aux.push_back(new equilibrium_dommaschk(&g, m[i], l[i], coeff1[i], coeff2[i], B0[i]));
+    p[i]=deq_aux[i];   
   }
-  else
-  {
-    std::vector<equilibrium_dommaschk*> deq_aux;
-    std::array<const IR3field_c1*, 40> p; //hardcoded to a max of 20, if linear combo c1 could receive a dblock instead of an array it would be simple to use a vecotr of undeterminate size
-    const equilibrium_null_field null_field(&g);
-    p.fill(&null_field);
-    deq_aux.push_back(new equilibrium_dommaschk(&g, m[0], l[0], coeff1[0], coeff2[0], B0[0]));
-    p[0]=deq_aux[0];  
-    for(int i=1;i<length;++i)
-    {
-      deq_aux.push_back(new equilibrium_dommaschk(&g, m[i], l[i], coeff1[i], coeff2[i], B0[i]));
-      p[i]=deq_aux[i];   
-      p[40-1-i]=&R_factor;
-    }
-    linear_combo_c1 deq_total(p, &g, 1, 1);
+  p[20]=&R_factor;
+  linear_combo_c1 deq_total(p, &g, 1, 1);
 
+  //uncomment these lines to print the value of the magnetic field and its derivatives in the initial position given
+  /*
   linear_combo_c1 deq_total_test2=deq_total;
+  printf("Initial position given: R0=%.9g phi0=%.9g z0=%.9g\n",R0,phi0,Z0);
   mag_field=deq_total_test2.contravariant(test_position_1,0);
-  printf("campo inserido: BR=%f,Bphi=%f,BZ=%f\n",mag_field[0],mag_field[1],mag_field[2]);
+  printf("FIELD         :BR=%.9g,Bphi=%.9g,BZ=%.9g\n",mag_field[0],mag_field[1],mag_field[2]);
 
   Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM R:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
+  printf("R   DERIVATIVE:dRBR=%.9g,dRBphi=%.9g,dRBZ=%.9g\n",Dmag_field[dIR3::uu],Dmag_field[dIR3::vu],Dmag_field[dIR3::wu]);
 
  
   Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM phi:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
+  printf("phi DERIVATIVE:dphiBR=%.9g,dphiBphi=%.9g,dphiBZ=%.9g\n",Dmag_field[dIR3::uv],Dmag_field[dIR3::vv],Dmag_field[dIR3::wv]);
 
   Dmag_field=deq_total_test2.del_contravariant(test_position_1,0);
-  printf("DERIVADA EM z:BR=%f,Bphi=%f,BZ=%f\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
-
+  printf("Z   DERIVATIVE:dZBR=%.9g,dZBphi=%.9g,dZBZ=%.9g\n",Dmag_field[dIR3::uw],Dmag_field[dIR3::vw],Dmag_field[dIR3::ww]);
+  */
 
   guiding_centre gc(
       Lref, Vref, charge/mass, Lambda*energySI_over_refEnergy, &deq_total);
@@ -192,5 +156,4 @@ vector< vector<double>>  dommaschktrace(
       initial_state, 0.0, Tfinal, Tfinal/nsamples, observer);
 
   return x_vec;
-  }
 }

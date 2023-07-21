@@ -491,14 +491,14 @@ equilibrium_dommaschk::equilibrium_dommaschk(
       metric_(g), m_(m), l_(l), coeff1_(coeff1), coeff2_(coeff2), B0_(B0) {
 }
 
-
+//The term +1/R in Bphi and the term -1/(R²) in dRBphi that appear due to the phi field will be added later in dommaschktrace.hh
 IR3 equilibrium_dommaschk::contravariant(const IR3& position, double time) const {
   	double R = position[IR3::u];
   	double phi = position[IR3::v];
   	double Z = position[IR3::w];
 	return {
 		BR(m_, l_, R, Z, phi, coeff1_, coeff2_),
-		Bphi(m_, l_, R, Z, phi, coeff1_, coeff2_)+1/(R),
+		Bphi(m_, l_, R, Z, phi, coeff1_, coeff2_),
 		BZ(m_, l_, R, Z, phi, coeff1_, coeff2_)	
 	};
 }
@@ -510,7 +510,7 @@ dIR3 equilibrium_dommaschk::del_contravariant(
   	double Z = position[IR3::w];
   	return {
 		dRBR(m_,l_,R,Z,phi,coeff1_,coeff2_), dphiBR(m_,l_,R,Z,phi,coeff1_,coeff2_), dZBR(m_,l_,R,Z,phi,coeff1_,coeff2_),
-		dRBphi(m_,l_,R,Z,phi,coeff1_,coeff2_)-1/(R*R), dphiBphi(m_,l_,R,Z,phi,coeff1_,coeff2_), dZBphi(m_,l_,R,Z,phi,coeff1_,coeff2_),
+		dRBphi(m_,l_,R,Z,phi,coeff1_,coeff2_), dphiBphi(m_,l_,R,Z,phi,coeff1_,coeff2_), dZBphi(m_,l_,R,Z,phi,coeff1_,coeff2_),
 		dRBZ(m_,l_,R,Z,phi,coeff1_,coeff2_), dphiBZ(m_,l_,R,Z,phi,coeff1_,coeff2_), dZBZ(m_,l_,R,Z,phi,coeff1_,coeff2_)
 	};	 
 }

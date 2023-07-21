@@ -15,35 +15,26 @@ quasisymmetric stellarator
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 1.03  # meters
-theta_initial = np.pi/2  # initial poloidal angle
-phi_initial = 0.03  # initial Z
+r_initial = 1.1  # meters
+theta_initial = np.pi/4  # initial poloidal angle
+phi_initial = 0.07  # initial Z
 B0 = 1  # Tesla, magnetic field on-axis
 energy = 100000 # electron-volt
-charge = 1  # times charge of proton
+charge = 2 # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.8  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 10  # resolution in time
+nsamples = 2000  # resolution in time
 tfinal = 2e-4  # seconds
 
-g_field = Dommaschk(m=[5], l=[2], coeff1=[1.4], coeff2=[1.4], B0=[B0])
-#g_field = Dommaschk(m=[5,5], l=[2,4], coeff1=[1.4,19.25], coeff2=[1.4,0], B0=[B0,B0])
+#To print the value of the field and its derivatives at the initial position, uncomment the lines labeled with such a purpose in dommaschktrace.hh
+#g_field = Dommaschk(m=[5], l=[2], coeff1=[1.4], coeff2=[1.4], B0=[B0])
+g_field = Dommaschk(m=[5,5], l=[2,4], coeff1=[1.4,19.25], coeff2=[1.4,0], B0=[B0,B0])
 #g_field = Dommaschk(m=[5,5,5], l=[2,4,10], coeff1=[1.4,19.25,5.1e10], coeff2=[1.4,0,5.1e10], B0=[B0,B0,B0])
 #g_field = Dommaschk(m=[5], l=[10], coeff1=[5.1e10], coeff2=[5.1e10], B0=[B0])
 #g_field = Dommaschk(m=[5,5,5,5], l=[2,4,10,14], coeff1=[1.4,19.25,5.1e10,7e16], coeff2=[1.4,0,5.1e10,0], B0=[B0,B0,B0,B0])
 #g_field = Dommaschk(m=[5], l=[12], coeff1=[5e18], coeff2=[5e18], B0=[B0])
 #g_field = Dommaschk(m=[5], l=[14], coeff1=[5e22], coeff2=[5e22], B0=[B0])
-
-""" Bfield = Dommaschk(mn=mn, coeffs=coeffs)
-point = np.asarray([[0.9231, 0.8423, -0.1123]])
-Bfield.set_points(point) """
-
-# import matplotlib.pyplot as plt
-# phi=np.linspace(0,10*np.pi,100)
-# plt.plot(phi,g_field.B_mag(0.1, g_field.iota * phi, phi))
-# plt.show()
-# exit()
 
 g_particle = ChargedParticle(
     r_initial=r_initial,
@@ -64,40 +55,64 @@ g_orbit = ParticleOrbit(
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
-# g_orbit.magnetic_field_strength
-
-# import matplotlib.pyplot as plt
-# plt.plot(g_orbit.time, g_orbit.r_pos)
-# plt.show()
-# print(g_orbit.time , g_orbit.r_pos)
-
-# print("Creating B contour plot")
-# g_orbit.plot_orbit_contourB(show=False)
+#g_orbit.magnetic_field_strength
+#import matplotlib.pyplot as plt
+#plt.plot(g_orbit.time, g_orbit.r_pos)
+#plt.show()
+#print(g_orbit.time , g_orbit.r_pos)
+#print("Creating B contour plot")
+#g_orbit.plot_orbit_contourB(show=False)
 
 print("Creating parameter plot")
-g_orbit.plot(show=True)
+g_orbit.plot(show=False)
 
-print("Creating 2D plot")
-g_orbit.plot_orbit(show=True) 
+""" print("Creating 2D plot")
+g_orbit.plot_orbit(show=True)  """
+
+print("Creating phase 2D plot")
+plt.figure(figsize=(10, 4))
+plt.subplot(1,3,1)
+plt.plot(g_orbit.r_pos * np.cos(g_orbit.varphi_pos),g_orbit.r_pos * np.sin(g_orbit.varphi_pos))
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('x-y Phase diagram')
+plt.tight_layout()
+
+plt.subplot(1,3,3)
+plt.plot(g_orbit.r_pos * np.cos(g_orbit.varphi_pos),g_orbit.theta_pos)
+plt.xlabel('R')
+plt.ylabel('Z')
+plt.title('x-Z Phase diagram')
+plt.tight_layout()
+
+
+plt.subplot(1,3,2)
+plt.plot(g_orbit.r_pos,g_orbit.theta_pos)
+plt.xlabel('R')
+plt.ylabel('Z')
+plt.title('R-Z Phase diagram')
+plt.tight_layout()
+
+
+
+
 
 # print("Creating 3D plot")
 # g_orbit.plot_orbit_3d(show=True)
 
 """ print("Creating animation plot")
-g_orbit.plot_animation(show=True, save_movie=False) """
+    g_orbit.plot_animation(show=True, save_movie=False) """
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 print("Creating 3D plot")
-def set_axes_equal(ax):
-    """
-    Make axes of 3D plot have equal scale so that spheres appear as spheres,
+def set_axes_equal(ax): 
+    """     Make axes of 3D plot have equal scale so that spheres appear as spheres,
     cubes as cubes, etc.. This is one possible solution to Matplotlib's
     ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
     Args:
-      ax: a matplotlib axis, e.g., as output from plt.gca().
-    """
+    ax: a matplotlib axis, e.g., as output from plt.gca(). """
     x_limits = ax.get_xlim3d()
     y_limits = ax.get_ylim3d()
     z_limits = ax.get_zlim3d()
@@ -135,9 +150,5 @@ ax.plot3D(rpos_cartesian[0], rpos_cartesian[1], rpos_cartesian[2])
 set_axes_equal(ax)
 
 plt.tight_layout()  # Adjust spacing between subplots and labels
-plt.show()
-
-
-
-
+plt.show() 
 
