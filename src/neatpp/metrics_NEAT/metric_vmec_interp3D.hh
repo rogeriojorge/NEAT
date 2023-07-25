@@ -11,6 +11,8 @@
 
 // add example similar to https://github.com/rncarpio/linterp/blob/master/src/linterp_test2.cpp
 
+// add ALGLIB for spline interpolation
+
 using namespace gyronimo;
 using namespace SPLINTER;
 
