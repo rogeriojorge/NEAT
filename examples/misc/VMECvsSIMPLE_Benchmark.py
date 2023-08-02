@@ -13,28 +13,28 @@ Perform a benchmark on the particle tracing with Gyronimo vs SIMPLE
 
 # Initialize an alpha particle at a radius = r_initial
 r_initial = 0.25  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
-theta_initial = np.pi / 2  # initial poloidal angle
+theta_initial = 0.1  # initial poloidal angle
 phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.99  # = mu * B0 / energy
+Lambda = 0.95  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = [5000,15000,50000]  # resolution in time
-tfinal = [1e-4,1e-3,1e-2]  # seconds
-linewidth = [3,1.5,0.5]
+nsamples = np.array([15000])  # resolution in time
+tfinal = [1e-3,1e-3,1e-3]  # seconds
+linewidth = [1.5,1.5,1.5]
 
 B0 = 5.3267
 Rmajor_ARIES = 7.7495
 Rminor_ARIES = 1.7044
 Aspect_ratios=Rmajor_ARIES/ Rminor_ARIES
-iterator=range(3)
+iterator=range(nsamples.size)
 
 filename = "Matt_precise_wout"
-wout_filename = "wout_nfp2_QA.nc"
+wout_filename = "wout_Matt_nfp2_QA_rescaled.nc"
 
 g_field_vmec = VMEC_NEAT(wout_filename=wout_filename)
-g_field_simple = Simple(wout_filename=wout_filename, ns_s=5, ns_tp=5, multharm=7)
+g_field_simple = Simple(wout_filename=wout_filename, ns_s=5, ns_tp=5, multharm=5)
 
 g_particle = ChargedParticle(
     r_initial=r_initial,
@@ -56,6 +56,8 @@ for j in iterator:
     
     print("  Starting particle tracer vmec")
     start_time = time.time()
+    g_particle.theta_initial = theta_initial
+    g_particle.phi_initial = phi_initial
     g_orbit_vmec = ParticleOrbit(
         g_particle, g_field_vmec, nsamples=nsamples[j], tfinal=tfinal[j]
     )
@@ -126,20 +128,25 @@ for j in iterator:
     plt.rc('lines', linewidth=linewidth[j])
     ##############################################################################################
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(22, 10))
+    fig,ax=plt.subplots(1,1,figsize=(20,10))
+    ax.xaxis.offsetText.set_fontsize(50)
+    plt.tick_params(axis='x', labelsize=50)
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(4,-4))
+    plt.tick_params(axis='y', labelsize=50)
     plt.plot(g_orbit_vmec.time, g_orbit_vmec.r_pos, "r-", label="vmec")
     plt.plot(g_orbit_simple.time, g_orbit_simple.r_pos, "g--", label="simple")
-    plt.legend(loc='best', fontsize=16)
-    plt.xlabel(r"$t (s)$")
-    plt.ylabel(r"$r$")
+    plt.legend(loc='lower right', fontsize=50)
+    plt.xlabel(r"$t \ (s)$",fontsize=60,labelpad=20)
+    plt.ylabel(r"s",fontsize=60,labelpad=20)
     plt.tight_layout()
     plt.savefig('results/Radial_' + filename + str(nsamples[j]) + '.pdf')
 
     ##############################################################################################
 
     plt.figure(figsize=(10,10))
-    plt.tick_params(axis='x', labelsize=16)
-    plt.tick_params(axis='y', labelsize=16)
+    plt.tick_params(axis='x', labelsize=50)
+    plt.tick_params(axis='y', labelsize=50)
     plt.plot(
         g_orbit_vmec.rpos_cylindrical[0] * np.cos(g_orbit_vmec.rpos_cylindrical[2]),
         g_orbit_vmec.rpos_cylindrical[0] * np.sin(g_orbit_vmec.rpos_cylindrical[2]),
@@ -150,9 +157,9 @@ for j in iterator:
         g_orbit_simple.rpos_cylindrical[0] * np.sin(-g_orbit_simple.rpos_cylindrical[2]),
         "g--", label="simple",
     )
-    plt.legend(loc='best',fontsize=16)
-    plt.xlabel(r"$X \ (m)$",fontsize=16)
-    plt.ylabel(r"$Y \ (m)$",fontsize=16)
+    plt.legend(loc='upper right',fontsize=50)
+    plt.xlabel(r"$X \ (m)$",fontsize=60)
+    plt.ylabel(r"$Y \ (m)$",fontsize=60)
     plt.tight_layout()
     plt.savefig('results/Cyl_' + filename + str(nsamples[j]) + '.pdf')
 
@@ -177,19 +184,19 @@ for j in iterator:
         g_orbit_simple.r_pos * np.sin(np.pi + g_orbit_simple.theta_pos),
         "g--", label="simple",
     )
-    plt.legend(loc='best',fontsize=16)
+    plt.legend(loc='upper right',fontsize=50)
     plt.gca().set_aspect("equal", adjustable="box")
-    plt.xlabel(r"r cos($\theta$)",fontsize=16)
-    plt.ylabel(r"r sin($\theta$)",fontsize=16)
+    plt.xlabel(r"s cos($\theta$)",fontsize=60)
+    plt.ylabel(r"s sin($\theta$)",fontsize=60)
     plt.savefig('results/Booz_' + filename + str(nsamples[j]) + '.pdf')
 
 ##############################################################################################
 
-if len(nsamples) > 1:
-        plt.figure(figsize=(10, 6))
-        plt.plot(nsamples, time_vmec, label="vmec")
-        plt.plot(nsamples, time_simple, label="simple")
-        plt.legend(loc='best',fontsize=16)
-        plt.xlabel("nsamples")
-        plt.ylabel("time (s)")
-        plt.savefig('results/Time_' + filename + str(nsamples[j]) + '.pdf')
+# if len(nsamples) > 1:
+#         plt.figure(figsize=(10, 6))
+#         plt.plot(nsamples, time_vmec, label="vmec")
+#         plt.plot(nsamples, time_simple, label="simple")
+#         plt.legend(loc='best',fontsize=16)
+#         plt.xlabel("nsamples")
+#         plt.ylabel("time (s)")
+#         plt.savefig('results/Time_' + filename + str(nsamples[j]) + '.pdf')
