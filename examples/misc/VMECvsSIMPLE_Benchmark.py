@@ -13,16 +13,16 @@ Perform a benchmark on the particle tracing with Gyronimo vs SIMPLE
 
 # Initialize an alpha particle at a radius = r_initial
 r_initial = 0.25  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
-theta_initial = 0.1  # initial poloidal angle
+theta_initial = 0.7  # initial poloidal angle
 phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = [0.8,0.95,0.99]  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = [50000,50001,50002]  # resolution in time
-tfinal = [1e-2,1e-2,1e-2]  # seconds
-linewidth = [1.5,1.5,1.5]
+nsamples = np.array([5000,5001,5002])  # resolution in time
+tfinal = [1e-3,1e-3,1e-3]  # seconds
+linewidth = [2,2,2]
 
 B0 = 5.3267
 Rmajor_ARIES = 7.7494
@@ -31,7 +31,7 @@ Aspect_ratios=Rmajor_ARIES/ Rminor_ARIES
 iterator=range(nsamples.size)
 
 filename = "Matt_precise_wout"
-wout_filename = "NEAT/examples/misc/wout_Matt_nfp2_QA_rescaled.nc"
+wout_filename = "NEAT/examples/misc/wout_Matt_nfp4_QH_rescaled.nc"
 
 g_field_vmec = VMEC_NEAT(wout_filename=wout_filename)
 g_field_simple = Simple(wout_filename=wout_filename, ns_s=5, ns_tp=5, multharm=3)
@@ -202,7 +202,7 @@ for j in iterator:
     plt.gca().set_aspect("equal", adjustable="box")
     plt.xlabel(r"s cos($\theta$)",fontsize=60)
     plt.ylabel(r"s sin($\theta$)",fontsize=60)
-    plt.savefig('results/Booz_' + filename + str(nsamples[j]) + '.pdf')
+    plt.savefig('NEAT/examples/misc/results/Booz_' + filename + str(nsamples[j]) + '.pdf')
 
 ##############################################################################################
 
