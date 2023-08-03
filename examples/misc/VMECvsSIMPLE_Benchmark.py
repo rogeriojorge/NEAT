@@ -18,7 +18,7 @@ phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.95  # = mu * B0 / energy
+Lambda = 0.99  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = np.array([15000])  # resolution in time
 tfinal = [1e-3,1e-3,1e-3]  # seconds
@@ -34,7 +34,7 @@ filename = "Matt_precise_wout"
 wout_filename = "wout_Matt_nfp2_QA_rescaled.nc"
 
 g_field_vmec = VMEC_NEAT(wout_filename=wout_filename)
-g_field_simple = Simple(wout_filename=wout_filename, ns_s=5, ns_tp=5, multharm=5)
+g_field_simple = Simple(wout_filename=wout_filename, ns_s=5, ns_tp=5, multharm=3)
 
 g_particle = ChargedParticle(
     r_initial=r_initial,
