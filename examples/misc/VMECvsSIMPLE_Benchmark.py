@@ -18,20 +18,20 @@ phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = 0.99  # = mu * B0 / energy
+Lambda = [0.8,0.95,0.99]  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = np.array([15000])  # resolution in time
-tfinal = [1e-3,1e-3,1e-3]  # seconds
+nsamples = [50000,50001,50002]  # resolution in time
+tfinal = [1e-2,1e-2,1e-2]  # seconds
 linewidth = [1.5,1.5,1.5]
 
 B0 = 5.3267
-Rmajor_ARIES = 7.7495
+Rmajor_ARIES = 7.7494
 Rminor_ARIES = 1.7044
 Aspect_ratios=Rmajor_ARIES/ Rminor_ARIES
 iterator=range(nsamples.size)
 
 filename = "Matt_precise_wout"
-wout_filename = "wout_Matt_nfp2_QA_rescaled.nc"
+wout_filename = "NEAT/examples/misc/wout_Matt_nfp2_QA_rescaled.nc"
 
 g_field_vmec = VMEC_NEAT(wout_filename=wout_filename)
 g_field_simple = Simple(wout_filename=wout_filename, ns_s=5, ns_tp=5, multharm=3)
@@ -49,8 +49,22 @@ g_particle = ChargedParticle(
 
 time_vmec = []
 time_simple = []
+plt.rc('xtick', labelsize=14)
+plt.rc('ytick', labelsize=14)
+plt.rc('font', size=14)
+plt.rc('legend', fontsize=14)	
 for j in iterator:
-    
+    g_particle = ChargedParticle(
+    	r_initial=r_initial,
+    	theta_initial=theta_initial,
+    	phi_initial=phi_initial,
+    	energy=energy,
+    	Lambda=Lambda[j],
+    	charge=charge,
+    	mass=mass,
+    	vpp_sign=vpp_sign,
+    )
+ 
     print("=" * 80)
     print(f"nsamples = {nsamples[j]}")
     
@@ -59,7 +73,7 @@ for j in iterator:
     g_particle.theta_initial = theta_initial
     g_particle.phi_initial = phi_initial
     g_orbit_vmec = ParticleOrbit(
-        g_particle, g_field_vmec, nsamples=nsamples[j], tfinal=tfinal[j]
+        g_particle, g_field_vmec, nsamples=nsamples[-1], tfinal=tfinal[-1]
     )
     total_time = time.time() - start_time
     print(f"  Finished vmec in {total_time}s")
@@ -70,7 +84,7 @@ for j in iterator:
     g_particle.theta_initial = - theta_initial
     g_particle.phi_initial = - phi_initial
     g_orbit_simple = ParticleOrbit(
-        g_particle, g_field_simple, nsamples=nsamples[j], tfinal=tfinal[j]
+        g_particle, g_field_simple, nsamples=nsamples[-1], tfinal=tfinal[-1]
     )
     total_time = time.time() - start_time
     print(f"  Finished simple in {total_time}s")
@@ -122,7 +136,7 @@ for j in iterator:
     plt.ylabel(r"$|B|$")
     plt.tight_layout()
     # plt.show()
-    plt.savefig('results/Stuff_' + filename + str(nsamples[j]) + '.pdf')
+    plt.savefig('NEAT/examples/misc/results/Stuff_' + filename + str(nsamples[j]) + '.pdf')
 
     ##############################################################################################
     plt.rc('lines', linewidth=linewidth[j])
@@ -140,7 +154,7 @@ for j in iterator:
     plt.xlabel(r"$t \ (s)$",fontsize=60,labelpad=20)
     plt.ylabel(r"s",fontsize=60,labelpad=20)
     plt.tight_layout()
-    plt.savefig('results/Radial_' + filename + str(nsamples[j]) + '.pdf')
+    plt.savefig('NEAT/examples/misc/results/Radial_' + filename + str(nsamples[j]) + '.pdf')
 
     ##############################################################################################
 
@@ -153,15 +167,15 @@ for j in iterator:
         "r-", label="vmec",
     )
     plt.plot(
-        g_orbit_simple.rpos_cylindrical[0] * np.cos(-g_orbit_simple.rpos_cylindrical[2]),
-        g_orbit_simple.rpos_cylindrical[0] * np.sin(-g_orbit_simple.rpos_cylindrical[2]),
+       -g_orbit_simple.rpos_cylindrical[0] * np.cos(g_orbit_simple.rpos_cylindrical[2]),
+        g_orbit_simple.rpos_cylindrical[0] * np.sin(g_orbit_simple.rpos_cylindrical[2]),
         "g--", label="simple",
     )
     plt.legend(loc='upper right',fontsize=50)
     plt.xlabel(r"$X \ (m)$",fontsize=60)
     plt.ylabel(r"$Y \ (m)$",fontsize=60)
     plt.tight_layout()
-    plt.savefig('results/Cyl_' + filename + str(nsamples[j]) + '.pdf')
+    plt.savefig('NEAT/examples/misc/results/Cyl_' + filename + str(nsamples[j]) + '.pdf')
 
     ##############################################################################################
 
@@ -200,3 +214,4 @@ for j in iterator:
 #         plt.xlabel("nsamples")
 #         plt.ylabel("time (s)")
 #         plt.savefig('results/Time_' + filename + str(nsamples[j]) + '.pdf')
+
