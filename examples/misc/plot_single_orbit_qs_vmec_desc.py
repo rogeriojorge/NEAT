@@ -31,7 +31,7 @@ quasisymmetric stellarator using Near Axis and VMEC
 
 # Initialize an alpha particle
 
-s_initial = 0.5  # psi/psi_a - VMEC radial coordinate
+s_initial = 0.25  # psi/psi_a - VMEC radial coordinate
 theta_initial = 1.26  # np.round(3*np.pi/2,2)   # initial poloidal angle - NEAT poloidal coordinate - theta_boozer - N phi_boozer
 phi_initial = 0.31  # np.round(np.pi/2,2)       # initial toroidal angle - NEAT toroidal coordinate - phi_cyl on axis
 
@@ -46,16 +46,16 @@ nsamples = 1000  # resolution in time
 tfinal = 1e-5  # seconds
 
 # Magnetic field
-nfp = 4  # Number of field periods
 B0 = 5.3267  # Tesla, magnetic field on-axis
 constant_b20 = False  # Use a constant B20 (mean value) or the real function
-Rmajor_ARIES = 7.7495*2  # Major radius
+Rmajor_ARIES = 7.7495*2  # Major radius double double of ARIES-CS
 Rminor_ARIES = 1.7044  # Minor radius
-s_boundary = 0.5  # Fraction of minor radius used for VMEC
-filename = f"input.nearaxis_sboundary{s_boundary}_desc"
-wout_filename = f"wout_nearaxis_sboundary{s_boundary}_desc.nc"
+Aspect=np.round(Rmajor_ARIES/Rminor_ARIES,2)
 
-g_field_basis = StellnaQS.from_paper("precise QH", B0=B0, nphi=201)
+filename = f"input.nearaxis_{Aspect}_desc"
+wout_filename = f"wout_nearaxis_{Aspect}_desc.nc"
+
+g_field_basis = StellnaQS.from_paper("precise QA", B0=B0, nphi=201)
 g_field = StellnaQS(
     rc=g_field_basis.rc * Rmajor_ARIES,
     zs=g_field_basis.zs * Rmajor_ARIES,
@@ -69,7 +69,7 @@ g_field = StellnaQS(
 
 # Folder creation for results
 OUT_DIR = os.path.join(
-    Path(__file__).parent.resolve(), f"comparison_qsc_desc_orbits_s_b={s_boundary}"
+    Path(__file__).parent.resolve(), f"comparison_qsc_desc_orbits_{Aspect}"
 )
 os.makedirs(OUT_DIR, exist_ok=True)
 filename_folder = os.path.join(OUT_DIR, filename)
@@ -141,13 +141,12 @@ g_orbit_vmec = ParticleOrbit(
 total_time_vmec = time.time() - start_time_vmec
 print(f"Finished in {total_time_vmec}s")
 
-# print("Creating parameter plot - NA")
+print("Creating parameter plot - NA")
 g_orbit.plot(
     show=False,
-    savefig="comparison_qsc_desc_orbits_s_b="
-    + str(s_boundary)
-    + "/s_b="
-    + str(s_boundary)
+    savefig=f"comparison_qsc_desc_orbits_{Aspect}"
+    + "/aspect="
+    + str(Aspect)
     + "_lambda="
     + str(Lambda)
     + "_s_i="
@@ -165,11 +164,10 @@ g_orbit.plot(
 print("Creating 3D plot - NA")
 g_orbit.plot_orbit_3d(
     show=False,
-    r_surface=Rminor_ARIES * np.sqrt(s_boundary),
-    savefig="comparison_qsc_desc_orbits_s_b="
-    + str(s_boundary)
-    + "/s_b="
-    + str(s_boundary)
+    r_surface=Rminor_ARIES,
+    savefig=f"comparison_qsc_desc_orbits_{Aspect}"
+    + "/aspect"
+    + str(Aspect)
     + "_lambda="
     + str(Lambda)
     + "_s_i="
@@ -187,10 +185,9 @@ g_orbit.plot_orbit_contourB(show=False)
 print("Creating parameter plot - VMEC")
 g_orbit_vmec.plot(
     show=False,
-    savefig="comparison_qsc_desc_orbits_s_b="
-    + str(s_boundary)
-    + "/s_b="
-    + str(s_boundary)
+    savefig=f"comparison_qsc_desc_orbits_{Aspect}"
+    + "/aspect"
+    + str(Aspect)
     + "_lambda="
     + str(Lambda)
     + "_s_i="
@@ -208,10 +205,9 @@ g_orbit_vmec.plot(
 # print("Creating 3D plot - VMEC")
 g_orbit_vmec.plot_orbit_3d(
     show=False,
-    savefig="comparison_qsc_desc_orbits_s_b="
-    + str(s_boundary)
-    + "/s_b="
-    + str(s_boundary)
+    savefig=f"comparison_qsc_desc_orbits_{Aspect}"
+    + "/aspect"
+    + str(Aspect)
     + "_lambda="
     + str(Lambda)
     + "_s_i="
@@ -228,7 +224,7 @@ g_orbit_vmec.plot_orbit_contourB(show=False)
 
 # Animations
 print("Creating animation plot")
-g_orbit.plot_animation(show=True)
+g_orbit.plot_animation(show=True, r_surface=Rminor_ARIES * np.sqrt(s_initial))
 
 print("Creating parameter plot 2")
 g_orbit_vmec.plot(show=False)
@@ -239,17 +235,13 @@ g_orbit_vmec.plot_orbit_3d(show=False)
 print("Creating animation plot 2")
 g_orbit_vmec.plot_animation(show=True)
 
-
-
-
 print("Calculating differences between near axis and vmec - Cyl")
 g_orbit.plot_diff_cyl(
     g_orbit_vmec,
     show=False,
-    savefig="comparison_qsc_desc_orbits_s_b="
-    + str(s_boundary)
-    + "/s_b="
-    + str(s_boundary)
+    savefig=f"comparison_qsc_desc_orbits_{Aspect}"
+    + "/aspect"
+    + str(Aspect)
     + "_lambda="
     + str(Lambda)
     + "_s_i="
@@ -264,13 +256,11 @@ g_orbit.plot_diff_cyl(
 print("Calculating differences between near axis and vmec - Boozer")
 g_orbit.plot_diff_boozer(
     g_orbit_vmec,
-    r_minor=(Rminor_ARIES * np.sqrt(s_boundary)),
-    MHD_code="VMEC",
+    r_minor=(Rminor_ARIES),
     show=False,
-    savefig="comparison_qsc_desc_orbits_s_b="
-    + str(s_boundary)
-    + "/s_b="
-    + str(s_boundary)
+    savefig=f"comparison_qsc_desc_orbits_{Aspect}"
+    + "/aspect"
+    + str(Aspect)
     + "_lambda="
     + str(Lambda)
     + "_s_i="
@@ -282,7 +272,7 @@ g_orbit.plot_diff_boozer(
     + "_boozer.png",
 )
 
-print(s_boundary, Lambda, s_initial, theta_initial, phi_initial)
+print(Lambda, s_initial, theta_initial, phi_initial)
 
 # for objective_file in glob.glob(os.path.join(OUT_DIR,f"input.*")): os.remove(objective_file)
 # for objective_file in glob.glob(os.path.join(OUT_DIR,f"wout_*")): os.remove(objective_file)
