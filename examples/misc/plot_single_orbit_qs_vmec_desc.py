@@ -49,10 +49,9 @@ tfinal = 1e-5  # seconds
 nfp = 4  # Number of field periods
 B0 = 5.3267  # Tesla, magnetic field on-axis
 constant_b20 = False  # Use a constant B20 (mean value) or the real function
-Rmajor_ARIES = 7.7495  # Major radius
+Rmajor_ARIES = 7.7495*2  # Major radius
 Rminor_ARIES = 1.7044  # Minor radius
 s_boundary = 0.5  # Fraction of minor radius used for VMEC
-r_avg = Rminor_ARIES * s_boundary  # Minor radius in VMEC
 filename = f"input.nearaxis_sboundary{s_boundary}_desc"
 wout_filename = f"wout_nearaxis_sboundary{s_boundary}_desc.nc"
 
@@ -78,22 +77,22 @@ filename_folder = os.path.join(OUT_DIR, filename)
 # Creating a DESC object from pyQsc near acis
 g_field_desc = Equilibrium.from_near_axis(
     g_field,  # the Qsc equilibrium object
-    r=r_avg,  # the finite radius (m) at which to evaluate the Qsc surface to use as the DESC boundary
+    r=Rminor_ARIES,  # the finite radius (m) at which to evaluate the Qsc surface to use as the DESC boundary
     L=8,  # DESC radial resolution
     M=8,  # DESC poloidal resolution
     N=8,  # DESC toroidal resolution
 )
 
 
-# constraints = get_fixed_boundary_constraints(iota=False) # get the fixed-boundary constraints, ( pressure and current profile (iota=False flag means fix current)
+constraints = get_fixed_boundary_constraints(iota=False) # get the fixed-boundary constraints, ( pressure and current profile (iota=False flag means fix current)
 # solve the equilibrium
-# g_field_desc.solve(verbose=3, ftol=1e-2,objective="force",maxiter=100,xtol=1e-6,constraints=constraints)
-# VMECIO.save(g_field_desc, wout_filename)
+g_field_desc.solve(verbose=3, ftol=1e-2,objective="force",maxiter=100,xtol=1e-6,constraints=constraints)
+VMECIO.save(g_field_desc, wout_filename)
 
 g_field_vmec = Vmec_NEAT(wout_filename=wout_filename, maximum_s=1)
 
 g_particle = ChargedParticle(
-    r_initial=r_avg * np.sqrt(s_initial),
+    r_initial=Rminor_ARIES * np.sqrt(s_initial),
     theta_initial=theta_initial,
     phi_initial=phi_initial,
     energy=energy,
@@ -104,7 +103,7 @@ g_particle = ChargedParticle(
 )
 
 phi_initial_vmec = g_field.to_RZ(
-    [[r_avg * np.sqrt(s_initial), theta_initial, phi_initial]]
+    [[Rminor_ARIES * np.sqrt(s_initial), theta_initial, phi_initial]]
 )[2][0]
 
 g_particle_vmec = ChargedParticle(
@@ -121,8 +120,12 @@ g_particle_vmec = ChargedParticle(
 print("Starting particle tracer 1")
 start_time = time.time()
 g_orbit = ParticleOrbit(
-    g_particle, g_field, nsamples=nsamples, tfinal=tfinal, constant_b20=constant_b20
-)
+    g_particle, 
+    g_field,
+    nsamples=nsamples, 
+    tfinal=tfinal, 
+    constant_b20=constant_b20,
+    )
 total_time = time.time() - start_time
 print(f"Finished in {total_time}s")
 
@@ -159,10 +162,10 @@ g_orbit.plot(
 # print("Creating 2D plot")
 # g_orbit.plot_orbit(show=False)
 
-# print("Creating 3D plot - NA")
+print("Creating 3D plot - NA")
 g_orbit.plot_orbit_3d(
     show=False,
-    r_surface=r_avg * np.sqrt(s_boundary),
+    r_surface=Rminor_ARIES * np.sqrt(s_boundary),
     savefig="comparison_qsc_desc_orbits_s_b="
     + str(s_boundary)
     + "/s_b="
@@ -178,10 +181,10 @@ g_orbit.plot_orbit_3d(
     + "_3d_neat.pdf",
 )
 
-# print("Creating B contour plot - NA")
+print("Creating B contour plot - NA")
 g_orbit.plot_orbit_contourB(show=False)
 
-# print("Creating parameter plot - VMEC")
+print("Creating parameter plot - VMEC")
 g_orbit_vmec.plot(
     show=False,
     savefig="comparison_qsc_desc_orbits_s_b="
@@ -220,21 +223,24 @@ g_orbit_vmec.plot_orbit_3d(
     + "_3d_desc.pdf",
 )
 
-# print("Creating B contour plot - VMEC")
+print("Creating B contour plot - VMEC")
 g_orbit_vmec.plot_orbit_contourB(show=False)
 
 # Animations
-# print("Creating animation plot")
-# g_orbit.plot_animation(show=True)
+print("Creating animation plot")
+g_orbit.plot_animation(show=True)
 
-# print("Creating parameter plot 2")
-# g_orbit_vmec.plot(show=False)
+print("Creating parameter plot 2")
+g_orbit_vmec.plot(show=False)
 
-# print("Creating 3D plot 2")
-# g_orbit_vmec.plot_orbit_3d(show=False)
+print("Creating 3D plot 2")
+g_orbit_vmec.plot_orbit_3d(show=False)
 
-# print("Creating animation plot 2")
-# g_orbit_vmec.plot_animation(show=True)
+print("Creating animation plot 2")
+g_orbit_vmec.plot_animation(show=True)
+
+
+
 
 print("Calculating differences between near axis and vmec - Cyl")
 g_orbit.plot_diff_cyl(
@@ -258,8 +264,8 @@ g_orbit.plot_diff_cyl(
 print("Calculating differences between near axis and vmec - Boozer")
 g_orbit.plot_diff_boozer(
     g_orbit_vmec,
-    r_minor=(r_avg * np.sqrt(s_boundary)),
-    MHD_code="DESC",
+    r_minor=(Rminor_ARIES * np.sqrt(s_boundary)),
+    MHD_code="VMEC",
     show=False,
     savefig="comparison_qsc_desc_orbits_s_b="
     + str(s_boundary)
