@@ -21,7 +21,7 @@ array<double,4> operator+(
 // #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 // #include <boost/numeric/odeint/stepper/adams_bashforth_moulton.hpp>
 // #include <boost/numeric/odeint/stepper/adams_moulton.hpp>
-// #include <boost/numeric/odeint/stepper/runge_kutta_cash_karp54.hpp>
+// #include <boost/numeric/odeint/stepper/runge_kutta_carp54.hpp>
 // #include <boost/numeric/odeint/stepper/runge_kutta_fehlberg78.hpp>
 // #include <boost/numeric/odeint/stepper/runge_kutta_dopri5.hpp>
 
@@ -112,7 +112,7 @@ public:
         for(size_t k = 0; k < gyron_ensemble_.size(); k++) {
             for(size_t j = 0; j < 2; j++) {
                 // This is hardcoding the freezing places -> To change
-                if (f[j + k*2][0] < 1.7044*sqrt(0.99) && f[j + k*2][0] > 0.01){
+                if (f[j + k*2][0] < 1.7044*sqrt(0.999) && f[j + k*2][0] > 0.01){
                     dfdx[j + k*2] = gyron_ensemble_[k](f[j + k*2], t);}
                 else {dfdx[j + k*2] = 0*f[j + k*2];}
             }
@@ -135,7 +135,7 @@ public:
         : m_states( states ), eq_pointer_(e), gc_pointer_(g) { }
     void operator()(const guiding_centre::state& s, double t) {
         IR3 x = gc_pointer_->get_position(s);
-        if (x[0] > 1.7044*sqrt(0.99)){
+        if (x[0] > 1.7044*sqrt(0.999)){
             throw stop_integration();
         } 
         double B = (eq_pointer_->magnitude(x, t)) * eq_pointer_->m_factor();
@@ -143,8 +143,8 @@ public:
         IR3 y = gc_pointer_->get_position(dots);
         IR3 X = eq_pointer_->metric()->transform2cylindrical(x);
         double v_parallel = gc_pointer_->get_vpp(s);
-        IR3 B_cov = (eq_pointer_->covariant(x, t)) * eq_pointer_->m_factor();
-        IR3 B_con = (eq_pointer_->contravariant(x, t)) * eq_pointer_->m_factor();
+        // IR3 B_cov = (eq_pointer_->covariant(x, t)) * eq_pointer_->m_factor();
+        // IR3 B_con = (eq_pointer_->contravariant(x, t)) * eq_pointer_->m_factor();
 
         m_states.push_back({
             t,x[0],x[1],x[2],
@@ -152,8 +152,8 @@ public:
             gc_pointer_->energy_perpendicular(s, t),
             B, gc_pointer_->get_vpp(s), y[0], y[1], y[2],
             gc_pointer_->get_vpp(dots),
-            B_cov[IR3::u], B_cov[IR3::w], B_cov[IR3::v],
-            B_con[IR3::u], B_con[IR3::w], B_con[IR3::v]
+            // B_cov[IR3::u], B_cov[IR3::w], B_cov[IR3::v],
+            // B_con[IR3::u], B_con[IR3::w], B_con[IR3::v]
         });
     }
 private:
@@ -392,19 +392,19 @@ vector< vector<double>> gc_solver_qs(
     //                     B0, B1c, B20, B2c, beta1s);
     // equilibrium_stellna_qs qsc(&g);
     cached_metric_qs g(Bref, G0, G2, I2, iota, iotaN,
-                    B0, B1c, B20, B2c, beta1s); // Not sure if it works
+                    B0, B1c, B20, B2c, beta1s);
     cached_field_qs qsc(&g);
     double Bi = qsc.magnitude({r0, theta0, phi0}, 0);
-    guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc);  // -> Version with Bi
+    guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc);
     guiding_centre::state initial_state = gc.generate_state(
         {r0, theta0, phi0}, energySI_over_refEnergy,
         (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
     vector<vector< double >> x_vec;
-    runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm2;
+    runge_kutta_dopri5<guiding_centre::state> integration_algorithm;
 
     integrate_const(
-        integration_algorithm2, odeint_adapter(&gc),
+        integration_algorithm, odeint_adapter(&gc),
         initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
 
     return x_vec;
@@ -427,35 +427,34 @@ vector< vector<double>> gc_solver_qs_partial(
     double energySI_over_refEnergy = energySIoverRefEnergy(mass, energy);
     cubic_periodic_gsl_factory ifactory;
 
-    // metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
-    //                             dblock_adapter(B20), B2c, beta1s, &ifactory);
-    // equilibrium_stellna_qs_partial qsc(&g);
-    cached_metric_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
+    metric_stellna_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
                                 dblock_adapter(B20), B2c, beta1s, &ifactory);
-    cached_field_qs_partial qsc(&g);
+    equilibrium_stellna_qs_partial qsc(&g);
+    // cached_metric_qs_partial g(nfp, Bref, dblock_adapter(phi_grid), G0, G2, I2, iota, iotaN, B0, B1c,
+    //                             dblock_adapter(B20), B2c, beta1s, &ifactory);
+    // cached_field_qs_partial qsc(&g);
     double Bi = qsc.magnitude({r0, theta0, phi0}, 0);
     guiding_centre gc(Lref, Vref, charge/mass, lambda*energySI_over_refEnergy/Bi, &qsc); 
     guiding_centre::state initial_state = gc.generate_state(
     {r0, theta0, phi0}, energySI_over_refEnergy,(vpp_sign > 0.0 ? guiding_centre::plus : guiding_centre::minus));
 
     vector<vector< double >> x_vec;
-    // runge_kutta4<guiding_centre::state> integration_algorithm;
-    runge_kutta_dopri5<guiding_centre::state> integration_algorithm2;
+    runge_kutta_dopri5<guiding_centre::state> integration_algorithm;
     // typedef guiding_centre::state state_type;
-    // typedef runge_kutta_cash_karp54<state_type> error_stepper_type;
+    // typedef runge_kutta_dopri5<state_type> error_stepper_type;
     // double abs_err = 1.0e-10 , rel_err = 1.0e-6 , a_x = 1.0 , a_dxdt = 1.0;
     
-    // try{
-    integrate_const(integration_algorithm2, odeint_adapter(&gc),
+    try{
+      integrate_const(integration_algorithm, odeint_adapter(&gc),
         initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
     // integrate_adaptive(
     //     make_controlled( 1.0e-14 , 1.0e-16 , error_stepper_type() ), odeint_adapter(&gc),
     //     initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
-    // }
-    // catch( const stop_integration & )
-    // {
-    //     // integration was stopped
-    // }
+    }
+    catch( const stop_integration & )
+    {
+        // integration was stopped
+    }
 
     return x_vec;
 }
@@ -497,9 +496,9 @@ vector< vector<double>> gc_solver(
         (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
 
     vector<vector< double >> x_vec;
-    runge_kutta_fehlberg78<guiding_centre::state> integration_algorithm2;
+    runge_kutta_dopri5<guiding_centre::state> integration_algorithm;
 
-    integrate_const(integration_algorithm2, odeint_adapter(&gc),
+    integrate_const(integration_algorithm, odeint_adapter(&gc),
         initial_state, 0.0, Tfinal, Tfinal/nsamples, push_back_state_and_time(x_vec,&qsc,&gc) );
 
     return x_vec;
@@ -579,8 +578,8 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_qs_ensemble(
     }
     vector<vector< double >> x_vec;
     ensemble_type ensemble_object(move(guiding_centre_vector));
-    boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
-    boost::numeric::odeint::integrate_const(
+    runge_kutta_dopri5<ensemble_type::state> ode_stepper;
+    integrate_const(
         ode_stepper, ensemble_object,
         initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object)
     );
@@ -643,7 +642,6 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_qs_partial_ensemble(
     for(size_t j = 0; j < ntheta; j++) {
         for(size_t l = 0; l < nphi; l++) {
             double Bi=qsc.magnitude({r0, theta[j][l], phi[j][l]}, 0);
-            // cout << Bi << ' ' << r0 << ' ' << theta[j] << ' ' << phi[j][l] << ' ' << endl;
             for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
                 auto GC=guiding_centre(Lref, Vref, charge/mass, lambdas[k]*energySI_over_refEnergy/Bi, &qsc);
                 initial.push_back(GC.generate_state(
@@ -656,9 +654,9 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_qs_partial_ensemble(
     }
     vector<vector< double >> x_vec;
     ensemble_type ensemble_object(move(guiding_centre_vector));
-    runge_kutta_cash_karp54<ensemble_type::state> ode_stepper;
+    runge_kutta_dopri5<ensemble_type::state> ode_stepper;
     
-    boost::numeric::odeint::integrate_const( ode_stepper, ensemble_object,
+    integrate_const( ode_stepper, ensemble_object,
         initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object));
 
     return make_tuple(lambdas,x_vec);
@@ -751,8 +749,8 @@ tuple<vector<double>,vector<vector<double>>> gc_solver_ensemble(
     }
     vector<vector< double >> x_vec;
     ensemble_type ensemble_object(move(guiding_centre_vector));
-    boost::numeric::odeint::runge_kutta4<ensemble_type::state> ode_stepper;
-    boost::numeric::odeint::integrate_const( ode_stepper, ensemble_object,
+    runge_kutta_dopri5<ensemble_type::state> ode_stepper;
+    integrate_const( ode_stepper, ensemble_object,
         initial, 0.0, Tfinal, Tfinal/nsamples, orbit_observer(x_vec, ensemble_object));
 
     return make_tuple(lambdas,x_vec);

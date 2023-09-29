@@ -16,7 +16,7 @@
 #include <gyronimo/dynamics/guiding_centre.hh>
 #include <gyronimo/dynamics/odeint_adapter.hh>
 #include <boost/math/tools/roots.hpp>
-
+// Integrators
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 #include <boost/numeric/odeint/stepper/runge_kutta_cash_karp54.hpp>
 #include <boost/numeric/odeint/stepper/runge_kutta_fehlberg78.hpp>
@@ -25,7 +25,7 @@
 #include <boost/numeric/odeint/stepper/adams_bashforth_moulton.hpp>
 #include <boost/numeric/odeint/stepper/adams_moulton.hpp>
 #include <boost/numeric/odeint/stepper/bulirsch_stoer.hpp>
-
+// Const and adaptive integration support
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
 #include <boost/numeric/odeint/integrate/integrate_adaptive.hpp>
 #include <gsl/gsl_errno.h>
@@ -54,14 +54,9 @@ public:
     IR3 y = gc_pointer_->get_position(dots);
     IR3 X = eq_pointer_->metric()->transform2cylindrical(x);
     double v_parallel = gc_pointer_->get_vpp(s);
-    IR3 B_cov = (eq_pointer_->covariant(x, t)) * eq_pointer_->m_factor();
-    IR3 B_con = (eq_pointer_->contravariant(x, t)) * eq_pointer_->m_factor();
-
-    // Check if the result has reached the stop value
-    // if (x[IR3::u] >= maximum_s_)
-    // {
-    //   throw 1;
-    // }
+    // Benchmarking of co and contravariant B
+    // IR3 B_cov = (eq_pointer_->covariant(x, t)) * eq_pointer_->m_factor();
+    // IR3 B_con = (eq_pointer_->contravariant(x, t)) * eq_pointer_->m_factor();
 
     m_states.push_back({t,
                         x[IR3::u], x[IR3::w], x[IR3::v],
@@ -71,8 +66,9 @@ public:
                         y[IR3::u], y[IR3::w], y[IR3::v],
                         gc_pointer_->get_vpp(dots),
                         X[IR3::u], X[IR3::v], X[IR3::w],
-                        B_cov[IR3::u], B_cov[IR3::w], B_cov[IR3::v],
-                        B_con[IR3::u], B_con[IR3::w], B_con[IR3::v]});
+                        // B_cov[IR3::u], B_cov[IR3::w], B_cov[IR3::v],
+                        // B_con[IR3::u], B_con[IR3::w], B_con[IR3::v]
+                      });
   };
 
 private:
@@ -145,10 +141,12 @@ vector<vector<double>> vmectrace(
 {
   parser_vmec vmap(vmec_file);
   cubic_gsl_factory ifactory;
-  // metric_vmec g(&vmap, &ifactory);
+  // Cached metrics and fields - faster but memory intensive
   cached_metric_trace g(&vmap, &ifactory);
-  // equilibrium_vmec veq(&g, &ifactory);
   cached_field_trace veq(&g, &ifactory);
+  // No cache version - slower but less memory
+  // metric_vmec g(&vmap, &ifactory);
+  // equilibrium_vmec veq(&g, &ifactory);
   
   double Lref = 1.0;
   double Vref = 1.0;
@@ -159,7 +157,7 @@ vector<vector<double>> vmectrace(
 
   // Lambda*energySI_over_refEnergy = energy*Bref/(2*Binicial*Uref)*(1-vparallel_over_v^2)
 
-  guiding_centre gc(Lref, Vref, charge / mass, Lambda * energySI_over_refEnergy / Bi , &veq); // -> Version with Bi
+  guiding_centre gc(Lref, Vref, charge / mass, Lambda * energySI_over_refEnergy / Bi , &veq);
   guiding_centre::state initial_state = gc.generate_state(
       {s0, phi0, theta0}, energySI_over_refEnergy,
       (vpp_sign > 0 ? guiding_centre::plus : guiding_centre::minus));
@@ -168,11 +166,10 @@ vector<vector<double>> vmectrace(
   cout.setf(ios::scientific);
   vector<vector<double>> x_vec;
   push_back_state_and_time_vmec observer(x_vec, integrator, &veq, &gc, maximum_s);
-  // runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm;
-
+  
   gsl_set_error_handler_off();
 
-// Uncomment for const integration comparisons
+// Constant integration comparisons
   switch (integrator) {
     case 1:
       { 
@@ -187,7 +184,7 @@ vector<vector<double>> vmectrace(
       break;}
     case 2:
       {   
-      runge_kutta_dopri5<guiding_centre::state> integration_algorithm; //runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm;
+      runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm; //runge_kutta_cash_karp54<guiding_centre::state> integration_algorithm;
       try
       {
         integrate_const(integration_algorithm, odeint_adapter(&gc),
@@ -278,6 +275,7 @@ vector<vector<double>> vmectrace(
       break;
   }
 
+  // Const and adaptive integrators
   // switch (integrator) {
   //   case 1:
   //     {   

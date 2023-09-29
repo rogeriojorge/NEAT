@@ -138,7 +138,7 @@ public:
      : gyron_ensemble_(gyron_ensemble) {};
     void operator()(const state& f, state& dfdx, double t) const {
         
-        // #pragma omp parallel for
+        #pragma omp parallel for
         for(size_t k = 0; k < gyron_ensemble_.size(); k++) {
             for(size_t j = 0; j < vpps; j++) {
                 if (f[j + k*vpps][0] < 0.99 && f[j + k*vpps][0] > 0.01){
@@ -259,12 +259,12 @@ vector<vector<double>> vmecloss(
     vector<double> phi(nphi);
 
     if (dist==0) {
-        double nfp=4;
+        double nfp=2;
         theta = vmec_linspace(0.0, 2*numbers::pi, ntheta);
         phi = vmec_linspace(0.0, 2*numbers::pi/nfp, nphi);
         
         // phi = vmec_linspace(0.0, 2*M_PI/nfp, nphi);
-        double threshold=0.75;
+        double threshold=0;
         lambda_trapped = vmec_linspace(threshold, 0.99, nlambda_trapped);
         lambda_passing = vmec_linspace(0.0, threshold, nlambda_passing);
         // lambda_trapped = vmec_linspace(Bref/B_max, Bref/B_min, nlambda_trapped);
@@ -275,7 +275,7 @@ vector<vector<double>> vmecloss(
         phi = vmec_rand_dist(0.0, 2*M_PI/4, nphi, dist);
         // double nfp=4;
         // phi = vmec_rand_dist(0.0, 2*M_PI/nfp, nphi, dist);
-        double threshold=0.75;
+        double threshold=0;
         lambda_trapped = vmec_rand_dist(threshold, 0.99, nlambda_trapped, dist);
         lambda_passing = vmec_rand_dist(0.0, threshold, nlambda_passing, dist);
         // lambda_trapped = vmec_rand_dist(Bref/B_max, Bref/B_min, nlambda_trapped, dist);
@@ -287,11 +287,10 @@ vector<vector<double>> vmecloss(
 
     vector<guiding_centre> guiding_centre_vector;
     ensemble_type::state initial;
-    //   #pragma omp parallel for
+    //#pragma omp parallel for
     for(size_t j = 0; j < ntheta; j++) {
         for(size_t l = 0; l < nphi; l++) {
             double Bi=veq.magnitude({r0, phi[l], theta[j]}, 0);
-            // cout << Bi << ' ' << r0 << ' ' << theta[j] << ' ' << phi[l] << ' ' << endl;
             for(size_t k = 0; k < nlambda_trapped + nlambda_passing; k++) {
                 auto GC=guiding_centre(Lref, Vref, charge/mass, lambdas[k]*energySI_over_refEnergy/Bi, &veq);
                 initial.push_back(GC.generate_state(
@@ -307,8 +306,7 @@ vector<vector<double>> vmecloss(
     vector<vector<double>> x_vec;
     
     vmec_ensemble_type ensemble_object(move(guiding_centre_vector));
-    runge_kutta_cash_karp54<vmec_ensemble_type::state> integration_algorithm;
-    // runge_kutta_fehlberg78<vmec_ensemble_type::state> integration_algorithm;
+    runge_kutta_dopri5<vmec_ensemble_type::state> integration_algorithm;
     vmec_orbit_observer observer(x_vec, ensemble_object);
     
     integrate_const(integration_algorithm, ensemble_object,

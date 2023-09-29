@@ -186,7 +186,7 @@ class ParticleOrbit:  # pylint: disable=R0902
         if zeros_to_nan:
             solution[solution[:, 1] == 0] = np.nan
         self.solution = solution
-
+    
         self.time = solution[:, 0]
         self.r_pos = solution[:, 1]
         self.theta_pos = solution[:, 2]
@@ -202,14 +202,18 @@ class ParticleOrbit:  # pylint: disable=R0902
         self.energy_parallel = solution[:, 4]
         self.energy_perpendicular = solution[:, 5]
         self.total_energy = self.energy_parallel + self.energy_perpendicular
-
         self.magnetic_field_strength = solution[:, 6]
         self.v_parallel = solution[:, 7]
+        
+        from scipy import signal
+        v_valleys, _ = signal.find_peaks(
+            -np.abs(self.v_parallel), distance=(5 / 100) * self.time.size)
+        self.trapped = np.any(np.abs(self.v_parallel[v_valleys]) < 5e5)
+
         self.rdot = solution[:, 8]
         self.thetadot = solution[:, 9]
         self.varphidot = solution[:, 10]
         self.vparalleldot = solution[:, 11]
-
         if self.field.near_axis:
             self.p_phi = canonical_angular_momentum(
                 particle,
@@ -219,7 +223,8 @@ class ParticleOrbit:  # pylint: disable=R0902
                 self.magnetic_field_strength,
             )
             # self.p_phi = np.array([1e-16] * len(self.time))
-
+           
+            #This part below takes a while for near-axis, comment for increased speed
             self.rpos_cylindrical = np.array(
                 self.field.to_RZ(
                     np.array(
@@ -232,22 +237,25 @@ class ParticleOrbit:  # pylint: disable=R0902
                     ).transpose()
                 )
             )
-            self.B_s = solution[:, 12]
-            self.B_theta = solution[:, 13]
-            self.B_varphi = solution[:, 14]
+            # place_holder=np.zeros_like(self.r_pos)
+            # self.rpos_cylindrical=np.array([place_holder,place_holder,place_holder])
+            # If you want to check B components uncomment below
+            # self.B_s = solution[:, 12]
+            # self.B_theta = solution[:, 13]
+            # self.B_varphi = solution[:, 14]
         else:
             # Canonical angular momentum still not calculated for VMEC fields yet
             self.p_phi = np.array([1e-16] * len(self.time))
             self.rpos_cylindrical = np.array(
                 [solution[:, 12], solution[:, 14], solution[:, 13]]
             )
+            # If you want to check B components uncomment below
             # self.B_s = solution[:, 15]
             # self.B_theta = solution[:, 16]
             # self.B_varphi = solution[:, 17]
             # self.B_s_contr = solution[:, 18]
             # self.B_theta_contr = solution[:, 19]
             # self.B_varphi_contr = solution[:, 20]
-
         self.rpos_cartesian = np.array(
             [
                 self.rpos_cylindrical[0] * np.cos(self.rpos_cylindrical[2]),
@@ -543,6 +551,7 @@ class ParticleEnsembleOrbit:  # pylint: disable=R0902
                 index_particles_lost = [
                     i for i, x in enumerate(self.lost_times_of_particles) if x == time
                 ]
+                # print(self.initial_jacobian,index_particles_lost)
                 initial_jacobian_particles_lost_at_this_time = (
                     [0]
                     if not index_particles_lost
