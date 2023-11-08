@@ -100,7 +100,7 @@ if(INSTALL_SIMPLE)
 endif()
 
 # Add gyronimo with VMEC support
-set(BUILD_VMEC_SUPPORT "ON")
+set(SUPPORT_VMEC "ON")
 add_subdirectory(external/gyronimo)
 
 # Add pybind11 include directories
