@@ -93,6 +93,8 @@ class Stellna(Qic, Optimizable):
             B20 = np.append(self.B20, self.B20[0])
         else:
             if self.constant_b20:
+                if isinstance(self.constant_b20, float) or isinstance(self.constant_b20, int):
+                    self.B20_mean += self.constant_b20
                 B20 = [self.B20_mean] * (len(self.varphi) + 1)
             else:
                 B20 = np.append(self.B20, self.B20[0])
@@ -201,6 +203,8 @@ class StellnaQS(Qsc, Optimizable):
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
         if self.constant_b20:
+            if isinstance(self.constant_b20, float) or isinstance(self.constant_b20, int):
+                self.B20_mean += self.constant_b20
             self.B20_gyronimo = self.B20_mean
         else:
             self.B20_gyronimo = np.append(
