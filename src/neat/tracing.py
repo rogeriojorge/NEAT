@@ -220,7 +220,7 @@ class ParticleOrbit:  # pylint: disable=R0902
                 field,
                 self.r_pos,
                 self.v_parallel,
-                self.magnetic_field_strength,
+                self.magnetic_field_strength/5.3267,
             )
             # self.p_phi = np.array([1e-16] * len(self.time))
            
@@ -343,7 +343,6 @@ class ParticleOrbit:  # pylint: disable=R0902
     ):
         """Plot particle orbit superimposed in B contours"""
         import matplotlib.pyplot as plt
-
         from .plotting import get_vmec_magB
 
         theta_array = np.linspace(0, 2 * np.pi, ntheta)
@@ -360,8 +359,9 @@ class ParticleOrbit:  # pylint: disable=R0902
                 ntheta=ntheta,
                 nzeta=nphi,
             )
-
-        fig, ax = plt.subplots()
+        plt.rc('xtick', labelsize=40)
+        plt.rc('ytick', labelsize=40)
+        fig, ax = plt.subplots(figsize=(18, 12))
         plt.contourf(phi_2D, theta_2D, b_on_surface, ncontours)
         # plt.title(titles[i]+'\n1-based index='+str(iradius+1))
         ax.scatter(
@@ -369,7 +369,7 @@ class ParticleOrbit:  # pylint: disable=R0902
             np.mod(self.theta_pos, 2 * np.pi),
             marker=".",
             color="k",
-            s=0.7,
+            s=16,
         )
         ax.scatter(
             np.mod(self.varphi_pos[0], 2 * np.pi),
@@ -378,15 +378,21 @@ class ParticleOrbit:  # pylint: disable=R0902
             color="b",
             s=60,
         )
-        plt.xlabel(r"$\phi$")
-        plt.ylabel(r"$\theta$")
-        plt.colorbar()
+        plt.xlabel(r"$\phi$ (rad)", fontsize=45, labelpad=25)
+        plt.ylabel(r"$\theta$ (rad)", fontsize=45, labelpad=25)
+        clb = plt.colorbar()
+        clb.ax.set_title(r'     $|B|$ (T)', pad=35, fontsize=45)
+
         plt.xlim([0, 2 * np.pi])
         plt.ylim([0, 2 * np.pi])
+        plt.tight_layout()
         if savefig is not None:
             plt.savefig(savefig)
         if show:
             plt.show()
+
+        plt.rc('xtick', labelsize=24)
+        plt.rc('ytick', labelsize=24)
 
     def plot_diff_cyl(self, self2, show=True, savefig=None):
         """Plot relevant physics parameters of the particle orbit"""

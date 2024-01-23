@@ -12,13 +12,13 @@ Perform a benchmark on the particle tracing with Gyronimo vs SIMPLE
 """
 
 # Initialize an alpha particle at a radius = r_initial
-r_initial = 0.25  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
-theta_initial = 0.7  # initial poloidal angle
+r_initial = 0.5  # initial normalized toroidal magnetic flux (radial VMEC coordinate)
+theta_initial = 1.7  # initial poloidal angle
 phi_initial = 0.1  # initial poloidal angle
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
-Lambda = [0.8,0.95,0.99]  # = mu * B0 / energy
+Lambda = [0.95,0.97,0.99]  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
 nsamples = np.array([5000,5001,5002])  # resolution in time
 tfinal = [1e-3,1e-3,1e-3]  # seconds
@@ -31,10 +31,10 @@ Aspect_ratios=Rmajor_ARIES/ Rminor_ARIES
 iterator=range(nsamples.size)
 
 filename = "Matt_precise_wout"
-wout_filename = "NEAT/examples/misc/wout_Matt_nfp4_QH_rescaled.nc"
+wout_filename = "NEAT/examples/misc/wout_Matt_nfp2_QA_rescaled.nc"
 
-g_field_vmec = VMEC_NEAT(wout_filename=wout_filename)
-g_field_simple = Simple(wout_filename=wout_filename, ns_s=5, ns_tp=5, multharm=3)
+g_field_vmec = VMEC_NEAT(wout_filename=wout_filename,integrator=3)
+g_field_simple = Simple(wout_filename=wout_filename, ns_s=5, ns_tp=5, multharm=4)
 
 g_particle = ChargedParticle(
     r_initial=r_initial,
@@ -92,7 +92,7 @@ for j in iterator:
 
     ##############################################################################################
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(20, 12))
     plt.subplot(2, 3, 1)
     plt.plot(g_orbit_vmec.time, np.pi - g_orbit_vmec.theta_pos, label="vmec")
     plt.plot(g_orbit_simple.time, np.pi + g_orbit_simple.theta_pos, label="simple")
@@ -158,7 +158,7 @@ for j in iterator:
 
     ##############################################################################################
 
-    plt.figure(figsize=(10,10))
+    plt.figure(figsize=(20,20))
     plt.tick_params(axis='x', labelsize=50)
     plt.tick_params(axis='y', labelsize=50)
     plt.plot(
@@ -167,8 +167,8 @@ for j in iterator:
         "r-", label="vmec",
     )
     plt.plot(
-       -g_orbit_simple.rpos_cylindrical[0] * np.cos(g_orbit_simple.rpos_cylindrical[2]),
-        g_orbit_simple.rpos_cylindrical[0] * np.sin(g_orbit_simple.rpos_cylindrical[2]),
+        g_orbit_simple.rpos_cylindrical[0] * np.cos(g_orbit_simple.rpos_cylindrical[2]),
+        -g_orbit_simple.rpos_cylindrical[0] * np.sin(g_orbit_simple.rpos_cylindrical[2]),
         "g--", label="simple",
     )
     plt.legend(loc='upper right',fontsize=50)
@@ -180,14 +180,14 @@ for j in iterator:
     ##############################################################################################
 
 
-    fig,ax1=plt.subplots(figsize=(10,10))
+    fig,ax1=plt.subplots(figsize=(20,20))
     circle=patches.Circle((0,0), radius=1,color='black',fill=False,linestyle='dotted',linewidth=2)
     circle2=patches.Circle((0,0), radius=r_initial,color='black',fill=False,linestyle='dotted',linewidth=2)
     ax1.add_patch(circle)
     ax1.add_patch(circle2)
     ax1.set(xlim=(-1.2,1.2),ylim=(-1.2,1.2))
-    plt.tick_params(axis='x', labelsize=16)
-    plt.tick_params(axis='y', labelsize=16)
+    plt.tick_params(axis='x', labelsize=50)
+    plt.tick_params(axis='y', labelsize=50)
     plt.plot(
         g_orbit_vmec.r_pos * np.cos(np.pi - g_orbit_vmec.theta_pos),
         g_orbit_vmec.r_pos * np.sin(np.pi - g_orbit_vmec.theta_pos),
@@ -200,8 +200,9 @@ for j in iterator:
     )
     plt.legend(loc='upper right',fontsize=50)
     plt.gca().set_aspect("equal", adjustable="box")
-    plt.xlabel(r"s cos($\theta$)",fontsize=60)
+    plt.xlabel(r"s cos($\theta$)",fontsize=60,labelpad=20)
     plt.ylabel(r"s sin($\theta$)",fontsize=60)
+    plt.tight_layout()
     plt.savefig('NEAT/examples/misc/results/Booz_' + filename + str(nsamples[j]) + '.pdf')
 
 ##############################################################################################

@@ -114,13 +114,13 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 
 # Integration settings
-nsamples = 1000  # resolution in time
+nsamples = 3000  # resolution in time
 tfinal = 5e-4  # seconds
 
 # Distribution
-ntheta = 1  # resolution in theta
+ntheta = 10  # resolution in theta
 nphi = 15  # resolution in phi
-nlambda_trapped = 3  # number of pitch angles for trapped particles
+nlambda_trapped = 10  # number of pitch angles for trapped particles
 nlambda_passing = 0  # number of pitch angles for passing particles
 nthreads = 4
 dist = 0  # 0 for linear distribution and other ints for random distributions
@@ -135,11 +135,11 @@ Aspect_r=np.round(Rmajor_ARIES/Rminor_ARIES,2)
 stellarator = ["precise QA", "2022 QH nfp4 well"]
 
 # Names of input from NA and output from VMEC
-filename_vmec = f"input.nearaxis_{Aspect_r}_QA"
-wout_filename_vmec = f"wout_nearaxis_{Aspect_r}_QA_000_000000.nc"
+filename_vmec = f"input.nearaxis_{Aspect_r}"
+wout_filename_vmec = f"wout_nearaxis_{Aspect_r}_000_000000.nc"
 
 # Initializing and scaling NA field
-g_field_basis = StellnaQS.from_paper(stellarator[0], B0=B0, nphi=101)
+g_field_basis = StellnaQS.from_paper(stellarator[1], B0=B0, nphi=101)
 g_field = StellnaQS(
     rc=g_field_basis.rc * Rmajor_ARIES,
     zs=g_field_basis.zs * Rmajor_ARIES,
@@ -408,7 +408,7 @@ for i in np.arange(0, g_orbits_vmec.nparticles, 1):
         )
 plt.legend(loc='best', fontsize=50)
 plt.xlabel(r"$t \ (s)$",fontsize=60,labelpad=20)
-plt.ylabel(r"s",fontsize=60,labelpad=20)
+plt.ylabel(r"s=\psi/\psi_b",fontsize=60,labelpad=20)
 plt.tight_layout()
 plt.savefig(f"results_losses/orbits_all_{s_initial}.pdf")
 # plt.show()
