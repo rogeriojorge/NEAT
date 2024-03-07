@@ -7,6 +7,8 @@ import time
 
 import numpy as np
 
+from neat.plotting import get_vmec_boundary
+
 """                                                                           
 Trace the orbit of a single particle in a
 quasisymmetric stellarator                 
@@ -21,8 +23,8 @@ charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 Lambda = 0.96  # = mu * B0 / energy
 vpp_sign = -1  # initial sign of the parallel velocity, +1 or -1
-nsamples = 100  # IGNORED - resolution in time
-tfinal = 2e-4  # seconds
+nsamples = 20000  # IGNORED - resolution in time
+tfinal = 1e-5  # seconds
 wout_filename = os.path.join(os.path.dirname(__file__), "inputs", "wout_ARIESCS.nc")
 B_scale = 1  # Scale the magnetic field by a factor
 Aminor_scale = 1  # Scale the machine size by a factor
@@ -30,33 +32,39 @@ Aminor_scale = 1  # Scale the machine size by a factor
 g_field = Simple(
     wout_filename=wout_filename, B_scale=B_scale, Aminor_scale=Aminor_scale
 )
-g_particle = ChargedParticle(
-    r_initial=r_initial,
-    theta_initial=theta_initial,
-    phi_initial=phi_initial,
-    energy=energy,
-    Lambda=Lambda,
-    charge=charge,
-    mass=mass,
-    vpp_sign=vpp_sign,
-)
-print("Starting particle tracer")
-start_time = time.time()
-g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
-total_time = time.time() - start_time
-print(f"Finished in {total_time}s")
+# g_field.params.integmode=0 # mode for integrator: -1 = RK VMEC, 0 = RK, 1 = Euler1, 2 = Euler2, 3 = Verlet
+# g_particle = ChargedParticle(
+#     r_initial=r_initial,
+#     theta_initial=theta_initial,
+#     phi_initial=phi_initial,
+#     energy=energy,
+#     Lambda=Lambda,
+#     charge=charge,
+#     mass=mass,
+#     vpp_sign=vpp_sign,
+# )
+# print("Starting particle tracer")
+# start_time = time.time()
+# g_orbit = ParticleOrbit(g_particle, g_field, nsamples=nsamples, tfinal=tfinal)
 
-print("Creating B contour plot")
-g_orbit.plot_orbit_contourB(show=False)
+# total_time = time.time() - start_time
+# print(f"Finished in {total_time}s")
 
-print("Creating parameter plot")
-g_orbit.plot(show=False)
+# print("Creating B contour plot")
+# g_orbit.plot_orbit_contourB(show=False)
 
-print("Creating 2D plot")
-g_orbit.plot_orbit(show=False)
+# print("Creating parameter plot")
+# g_orbit.plot(show=True)
 
-print("Creating 3D plot")
-g_orbit.plot_orbit_3d(show=True)
+# # print("Creating 2D plot")
+# g_orbit.plot_orbit(show=False)
 
-print("Creating animation plot")
-g_orbit.plot_animation(show=True)
+# print("Creating 3D plot")
+# g_orbit.plot_orbit_3d(show=True)
+
+# print("Creating animation plot")
+# g_orbit.plot_animation(show=True)
+
+*coordinates, bfield = get_vmec_boundary(wout_filename=wout_filename)
+print(coordinates[0][0][0][0], coordinates[0][1][0][0], coordinates[0][2][0][0])
+print(bfield[0][0])

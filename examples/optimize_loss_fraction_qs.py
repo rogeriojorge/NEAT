@@ -6,32 +6,32 @@ import os
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-from simsopt import LeastSquaresProblem, least_squares_serial_solve
-from simsopt.solve.mpi import least_squares_mpi_solve
+from simsopt.objectives import LeastSquaresProblem
+from simsopt.solve import least_squares_mpi_solve, least_squares_serial_solve
 from simsopt.util.mpi import MpiPartition, log
 
 from neat.fields import StellnaQS
 from neat.objectives import EffectiveVelocityResidual, LossFractionResidual
 from neat.tracing import ChargedParticle, ChargedParticleEnsemble, ParticleOrbit
 
-r_initial = 0.05
-r_max = 0.1
+r_initial = 0.7
+r_max = 1.4
 n_iterations = 20
 ftol = 1e-5
 B0 = 5
 B2c = B0 / 7
 nsamples = 600
 tfinal = 4e-5
-stellarator_index = 2
+stellarator_index = "precise QA"
 constant_b20 = True
 energy = 3.52e6  # electron-volt
 charge = 2  # times charge of proton
 mass = 4  # times mass of proton
 ntheta = 10  # resolution in theta
-nphi = 4  # resolution in phi
-nlambda_trapped = 14  # number of pitch angles for trapped particles
+nphi = 10  # resolution in phi
+nlambda_trapped = 10  # number of pitch angles for trapped particles
 nlambda_passing = 2  # number of pitch angles for passing particles
-nthreads = 4
+nthreads = 2
 
 
 class optimize_loss_fraction:
@@ -106,7 +106,18 @@ class optimize_loss_fraction:
             least_squares_serial_solve(self.prob, ftol=ftol, max_nfev=n_iterations)
 
 
-g_field = StellnaQS.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
+Rmajor_ARIES = 7.7495 / 2
+g_field_basis = StellnaQS.from_paper(stellarator_index, nphi=51, B2c=B2c, B0=B0)
+g_field = StellnaQS(
+    rc=g_field_basis.rc * Rmajor_ARIES,
+    zs=g_field_basis.zs * Rmajor_ARIES,
+    etabar=g_field_basis.etabar / Rmajor_ARIES,
+    B2c=g_field_basis.B2c * (B0 / Rmajor_ARIES / Rmajor_ARIES),
+    B0=B0,
+    nfp=g_field_basis.nfp,
+    order="r3",
+    nphi=111,
+)
 g_particle = ChargedParticleEnsemble(
     r_initial=r_initial,
     r_max=r_max,
@@ -153,7 +164,7 @@ if optimizer.mpi.proc0_world:
     print("        B20 = ", optimizer.field.B20_mean)
     optimizer.residual.orbits.plot_loss_fraction(show=False)
 initial_orbit = ParticleOrbit(test_particle, g_field, nsamples=nsamples, tfinal=tfinal)
-initial_field = StellnaQS.from_paper(stellarator_index, nphi=151, B2c=B2c, B0=B0)
+initial_field = StellnaQS.from_paper(stellarator_index, nphi=51, B2c=B2c, B0=B0)
 ##################
 optimizer.run(ftol=ftol, n_iterations=n_iterations)
 ##################
