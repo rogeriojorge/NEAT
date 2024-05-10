@@ -23,14 +23,6 @@ To install NEAT, you'll need the following libraries
 and the python packages specified in [requirements.txt](requirements.txt).
 Note that [pyQSC](https://github.com/landreman/pyQSC/) and [pyQIC](https://github.com/rogeriojorge/pyQIC/) should be downloaded and installed locally.
 
-## PyPI
-
-The simplest installation of NEAT is by running the command
-
-    pip install neatstel
-
-However, it doesn't work on every system and the code hosted in PyPI might be outdated.
-
 ## From source
 
 To download, clone NEAT using the following command:
