@@ -20,6 +20,7 @@ except ImportError as error:
     simple_loaded = False
 
 import copy
+import random
 
 import numpy as np
 from qic import Qic
@@ -27,12 +28,14 @@ from qsc import Qsc
 from scipy.io import netcdf_file
 
 from neatpp import (
+    booztrace,
     gc_solver,
     gc_solver_ensemble,
     gc_solver_qs,
     gc_solver_qs_ensemble,
     gc_solver_qs_partial,
     gc_solver_qs_partial_ensemble,
+    vmecloss,
     vmectrace,
 )
 
@@ -267,6 +270,11 @@ if simple_loaded:
             multharm: int = 3,
             ns_s: int = 3,
             ns_tp: int = 3,
+            nsamples: int = 20000,
+            integmode: int = 1,
+            npoiper: int = 100,
+            npoiper2: int = 128,
+            nper: int = 1000,
         ) -> None:
             self.near_axis = False
             self.wout_filename = wout_filename
@@ -283,6 +291,12 @@ if simple_loaded:
             from pysimple import simple as simple_local
 
             self.params = copy.deepcopy(params_local)
+            # self.params.ntimstep = nsamples
+            self.params.integmode = integmode
+            # self.params.npoiper2 = npoiper2
+            # self.params.npoiper = npoiper
+            # self.params.npoi = npoiper * nper
+            # self.params.nper = nper
             self.stuff = copy.deepcopy(stuff_local)
             self.simple = copy.deepcopy(simple_local)
 
@@ -337,8 +351,23 @@ if simple_loaded:
             """Single particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
 
             relative_error = 1e-13
+            # npoints=3000
             npoints = 256
+            # Simple.init_params(Tracy, charge, mass, energy, npoints, 1, relative_error)
+            # self.params.nper=npoints
             Simple.init_params(Tracy, charge, mass, energy, npoints, 1, relative_error)
+            # self.params.n_e = charge
+            # self.params.n_d = mass
+            # self.params.trace_time = tfinal
+            # self.params.sbeg = r_initial
+            # self.params.params_init()
+
+            # self.tracy.dtau= 1 * (2 * np.pi * Rmajor / npoints)
+            # self.tracy.dtaumin= 2 * np.pi * Rmajor / npoints
+            # self.tracy.v0 = self.params.v0
+            # self.tracy.n_e = charge
+            # self.tracy.n_d = mass
+            # self.tracy.relerr = relative_error
 
             # s, th, ph, v/v_th, v_par/v
             abs_v_parallel_over_v = np.sqrt(1 - Lambda)
@@ -361,6 +390,8 @@ if simple_loaded:
             dtaumin = 2 * np.pi * Rmajor / npoints
             v_th = np.sqrt(2 * energy * ELEMENTARY_CHARGE / (mass * PROTON_MASS))
             nt = int(tfinal * v_th / dtaumin)
+            if nsamples < nt:
+                print(f"Warning: nsamples={nsamples} smaller than nt={nt}")
             time = np.linspace(dtaumin / v_th, nt * dtaumin / v_th, nt)
             # dtaumin (time step of the integrator) = 2*pi*Rmajor/npoiper2
             # actual time step dt = dtaumin/v_th
@@ -389,7 +420,7 @@ if simple_loaded:
                     z_vmec[kt + 1, 0], z_vmec[kt + 1, 1], z_vmec[kt + 1, 2]
                 )
                 z_cyl[kt + 1, 2] = z_vmec[kt + 1, 2]
-
+            ## PARALLEL VELOCITY OUTPUTED WITH A MINUS SIGN
             return np.array(
                 [
                     time,
@@ -403,14 +434,14 @@ if simple_loaded:
                         [Lambda * np.sqrt(2 * energy / mass)] * len(z_vmec[:, 2])
                     ),  # perpendicular energy
                     np.array([0] * len(z_vmec[:, 2])),  # magnetic_field_strength,
-                    z_vmec[:, 4],  # parallel velocity
+                    -z_vmec[:, 4] * v_th,  # parallel velocity
                     np.array([0] * len(z_vmec[:, 2])),  # rdot,
                     np.array([0] * len(z_vmec[:, 2])),  # thetadot,
                     np.array([0] * len(z_vmec[:, 2])),  # varphidot,
                     np.array([0] * len(z_vmec[:, 2])),  # vparalleldot,
-                    z_cyl[:, 0],
+                    z_cyl[:, 0] / 100,
                     z_cyl[:, 2],
-                    z_cyl[:, 1],
+                    z_cyl[:, 1] / 100,
                 ]
             ).T
 
@@ -438,14 +469,14 @@ if simple_loaded:
             nper,
         ):
             """Ensemble particle tracer that uses SIMPLE's fortran (f90wrap+f2py) compiled functions"""
-
+            # nparticles = ntheta * nphi * nlambda_passing * nlambda_trapped
+            # Tracy = self.params.Tracer()
             self.params.ntestpart = nparticles
             self.params.trace_time = tfinal
             self.params.contr_pp = -1e10  # Trace all passing particles
             self.params.startmode = (
                 1  # automatically select initial particle distribution
             )
-
             self.params.ntimstep = nsamples
             self.params.sbeg = r_initial
             self.params.npoiper2 = npoiper2
@@ -481,6 +512,8 @@ if simple_loaded:
                 )
             )
 
+            # self.simple_main.finalize()
+
             return return_array
 
 
@@ -493,16 +526,18 @@ class Vmec:
 
     """
 
-    def __init__(self, wout_filename: str) -> None:
+    def __init__(self, wout_filename: str, maximum_s=0.95, integrator=2) -> None:
         self.near_axis = False
         self.wout_filename = wout_filename
         net_file = netcdf_file(wout_filename, "r", mmap=False)
         self.nfp = net_file.variables["nfp"][()]
+        self.maximum_s = maximum_s
+        self.integrator = integrator
         net_file.close()
 
     def gyronimo_parameters(self):
         """Return list of parameters to feed gyronimo-based functions"""
-        return [self.wout_filename]
+        return [self.wout_filename, self.maximum_s, self.integrator]
 
     def neatpp_solver(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
@@ -510,7 +545,35 @@ class Vmec:
 
     def neatpp_solver_ensemble(self, *args, **kwargs):
         """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
-        print(
-            "Please use a Simple field for particle ensemble calculations with VMEC fields"
-        )
-        raise NotImplementedError
+        return vmecloss(*args, *kwargs)
+
+
+class Boozxform:
+    """Boozxform class
+
+    This class initializes a Boozxform field to be
+    ready to be used in the gyronimo-based
+    particle tracer.
+
+    """
+
+    def __init__(self, wout_filename: str, maximum_s=0.95, integrator=2) -> None:
+        self.near_axis = False
+        self.wout_filename = wout_filename
+        net_file = netcdf_file(wout_filename, "r", mmap=False)
+        self.nfp = net_file.variables["nfp_b"][()]
+        self.maximum_s = maximum_s
+        self.integrator = integrator
+        net_file.close()
+
+    def gyronimo_parameters(self):
+        """Return list of parameters to feed gyronimo-based functions"""
+        return [self.wout_filename, self.maximum_s, self.integrator]
+
+    def neatpp_solver(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as single particle tracer"""
+        return booztrace(*args, *kwargs)
+
+    def neatpp_solver_ensemble(self, *args, **kwargs):
+        """Specify what gyronimo-based function from neatpp to use as ensemble particle tracer"""
+        return KeyError("Ensembles for Boozxform ot implemented yet! Soon!")
