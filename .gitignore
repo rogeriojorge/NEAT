@@ -251,3 +251,4 @@ examples/start.dat
 tests/start.dat
 start.dat
 .pylintrc
+cmake_config_file_local.json
