@@ -3,7 +3,7 @@ LABEL maintainer.name="Rogerio Jorge" \
       maintainer.email="rogerio.jorge.at.tecnico.ulisboa" \
       developers="EUROfusion Enabling Research IST-MOD-01 team @ Tecnico Lisboa" \
       version="0.1" \
-      description="Docker file for NEAT container based on a ubuntu image" 
+      description="Docker file for NEAT container based on a Ubuntu image" 
 
 # Define environment variable needed to run non-interactively
 ENV DEBIAN_FRONTEND noninteractive
@@ -47,10 +47,11 @@ WORKDIR /home/external/pyQIC
 RUN pip3 install .
 
 # # Install SIMSOPT
-# WORKDIR /home/external
-# RUN git clone https://github.com/hiddensymmetries/simsopt.git simsopt
-# WORKDIR /home/external/simsopt
-# RUN pip3 install .
+WORKDIR /home/external
+RUN git clone https://github.com/hiddensymmetries/simsopt.git simsopt
+WORKDIR /home/external/simsopt
+RUN sed -i '59s/-mfma // ' CMakeLists.txt
+RUN pip3 install .
 
 # # Install NEAT
 WORKDIR /home

@@ -137,9 +137,11 @@ class EffectiveVelocityResidual(base_class):
         tfinal = max(self.orbits.time)
         time_of_particles = np.array(
             [
-                tfinal
-                if self.orbits.lost_times_of_particles[i] == 0
-                else self.orbits.lost_times_of_particles[i]
+                (
+                    tfinal
+                    if self.orbits.lost_times_of_particles[i] == 0
+                    else self.orbits.lost_times_of_particles[i]
+                )
                 for i in range(self.orbits.nparticles)
             ]
         )
