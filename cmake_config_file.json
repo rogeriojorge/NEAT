@@ -6,6 +6,7 @@
             "-DCMAKE_CXX_COMPILER=g++",
             "-DCMAKE_Fortran_COMPILER=gfortran",
             "-DPROFILING=OFF",
+            "-DCMAKE_MACOSX_RPATH=ON",
             "-DNETCDF_INC_PATH=/usr/include",
             "-DNETCDF_LIB_PATH=/usr/lib"
         ]

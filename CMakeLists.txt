@@ -25,6 +25,14 @@ set(CMAKE_INSTALL_LIBDIR lib)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64" AND (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang") AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15)
+    # request classic linker for Xcode 15 for Apple Silicon Macs
+    # message("-- Xcode >= 15 on arm64 detected, requesting classic linker")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ld_classic")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -ld_classic")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -ld_classic")
+endif()
+
 # Logging messages to debug possible Python issues
 find_program(PYTHON "python3")
 message(status " Python executable is ${PYTHON}")
