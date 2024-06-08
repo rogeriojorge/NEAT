@@ -18,10 +18,9 @@ build:
     python: "3.8"
 
 python:
-   install:
-   - requirements: docs/requirements.txt
-   - method: pip
-     path: .
-     extra_requirements:
-       - docs
-   - method: pip
+  install:
+    - requirements: docs/requirements.txt
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
