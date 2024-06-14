@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import glob
 import os
@@ -6,9 +6,9 @@ import os
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-from simsopt import LeastSquaresProblem, least_squares_serial_solve
-from simsopt.solve.mpi import least_squares_mpi_solve
-from simsopt.util.mpi import MpiPartition, log
+from simsopt.objectives import LeastSquaresProblem
+from simsopt.solve import least_squares_mpi_solve, least_squares_serial_solve
+from simsopt.util import MpiPartition
 
 from neat.fields import StellnaQS
 from neat.objectives import EffectiveVelocityResidual, LossFractionResidual
@@ -21,7 +21,7 @@ ftol = 1e-5
 B0 = 5
 B2c = B0 / 7
 nsamples = 600
-tfinal = 4e-5
+tfinal = 6e-5
 stellarator_index = 2
 constant_b20 = True
 energy = 3.52e6  # electron-volt
@@ -127,7 +127,7 @@ optimizer = optimize_loss_fraction(
     constant_b20=constant_b20,
 )
 test_particle = ChargedParticle(
-    r_initial=r_initial, theta_initial=np.pi / 2, phi_initial=np.pi, Lambda=1.00
+    r_initial=r_initial, theta_initial=np.pi / 2, phi_initial=np.pi, Lambda=0.98
 )
 ##################
 if optimizer.mpi.proc0_world:

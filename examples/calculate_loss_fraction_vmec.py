@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from neat.fields import Simple  # isort:skip
 from neat.tracing import ChargedParticleEnsemble, ParticleEnsembleOrbit_Simple
